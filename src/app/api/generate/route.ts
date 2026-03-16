@@ -57,7 +57,7 @@ export async function POST(request: Request) {
         send("step", {
           step: "enrich",
           status: "done",
-          meta: { themeSlug },
+          meta: { themeSlug, archetypeId: enriched.archetype.id },
           detail: `${enriched.archetype.name} archetype · ${enriched.flavorSeed.colorHarmony} palette · ${enriched.flavorSeed.typoPairingStyle} fonts${gapsFilled > 0 ? ` · ${gapsFilled} gaps auto-filled` : ""}`,
         });
 

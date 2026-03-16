@@ -8,6 +8,7 @@ import AuditResults from "@/components/AuditResults";
 import type { AuditResult } from "@/lib/validation/design-audit";
 import type { PlaygroundHandle } from "@/components/WpPlayground";
 import { generateStyleCss } from "@/lib/packer/constants";
+import { buildSampleContentPHP } from "@/lib/playground/sample-content";
 
 const WpPlayground = dynamic(() => import("@/components/WpPlayground"), {
   ssr: false,
@@ -54,6 +55,7 @@ export default function Home() {
   const [isPackaging, setIsPackaging] = useState(false);
   const [themeSlug, setThemeSlug] = useState("generated-theme");
   const themeSlugRef = useRef("generated-theme");
+  const archetypeIdRef = useRef("blog");
 
   const playgroundRef = useRef<PlaygroundHandle>(null);
   const themePathRef = useRef("/wordpress/wp-content/themes/generated-theme");
@@ -98,17 +100,23 @@ export default function Home() {
     await pg.writeFile(wpPath, content);
   }
 
-  /** Activate the theme in Playground */
+  /** Activate the theme and populate with sample content */
   async function activateThemeInPlayground(slug: string) {
     await playgroundReadyPromiseRef.current;
     const pg = playgroundRef.current;
     if (!pg?.isReady() || themeActivatedRef.current) return;
     themeActivatedRef.current = true;
 
+    // Activate theme
     await pg.runPHP(`<?php
       require '/wordpress/wp-load.php';
       switch_theme('${slug}');
     `);
+
+    // Insert archetype-appropriate sample content
+    const contentPHP = buildSampleContentPHP(archetypeIdRef.current, slug);
+    await pg.runPHP(contentPHP);
+
     await pg.goTo("/");
   }
 
@@ -170,6 +178,7 @@ export default function Home() {
               const slug = parsed.meta.themeSlug;
               setThemeSlug(slug);
               themeSlugRef.current = slug;
+              archetypeIdRef.current = parsed.meta.archetypeId ?? "blog";
               themePathRef.current = `/wordpress/wp-content/themes/${slug}`;
 
               // Write style.css so WP can discover the theme
