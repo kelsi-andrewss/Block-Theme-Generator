@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import GeneratorForm from "@/components/GeneratorForm";
 import ProgressIndicator from "@/components/ProgressIndicator";
@@ -24,49 +24,38 @@ interface ThemeFilesData {
 interface GenerationResult {
   themeFiles: ThemeFilesData;
   audit: AuditResult;
-  meta: { themeName: string; displayName: string; description: string; generationTime: number };
+  meta: { themeName: string; displayName: string; description: string };
   validationErrors?: string[];
 }
 
-const PIPELINE_STEPS = [
-  "Enriching prompt",
-  "Generating theme.json",
-  "Generating templates",
-  "Generating parts",
-  "Generating patterns",
-  "Validating & auditing",
-];
-
-function buildSteps(activeIndex: number, error: boolean) {
-  return PIPELINE_STEPS.map((name, i) => ({
-    name,
-    status: (
-      error && i === activeIndex
-        ? "error"
-        : i < activeIndex
-          ? "done"
-          : i === activeIndex
-            ? "active"
-            : "pending"
-    ) as "pending" | "active" | "done" | "error",
-  }));
+interface StepState {
+  name: string;
+  key: string;
+  status: "pending" | "active" | "done" | "error";
 }
+
+const INITIAL_STEPS: StepState[] = [
+  { name: "Enriching prompt", key: "enrich", status: "pending" },
+  { name: "Generating theme.json", key: "theme-json", status: "pending" },
+  { name: "Generating templates", key: "templates", status: "pending" },
+  { name: "Generating parts", key: "parts", status: "pending" },
+  { name: "Generating patterns", key: "patterns", status: "pending" },
+  { name: "Validating & auditing", key: "validate", status: "pending" },
+];
 
 export default function Home() {
   const [step, setStep] = useState<AppStep>("input");
   const [result, setResult] = useState<GenerationResult | null>(null);
-  const [progressIndex, setProgressIndex] = useState(0);
+  const [pipelineSteps, setPipelineSteps] = useState<StepState[]>(INITIAL_STEPS);
   const [error, setError] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [previewZip, setPreviewZip] = useState<Blob | null>(null);
   const [isPackaging, setIsPackaging] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const clearProgress = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
+  const updateStep = useCallback((key: string, status: StepState["status"]) => {
+    setPipelineSteps(prev =>
+      prev.map(s => (s.key === key ? { ...s, status } : s))
+    );
   }, []);
 
   async function handleSubmit(data: {
@@ -76,17 +65,9 @@ export default function Home() {
   }) {
     setStep("generating");
     setError(null);
-    setProgressIndex(0);
     setShowPreview(false);
     setPreviewZip(null);
-
-    let idx = 0;
-    intervalRef.current = setInterval(() => {
-      idx++;
-      if (idx < PIPELINE_STEPS.length) {
-        setProgressIndex(idx);
-      }
-    }, 800);
+    setPipelineSteps(INITIAL_STEPS);
 
     try {
       const res = await fetch("/api/generate", {
@@ -95,19 +76,47 @@ export default function Home() {
         body: JSON.stringify(data),
       });
 
-      clearProgress();
-
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error ?? `Generation failed (${res.status})`);
       }
 
-      const json: GenerationResult = await res.json();
-      setProgressIndex(PIPELINE_STEPS.length);
-      setResult(json);
-      setStep("results");
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("No response stream");
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // Parse SSE events from buffer
+        const events = buffer.split("\n\n");
+        buffer = events.pop() ?? ""; // last incomplete chunk
+
+        for (const event of events) {
+          if (!event.trim()) continue;
+
+          const eventMatch = event.match(/^event: (\w+)\ndata: (.+)$/s);
+          if (!eventMatch) continue;
+
+          const [, eventType, eventData] = eventMatch;
+          const parsed = JSON.parse(eventData);
+
+          if (eventType === "step") {
+            updateStep(parsed.step, parsed.status);
+          } else if (eventType === "complete") {
+            setResult(parsed as GenerationResult);
+            setStep("results");
+          } else if (eventType === "error") {
+            throw new Error(parsed.error);
+          }
+        }
+      }
     } catch (err) {
-      clearProgress();
       setError(err instanceof Error ? err.message : "Generation failed");
     }
   }
@@ -155,22 +164,20 @@ export default function Home() {
     setStep("input");
     setResult(null);
     setError(null);
-    setProgressIndex(0);
     setShowPreview(false);
     setPreviewZip(null);
+    setPipelineSteps(INITIAL_STEPS);
   }
+
+  const currentStepIndex = pipelineSteps.findIndex(s => s.status === "active");
 
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-zinc-900 text-white">
         <div className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-bold tracking-tight">
-              Block Theme Generator
-            </h1>
-            <p className="text-sm text-zinc-400">
-              AI-powered WordPress themes from a description
-            </p>
+            <h1 className="text-lg font-bold tracking-tight">Block Theme Generator</h1>
+            <p className="text-sm text-zinc-400">AI-powered WordPress themes from a description</p>
           </div>
           {step !== "input" && (
             <button
@@ -193,14 +200,12 @@ export default function Home() {
                 Generating your theme...
               </h2>
               <ProgressIndicator
-                currentStep={progressIndex}
-                steps={buildSteps(progressIndex, !!error)}
+                currentStep={currentStepIndex >= 0 ? currentStepIndex : 0}
+                steps={pipelineSteps.map(s => ({ name: s.name, status: s.status }))}
               />
               {error && (
                 <div className="mt-8 text-center">
-                  <p className="text-red-600 dark:text-red-400 text-sm mb-4">
-                    {error}
-                  </p>
+                  <p className="text-red-600 dark:text-red-400 text-sm mb-4">{error}</p>
                   <button
                     onClick={handleStartOver}
                     className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
@@ -219,8 +224,7 @@ export default function Home() {
                   Theme generated
                 </h2>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                  {result.meta.displayName} &mdash; built in{" "}
-                  {(result.meta.generationTime / 1000).toFixed(1)}s
+                  {result.meta.displayName}
                 </p>
                 {result.validationErrors && result.validationErrors.length > 0 && (
                   <p className="text-xs text-amber-600 mt-2">
