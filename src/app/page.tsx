@@ -67,6 +67,13 @@ export default function Home() {
       playgroundReadyResolveRef.current = resolve;
     })
   );
+  const playgroundOpsRef = useRef<Promise<void>>(Promise.resolve());
+
+  function enqueuePlaygroundOp(op: () => Promise<void>) {
+    playgroundOpsRef.current = playgroundOpsRef.current.then(op).catch((err) => {
+      console.error("Playground operation failed:", err);
+    });
+  }
 
   const updateStep = useCallback((key: string, status: StepState["status"], detail?: string) => {
     setPipelineSteps(prev =>
@@ -131,6 +138,7 @@ export default function Home() {
     setPipelineSteps(INITIAL_STEPS);
     themeActivatedRef.current = false;
     themeDirCreatedRef.current = false;
+    playgroundOpsRef.current = Promise.resolve();
     playgroundReadyPromiseRef.current = new Promise<void>((resolve) => {
       playgroundReadyResolveRef.current = resolve;
     });
@@ -194,36 +202,52 @@ export default function Home() {
                 version: "1.0.0",
               });
               // This will wait for Playground to be ready + create dirs
-              pushToPlayground(`${themePathRef.current}/style.css`, styleCss);
+              enqueuePlaygroundOp(async () => {
+                await pushToPlayground(`${themePathRef.current}/style.css`, styleCss);
+              });
             }
           } else if (eventType === "files") {
             const base = themePathRef.current;
 
             if (parsed.type === "theme-json") {
-              await pushToPlayground(`${base}/theme.json`, parsed.content);
-              await activateThemeInPlayground(themeSlugRef.current);
+              enqueuePlaygroundOp(async () => {
+                await pushToPlayground(`${base}/theme.json`, parsed.content);
+                await activateThemeInPlayground(themeSlugRef.current);
+              });
             } else if (parsed.type === "templates" && parsed.files) {
-              for (const [filename, content] of Object.entries(parsed.files)) {
-                await pushToPlayground(`${base}/templates/${filename}`, content as string);
-              }
-              await playgroundRef.current?.goTo("/");
+              const files = Object.entries(parsed.files);
+              enqueuePlaygroundOp(async () => {
+                for (const [filename, content] of files) {
+                  await pushToPlayground(`${base}/templates/${filename}`, content as string);
+                }
+                await playgroundRef.current?.goTo("/");
+              });
             } else if (parsed.type === "parts" && parsed.files) {
-              for (const [filename, content] of Object.entries(parsed.files)) {
-                await pushToPlayground(`${base}/parts/${filename}`, content as string);
-              }
-              await playgroundRef.current?.goTo("/");
+              const files = Object.entries(parsed.files);
+              enqueuePlaygroundOp(async () => {
+                for (const [filename, content] of files) {
+                  await pushToPlayground(`${base}/parts/${filename}`, content as string);
+                }
+                await playgroundRef.current?.goTo("/");
+              });
             } else if (parsed.type === "patterns" && parsed.files) {
-              for (const [filename, content] of Object.entries(parsed.files)) {
-                await pushToPlayground(`${base}/patterns/${filename}`, content as string);
-              }
+              const files = Object.entries(parsed.files);
+              enqueuePlaygroundOp(async () => {
+                for (const [filename, content] of files) {
+                  await pushToPlayground(`${base}/patterns/${filename}`, content as string);
+                }
+              });
             } else if (parsed.type === "dark-mode") {
-              await pushToPlayground(`${base}/styles/dark.json`, parsed.content);
+              enqueuePlaygroundOp(async () => {
+                await pushToPlayground(`${base}/styles/dark.json`, parsed.content);
+              });
             }
           } else if (eventType === "complete") {
             setResult(parsed as GenerationResult);
             setStep("results");
-            // Final refresh
-            await playgroundRef.current?.goTo("/");
+            enqueuePlaygroundOp(async () => {
+              await playgroundRef.current?.goTo("/");
+            });
           } else if (eventType === "error") {
             throw new Error(parsed.error);
           }
