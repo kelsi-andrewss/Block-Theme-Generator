@@ -52,7 +52,7 @@ export async function POST(request: Request) {
         const themeName = [style ?? enriched.archetype.id, archetype ?? enriched.archetype.name, "theme"]
           .filter(Boolean).join("-");
         const themeSlug = slugify(themeName);
-        send("step", { step: "enrich", status: "done" });
+        send("step", { step: "enrich", status: "done", meta: { themeSlug } });
 
         // Step 2: Get provider
         const provider = getProvider();
@@ -60,7 +60,8 @@ export async function POST(request: Request) {
         // Step 3: Theme.json
         send("step", { step: "theme-json", status: "active" });
         const themeJson = await generateLightThemeJson(enriched, provider);
-        send("step", { step: "theme-json", status: "done", data: themeJson });
+        send("files", { type: "theme-json", content: JSON.stringify(themeJson, null, 2) });
+        send("step", { step: "theme-json", status: "done" });
 
         // Steps 4-7: Dark mode + templates + parts + patterns in parallel
         send("step", { step: "templates", status: "active" });
@@ -69,18 +70,22 @@ export async function POST(request: Request) {
 
         const [darkMode, templates, parts, patterns] = await Promise.all([
           generateDarkMode(themeJson, provider).then(r => {
+            send("files", { type: "dark-mode", content: JSON.stringify(r, null, 2) });
             send("step", { step: "dark-mode", status: "done" });
             return r;
           }),
           generateTemplates(enriched, themeJson, provider).then(r => {
+            send("files", { type: "templates", files: mapToObject(r) });
             send("step", { step: "templates", status: "done" });
             return r;
           }),
           generateParts(enriched, themeJson, provider).then(r => {
+            send("files", { type: "parts", files: mapToObject(r) });
             send("step", { step: "parts", status: "done" });
             return r;
           }),
           generatePatterns(enriched, themeJson, provider).then(r => {
+            send("files", { type: "patterns", files: mapToObject(r) });
             send("step", { step: "patterns", status: "done" });
             return r;
           }),
