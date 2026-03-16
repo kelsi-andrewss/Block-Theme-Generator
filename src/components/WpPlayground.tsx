@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface WpPlaygroundProps {
   themeZip: Blob;
@@ -17,8 +17,6 @@ const VIEWPORT_WIDTHS: Record<ViewportSize, number> = {
   mobile: 375,
 };
 
-const PLAYGROUND_REMOTE_URL = "https://playground.wordpress.net/remote.html";
-
 export default function WpPlayground({
   themeZip,
   themeName,
@@ -26,69 +24,71 @@ export default function WpPlayground({
   onError,
 }: WpPlaygroundProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">(
-    "loading"
-  );
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [errorMessage, setErrorMessage] = useState("");
   const [viewport, setViewport] = useState<ViewportSize>("desktop");
-  const onReadyRef = useRef(onReady);
-  const onErrorRef = useRef(onError);
-
-  onReadyRef.current = onReady;
-  onErrorRef.current = onError;
-
-  const bootPlayground = useCallback(async () => {
-    const iframe = iframeRef.current;
-    if (!iframe) return;
-
-    try {
-      const playgroundModule = await import("@wp-playground/client");
-
-      const blobUrl = URL.createObjectURL(themeZip);
-
-      const client = await playgroundModule.startPlaygroundWeb({
-        iframe,
-        remoteUrl: PLAYGROUND_REMOTE_URL,
-        disableProgressBar: true,
-        blueprint: {
-          landingPage: "/",
-          steps: [
-            {
-              step: "installTheme",
-              themeData: {
-                resource: "url",
-                url: blobUrl,
-              },
-              options: {
-                activate: true,
-              },
-            },
-          ],
-        } as Parameters<typeof playgroundModule.startPlaygroundWeb>[0]["blueprint"],
-      });
-
-      URL.revokeObjectURL(blobUrl);
-
-      await client.goTo("/");
-
-      setStatus("ready");
-      onReadyRef.current?.();
-    } catch (err) {
-      const error =
-        err instanceof Error ? err : new Error("Failed to load preview");
-      setStatus("error");
-      setErrorMessage(error.message);
-      onErrorRef.current?.(error);
-    }
-  }, [themeZip]);
+  const [playgroundUrl, setPlaygroundUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    bootPlayground();
-  }, [bootPlayground]);
+    // Convert the theme zip to a base64 data URI and encode a Blueprint
+    // that installs it. Use the Playground URL-based Blueprint API.
+    async function buildPlaygroundUrl() {
+      try {
+        const arrayBuffer = await themeZip.arrayBuffer();
+        const uint8 = new Uint8Array(arrayBuffer);
+        let binary = "";
+        for (let i = 0; i < uint8.length; i++) {
+          binary += String.fromCharCode(uint8[i]);
+        }
+        const base64 = btoa(binary);
 
-  function handleOpenNewTab() {
-    window.open("https://playground.wordpress.net/", "_blank");
-  }
+        // Playground accepts blueprints as a URL query param
+        // Use writeFile steps to write the zip, then activate via wp-cli
+        const blueprint = {
+          landingPage: "/",
+          features: { networking: true },
+          steps: [
+            {
+              step: "writeFile",
+              path: "/tmp/theme.zip",
+              data: {
+                resource: "literal",
+                contents: base64,
+                encoding: "base64",
+              },
+            },
+            {
+              step: "wp-cli",
+              command: `wp theme install /tmp/theme.zip --activate`,
+            },
+          ],
+        };
+
+        const blueprintEncoded = encodeURIComponent(JSON.stringify(blueprint));
+        const url = `https://playground.wordpress.net/#${blueprintEncoded}`;
+
+        // Check if the blueprint URL is too long (browsers limit ~2MB)
+        if (url.length > 1_500_000) {
+          // Too large for URL — fall back to basic playground
+          setPlaygroundUrl("https://playground.wordpress.net/");
+          setStatus("ready");
+          onReady?.();
+          return;
+        }
+
+        setPlaygroundUrl(url);
+        setStatus("ready");
+        onReady?.();
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error("Failed to build preview URL");
+        setStatus("error");
+        setErrorMessage(error.message);
+        onError?.(error);
+      }
+    }
+
+    buildPlaygroundUrl();
+  }, [themeZip, onReady, onError]);
 
   return (
     <div className="space-y-4">
@@ -111,93 +111,76 @@ export default function WpPlayground({
           ))}
         </div>
 
-        <button
-          type="button"
-          onClick={handleOpenNewTab}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-        >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
+        {playgroundUrl && (
+          <a
+            href={playgroundUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-            />
-          </svg>
-          Open in new tab
-        </button>
-      </div>
-
-      {/* Preview container */}
-      <div className="relative rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 overflow-hidden">
-        {/* Loading overlay */}
-        {status === "loading" && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white dark:bg-zinc-900">
-            <div className="w-8 h-8 border-3 border-zinc-200 dark:border-zinc-700 border-t-blue-600 rounded-full animate-spin" />
-            <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
-              Starting WordPress Playground...
-            </p>
-            <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
-              This may take a moment on first load
-            </p>
-          </div>
-        )}
-
-        {/* Error state */}
-        {status === "error" && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white dark:bg-zinc-900 p-8">
             <svg
-              className="w-12 h-12 text-red-400"
+              className="w-4 h-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              strokeWidth={1.5}
+              strokeWidth={2}
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
               />
             </svg>
-            <p className="mt-3 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Failed to load preview
+            Open in new tab
+          </a>
+        )}
+      </div>
+
+      {/* Preview container */}
+      <div className="relative rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 overflow-hidden">
+        {status === "loading" && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white dark:bg-zinc-900">
+            <div className="w-8 h-8 border-3 border-zinc-200 dark:border-zinc-700 border-t-blue-600 rounded-full animate-spin" />
+            <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
+              Preparing WordPress preview...
             </p>
-            <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500 text-center max-w-sm">
-              {errorMessage ||
-                "WordPress Playground could not be initialized."}
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setStatus("loading");
-                setErrorMessage("");
-                bootPlayground();
-              }}
-              className="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-            >
-              Try again
-            </button>
           </div>
         )}
 
-        {/* Iframe */}
-        <div className="flex justify-center bg-zinc-50 dark:bg-zinc-950">
-          <iframe
-            ref={iframeRef}
-            title={`Preview of ${themeName} theme`}
-            className="border-0 bg-white transition-[width] duration-300 ease-in-out"
-            style={{
-              width: VIEWPORT_WIDTHS[viewport],
-              maxWidth: "100%",
-              height: viewport === "mobile" ? 667 : 600,
-            }}
-          />
-        </div>
+        {status === "error" && (
+          <div className="flex flex-col items-center justify-center p-12 bg-white dark:bg-zinc-900">
+            <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Preview unavailable
+            </p>
+            <p className="mt-1 text-xs text-zinc-400 text-center max-w-sm">
+              {errorMessage || "Could not initialize WordPress Playground."}
+            </p>
+            <a
+              href="https://playground.wordpress.net/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            >
+              Open Playground manually
+            </a>
+          </div>
+        )}
+
+        {playgroundUrl && (
+          <div className="flex justify-center bg-zinc-50 dark:bg-zinc-950">
+            <iframe
+              ref={iframeRef}
+              src={playgroundUrl}
+              title={`Preview of ${themeName} theme`}
+              className="border-0 bg-white transition-[width] duration-300 ease-in-out"
+              style={{
+                width: VIEWPORT_WIDTHS[viewport],
+                maxWidth: "100%",
+                height: viewport === "mobile" ? 667 : 600,
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
