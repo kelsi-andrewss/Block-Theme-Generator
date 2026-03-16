@@ -1,17 +1,31 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import dynamic from "next/dynamic";
 import GeneratorForm from "@/components/GeneratorForm";
 import ProgressIndicator from "@/components/ProgressIndicator";
 import AuditResults from "@/components/AuditResults";
 import type { AuditResult } from "@/lib/validation/design-audit";
 
+const WpPlayground = dynamic(() => import("@/components/WpPlayground"), {
+  ssr: false,
+});
+
 type AppStep = "input" | "generating" | "results";
 
+interface ThemeFilesData {
+  themeJson: string;
+  darkMode: string;
+  templates: Record<string, string>;
+  parts: Record<string, string>;
+  patterns: Record<string, string>;
+}
+
 interface GenerationResult {
-  zip: string;
+  themeFiles: ThemeFilesData;
   audit: AuditResult;
-  meta: { themeName: string; generationTime: number };
+  meta: { themeName: string; displayName: string; description: string; generationTime: number };
+  validationErrors?: string[];
 }
 
 const PIPELINE_STEPS = [
@@ -20,7 +34,7 @@ const PIPELINE_STEPS = [
   "Generating templates",
   "Generating parts",
   "Generating patterns",
-  "Packaging theme",
+  "Validating & auditing",
 ];
 
 function buildSteps(activeIndex: number, error: boolean) {
@@ -43,6 +57,9 @@ export default function Home() {
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [progressIndex, setProgressIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewZip, setPreviewZip] = useState<Blob | null>(null);
+  const [isPackaging, setIsPackaging] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const clearProgress = useCallback(() => {
@@ -60,8 +77,9 @@ export default function Home() {
     setStep("generating");
     setError(null);
     setProgressIndex(0);
+    setShowPreview(false);
+    setPreviewZip(null);
 
-    // Simulate progress stepping while waiting for the API
     let idx = 0;
     intervalRef.current = setInterval(() => {
       idx++;
@@ -94,14 +112,28 @@ export default function Home() {
     }
   }
 
-  function handleDownload() {
-    if (!result) return;
-    const byteString = atob(result.zip);
-    const bytes = new Uint8Array(byteString.length);
-    for (let i = 0; i < byteString.length; i++) {
-      bytes[i] = byteString.charCodeAt(i);
+  async function packageAndGetZip(): Promise<Blob | null> {
+    if (!result) return null;
+    setIsPackaging(true);
+    try {
+      const res = await fetch("/api/package", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          themeFiles: result.themeFiles,
+          meta: result.meta,
+        }),
+      });
+      if (!res.ok) throw new Error("Packaging failed");
+      return await res.blob();
+    } finally {
+      setIsPackaging(false);
     }
-    const blob = new Blob([bytes], { type: "application/zip" });
+  }
+
+  async function handleDownload() {
+    const blob = await packageAndGetZip();
+    if (!blob || !result) return;
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -112,13 +144,11 @@ export default function Home() {
     URL.revokeObjectURL(url);
   }
 
-  function handlePreview() {
-    // TODO: Connect to WordPress Playground (story-860)
-    window.open(
-      "https://playground.wordpress.net/",
-      "_blank",
-      "noopener,noreferrer"
-    );
+  async function handlePreview() {
+    const blob = previewZip ?? await packageAndGetZip();
+    if (!blob) return;
+    setPreviewZip(blob);
+    setShowPreview(true);
   }
 
   function handleStartOver() {
@@ -126,13 +156,14 @@ export default function Home() {
     setResult(null);
     setError(null);
     setProgressIndex(0);
+    setShowPreview(false);
+    setPreviewZip(null);
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
       <header className="bg-zinc-900 text-white">
-        <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
           <div>
             <h1 className="text-lg font-bold tracking-tight">
               Block Theme Generator
@@ -152,15 +183,12 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Content */}
       <main className="flex-1 bg-white dark:bg-zinc-900">
-        <div className="max-w-3xl mx-auto px-6 py-10">
-          {/* Input step */}
+        <div className="max-w-5xl mx-auto px-6 py-10">
           {step === "input" && <GeneratorForm onSubmit={handleSubmit} />}
 
-          {/* Generating step */}
           {step === "generating" && (
-            <div className="py-12">
+            <div className="py-12 max-w-xl mx-auto">
               <h2 className="text-xl font-semibold text-center text-zinc-900 dark:text-zinc-100 mb-8">
                 Generating your theme...
               </h2>
@@ -184,7 +212,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* Results step */}
           {step === "results" && result && (
             <div>
               <div className="text-center mb-8">
@@ -192,15 +219,39 @@ export default function Home() {
                   Theme generated
                 </h2>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                  {result.meta.themeName} -- built in{" "}
+                  {result.meta.displayName} &mdash; built in{" "}
                   {(result.meta.generationTime / 1000).toFixed(1)}s
                 </p>
+                {result.validationErrors && result.validationErrors.length > 0 && (
+                  <p className="text-xs text-amber-600 mt-2">
+                    {result.validationErrors.length} validation warning(s)
+                  </p>
+                )}
               </div>
+
               <AuditResults
                 result={result.audit}
                 onDownload={handleDownload}
                 onPreview={handlePreview}
               />
+
+              {isPackaging && (
+                <p className="text-center text-sm text-zinc-500 mt-4 animate-pulse">
+                  Packaging ZIP...
+                </p>
+              )}
+
+              {showPreview && previewZip && (
+                <div className="mt-10">
+                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+                    Live Preview
+                  </h3>
+                  <WpPlayground
+                    themeZip={previewZip}
+                    themeName={result.meta.themeName}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>

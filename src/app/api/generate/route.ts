@@ -7,7 +7,6 @@ import { generateParts } from "@/lib/generators/parts";
 import { generatePatterns } from "@/lib/generators/patterns";
 import { validateBlockMarkup } from "@/lib/validation/block-validator";
 import { auditThemeDesign } from "@/lib/validation/design-audit";
-import { packageTheme } from "@/lib/packer/zip";
 
 function slugify(name: string): string {
   return name
@@ -15,6 +14,14 @@ function slugify(name: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 40);
+}
+
+function mapToObject(map: Map<string, string>): Record<string, string> {
+  const obj: Record<string, string> = {};
+  for (const [key, value] of map) {
+    obj[key] = value;
+  }
+  return obj;
 }
 
 export async function POST(request: Request) {
@@ -74,7 +81,6 @@ export async function POST(request: Request) {
         );
       }
     }
-    // Validate pattern markup (strip PHP header first)
     for (const [filename, content] of patterns) {
       const markupStart = content.indexOf("?>");
       if (markupStart !== -1) {
@@ -93,39 +99,23 @@ export async function POST(request: Request) {
     // Step 8: Audit theme design
     const audit = auditThemeDesign(themeJson);
 
-    // Step 9: Package as ZIP
-    const themeFiles = {
-      themeJson: JSON.stringify(themeJson, null, 2),
-      darkMode: JSON.stringify(darkMode, null, 2),
-      templates,
-      parts,
-      patterns,
-      meta: {
-        name: themeName.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-        slug: themeSlug,
-        description: enriched.original,
-        version: "1.0.0",
-      },
-    };
-    const zipBlob = await packageTheme(themeFiles);
-
-    // Convert blob to base64
-    const arrayBuffer = await zipBlob.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
-    let binary = "";
-    for (let i = 0; i < uint8Array.length; i++) {
-      binary += String.fromCharCode(uint8Array[i]);
-    }
-    const zipBase64 = btoa(binary);
-
     const generationTime = Date.now() - startTime;
 
+    // Return generated files (not packaged) — packaging happens on download
     return NextResponse.json({
-      zip: zipBase64,
+      themeFiles: {
+        themeJson: JSON.stringify(themeJson, null, 2),
+        darkMode: JSON.stringify(darkMode, null, 2),
+        templates: mapToObject(templates),
+        parts: mapToObject(parts),
+        patterns: mapToObject(patterns),
+      },
       audit,
       validationErrors: validationErrors.length > 0 ? validationErrors : undefined,
       meta: {
         themeName: themeSlug,
+        displayName: themeName.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        description: enriched.original,
         generationTime,
       },
     });
