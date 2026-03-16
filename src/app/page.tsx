@@ -164,10 +164,15 @@ export default function Home() {
         for (const event of events) {
           if (!event.trim()) continue;
 
-          const eventMatch = event.match(/^event: (\w+)\ndata: (.+)$/s);
-          if (!eventMatch) continue;
+          // Parse SSE format: "event: <type>\ndata: <json>"
+          // Data is always a single line (JSON.stringify produces no newlines)
+          const lines = event.split("\n");
+          const eventLine = lines.find(l => l.startsWith("event: "));
+          const dataLine = lines.find(l => l.startsWith("data: "));
+          if (!eventLine || !dataLine) continue;
 
-          const [, eventType, eventData] = eventMatch;
+          const eventType = eventLine.slice(7);
+          const eventData = dataLine.slice(6);
           const parsed = JSON.parse(eventData);
 
           if (eventType === "step") {
