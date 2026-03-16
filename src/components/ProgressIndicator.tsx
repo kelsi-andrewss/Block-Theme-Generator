@@ -3,6 +3,7 @@
 interface Step {
   name: string;
   status: "pending" | "active" | "done" | "error";
+  detail?: string;
 }
 
 interface ProgressIndicatorProps {
@@ -35,32 +36,12 @@ export default function ProgressIndicator({
                   }`}
                 >
                   {step.status === "done" ? (
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M5 13l4 4L19 7"
-                      />
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   ) : step.status === "error" ? (
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   ) : (
                     index + 1
@@ -77,8 +58,8 @@ export default function ProgressIndicator({
                 )}
               </div>
 
-              {/* Label */}
-              <div className="pt-1 pb-4">
+              {/* Label + detail */}
+              <div className="pt-1 pb-4 min-w-0">
                 <p
                   className={`text-sm font-medium ${
                     step.status === "done"
@@ -92,14 +73,22 @@ export default function ProgressIndicator({
                 >
                   {step.name}
                 </p>
-                {step.status === "active" && (
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
-                    Processing...
+                {step.detail && (
+                  <p className={`text-xs mt-0.5 truncate ${
+                    step.status === "done"
+                      ? "text-green-500/70 dark:text-green-400/60"
+                      : step.status === "active"
+                        ? "text-blue-500/70 dark:text-blue-400/60"
+                        : step.status === "error"
+                          ? "text-red-500"
+                          : "text-zinc-400 dark:text-zinc-500"
+                  }`}>
+                    {step.detail}
                   </p>
                 )}
-                {step.status === "error" && (
-                  <p className="text-xs text-red-500 mt-0.5">
-                    Failed
+                {step.status === "active" && !step.detail && (
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
+                    Processing...
                   </p>
                 )}
               </div>

@@ -34,6 +34,7 @@ interface StepState {
   name: string;
   key: string;
   status: "pending" | "active" | "done" | "error";
+  detail?: string;
 }
 
 const INITIAL_STEPS: StepState[] = [
@@ -64,9 +65,9 @@ export default function Home() {
     })
   );
 
-  const updateStep = useCallback((key: string, status: StepState["status"]) => {
+  const updateStep = useCallback((key: string, status: StepState["status"], detail?: string) => {
     setPipelineSteps(prev =>
-      prev.map(s => (s.key === key ? { ...s, status } : s))
+      prev.map(s => (s.key === key ? { ...s, status, ...(detail !== undefined ? { detail } : {}) } : s))
     );
   }, []);
 
@@ -161,7 +162,7 @@ export default function Home() {
           const parsed = JSON.parse(eventData);
 
           if (eventType === "step") {
-            updateStep(parsed.step, parsed.status);
+            updateStep(parsed.step, parsed.status, parsed.detail);
 
             // When enrich completes, configure the theme path
             if (parsed.step === "enrich" && parsed.status === "done" && parsed.meta?.themeSlug) {
@@ -290,7 +291,7 @@ export default function Home() {
                 </h2>
                 <ProgressIndicator
                   currentStep={currentStepIndex >= 0 ? currentStepIndex : 0}
-                  steps={pipelineSteps.map(s => ({ name: s.name, status: s.status }))}
+                  steps={pipelineSteps.map(s => ({ name: s.name, status: s.status, detail: s.detail }))}
                 />
                 {error && (
                   <div className="mt-6">

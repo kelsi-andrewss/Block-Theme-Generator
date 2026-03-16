@@ -47,52 +47,70 @@ export async function POST(request: Request) {
 
       try {
         // Step 1: Enrich
-        send("step", { step: "enrich", status: "active" });
+        send("step", { step: "enrich", status: "active", detail: "Analyzing your description..." });
         const enriched = enrichPrompt(description);
         const themeName = [style, enriched.archetype.name, "theme"]
           .filter(Boolean).join(" ");
         const themeSlug = slugify(themeName);
-        send("step", { step: "enrich", status: "done", meta: { themeSlug } });
+
+        const gapsFilled = Object.values(enriched.gaps).filter(g => !g.specified).length;
+        send("step", {
+          step: "enrich",
+          status: "done",
+          meta: { themeSlug },
+          detail: `${enriched.archetype.name} archetype · ${enriched.flavorSeed.colorHarmony} palette · ${enriched.flavorSeed.typoPairingStyle} fonts${gapsFilled > 0 ? ` · ${gapsFilled} gaps auto-filled` : ""}`,
+        });
 
         // Step 2: Get provider
         const provider = getProvider();
 
         // Step 3: Theme.json
-        send("step", { step: "theme-json", status: "active" });
+        send("step", { step: "theme-json", status: "active", detail: "Creating color palette, typography scale, and layout..." });
         const themeJson = await generateLightThemeJson(enriched, provider);
         send("files", { type: "theme-json", content: JSON.stringify(themeJson, null, 2) });
-        send("step", { step: "theme-json", status: "done" });
+
+        // Extract palette colors for the detail message
+        const palette = (themeJson as Record<string, unknown>).settings as Record<string, unknown> | undefined;
+        const colors = (palette?.color as Record<string, unknown>)?.palette as Array<{color: string; name: string}> | undefined;
+        const colorPreview = colors?.slice(0, 3).map(c => c.color).join(", ") ?? "";
+        const fontFamilies = (palette?.typography as Record<string, unknown>)?.fontFamilies as Array<{name: string}> | undefined;
+        const fontPreview = fontFamilies?.map(f => f.name).join(" + ") ?? "";
+        send("step", {
+          step: "theme-json",
+          status: "done",
+          detail: [colorPreview && `Colors: ${colorPreview}`, fontPreview && `Fonts: ${fontPreview}`].filter(Boolean).join(" · ") || "Theme configuration ready",
+        });
 
         // Steps 4-7: Dark mode + templates + parts + patterns in parallel
-        send("step", { step: "templates", status: "active" });
-        send("step", { step: "parts", status: "active" });
-        send("step", { step: "patterns", status: "active" });
+        send("step", { step: "templates", status: "active", detail: "index, single, page, archive, 404, search, front-page" });
+        send("step", { step: "parts", status: "active", detail: "Header with navigation · Footer" });
+        send("step", { step: "patterns", status: "active", detail: `${enriched.archetype.sections.slice(0, 4).join(", ")}...` });
 
         const [darkMode, templates, parts, patterns] = await Promise.all([
           generateDarkMode(themeJson, provider).then(r => {
             send("files", { type: "dark-mode", content: JSON.stringify(r, null, 2) });
-            send("step", { step: "dark-mode", status: "done" });
+            send("step", { step: "dark-mode", status: "done", detail: "Dark color variant ready" });
             return r;
           }),
           generateTemplates(enriched, themeJson, provider).then(r => {
             send("files", { type: "templates", files: mapToObject(r) });
-            send("step", { step: "templates", status: "done" });
+            send("step", { step: "templates", status: "done", detail: `${r.size} templates built` });
             return r;
           }),
           generateParts(enriched, themeJson, provider).then(r => {
             send("files", { type: "parts", files: mapToObject(r) });
-            send("step", { step: "parts", status: "done" });
+            send("step", { step: "parts", status: "done", detail: `${r.size} template parts built` });
             return r;
           }),
           generatePatterns(enriched, themeJson, provider).then(r => {
             send("files", { type: "patterns", files: mapToObject(r) });
-            send("step", { step: "patterns", status: "done" });
+            send("step", { step: "patterns", status: "done", detail: `${r.size} block patterns built` });
             return r;
           }),
         ]);
 
         // Step 8: Validate
-        send("step", { step: "validate", status: "active" });
+        send("step", { step: "validate", status: "active", detail: "Checking block markup, WCAG contrast, typography..." });
         const validationErrors: string[] = [];
         const allMarkup = new Map([...templates, ...parts]);
         for (const [filename, content] of allMarkup) {
@@ -115,7 +133,11 @@ export async function POST(request: Request) {
         }
 
         const audit = auditThemeDesign(themeJson);
-        send("step", { step: "validate", status: "done" });
+        send("step", {
+          step: "validate",
+          status: "done",
+          detail: `Score: ${audit.score}/100 (${audit.grade})${validationErrors.length > 0 ? ` · ${validationErrors.length} warnings` : ""}`,
+        });
 
         // Final result
         send("complete", {
