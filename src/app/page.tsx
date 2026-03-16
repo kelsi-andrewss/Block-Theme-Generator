@@ -56,6 +56,13 @@ export default function Home() {
   const playgroundRef = useRef<PlaygroundHandle>(null);
   const themePathRef = useRef("/wordpress/wp-content/themes/generated-theme");
   const themeActivatedRef = useRef(false);
+  const themeDirCreatedRef = useRef(false);
+  const playgroundReadyResolveRef = useRef<(() => void) | null>(null);
+  const playgroundReadyPromiseRef = useRef<Promise<void>>(
+    new Promise<void>((resolve) => {
+      playgroundReadyResolveRef.current = resolve;
+    })
+  );
 
   const updateStep = useCallback((key: string, status: StepState["status"]) => {
     setPipelineSteps(prev =>
@@ -63,15 +70,35 @@ export default function Home() {
     );
   }, []);
 
-  /** Write a file into the Playground's WordPress instance and refresh */
+  function handlePlaygroundReady() {
+    playgroundReadyResolveRef.current?.();
+  }
+
+  /** Wait for Playground + ensure theme dir exists, then write file */
   async function pushToPlayground(wpPath: string, content: string) {
+    await playgroundReadyPromiseRef.current;
     const pg = playgroundRef.current;
     if (!pg?.isReady()) return;
+
+    // Ensure theme directory structure exists on first write
+    if (!themeDirCreatedRef.current) {
+      themeDirCreatedRef.current = true;
+      const base = themePathRef.current;
+      await pg.runPHP(`<?php
+        @mkdir('${base}', 0777, true);
+        @mkdir('${base}/templates', 0777, true);
+        @mkdir('${base}/parts', 0777, true);
+        @mkdir('${base}/patterns', 0777, true);
+        @mkdir('${base}/styles', 0777, true);
+      `);
+    }
+
     await pg.writeFile(wpPath, content);
   }
 
-  /** Activate the theme in Playground after first files are written */
+  /** Activate the theme in Playground */
   async function activateThemeInPlayground(slug: string) {
+    await playgroundReadyPromiseRef.current;
     const pg = playgroundRef.current;
     if (!pg?.isReady() || themeActivatedRef.current) return;
     themeActivatedRef.current = true;
@@ -93,6 +120,10 @@ export default function Home() {
     setResult(null);
     setPipelineSteps(INITIAL_STEPS);
     themeActivatedRef.current = false;
+    themeDirCreatedRef.current = false;
+    playgroundReadyPromiseRef.current = new Promise<void>((resolve) => {
+      playgroundReadyResolveRef.current = resolve;
+    });
 
     try {
       const res = await fetch("/api/generate", {
@@ -132,30 +163,21 @@ export default function Home() {
           if (eventType === "step") {
             updateStep(parsed.step, parsed.status);
 
-            // When enrich completes, set up the theme directory
+            // When enrich completes, configure the theme path
             if (parsed.step === "enrich" && parsed.status === "done" && parsed.meta?.themeSlug) {
               const slug = parsed.meta.themeSlug;
               setThemeSlug(slug);
               themePathRef.current = `/wordpress/wp-content/themes/${slug}`;
 
-              // Create theme dir + minimal style.css so WP recognizes it
-              const pg = playgroundRef.current;
-              if (pg?.isReady()) {
-                await pg.runPHP(`<?php
-                  @mkdir('/wordpress/wp-content/themes/${slug}', 0777, true);
-                  @mkdir('/wordpress/wp-content/themes/${slug}/templates', 0777, true);
-                  @mkdir('/wordpress/wp-content/themes/${slug}/parts', 0777, true);
-                  @mkdir('/wordpress/wp-content/themes/${slug}/patterns', 0777, true);
-                  @mkdir('/wordpress/wp-content/themes/${slug}/styles', 0777, true);
-                `);
-                const styleCss = generateStyleCss({
-                  name: slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()),
-                  slug,
-                  description: data.description ?? "",
-                  version: "1.0.0",
-                });
-                await pushToPlayground(`${themePathRef.current}/style.css`, styleCss);
-              }
+              // Write style.css so WP can discover the theme
+              const styleCss = generateStyleCss({
+                name: slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()),
+                slug,
+                description: data.description ?? "",
+                version: "1.0.0",
+              });
+              // This will wait for Playground to be ready + create dirs
+              pushToPlayground(`${themePathRef.current}/style.css`, styleCss);
             }
           } else if (eventType === "files") {
             const base = themePathRef.current;
@@ -288,7 +310,7 @@ export default function Home() {
                 <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-3">
                   Live Preview
                 </h3>
-                <WpPlayground ref={playgroundRef} themeName={themeSlug} />
+                <WpPlayground ref={playgroundRef} themeName={themeSlug} onReady={handlePlaygroundReady} />
               </div>
             </div>
           </div>
@@ -326,7 +348,7 @@ export default function Home() {
                 <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-3">
                   Live Preview
                 </h3>
-                <WpPlayground ref={playgroundRef} themeName={themeSlug} />
+                <WpPlayground ref={playgroundRef} themeName={themeSlug} onReady={handlePlaygroundReady} />
               </div>
             </div>
           </div>

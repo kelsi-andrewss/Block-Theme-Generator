@@ -49,8 +49,8 @@ export async function POST(request: Request) {
         // Step 1: Enrich
         send("step", { step: "enrich", status: "active" });
         const enriched = enrichPrompt(description);
-        const themeName = [style ?? enriched.archetype.id, archetype ?? enriched.archetype.name, "theme"]
-          .filter(Boolean).join("-");
+        const themeName = [style, enriched.archetype.name, "theme"]
+          .filter(Boolean).join(" ");
         const themeSlug = slugify(themeName);
         send("step", { step: "enrich", status: "done", meta: { themeSlug } });
 
