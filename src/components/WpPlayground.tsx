@@ -81,19 +81,36 @@ const WpPlayground = forwardRef<PlaygroundHandle, WpPlaygroundProps>(
       },
     }));
 
+    // Suppress "Progress bar not available" errors from Playground's remote.html
+    // This is a known issue with @wp-playground/client — the remote tries to
+    // access a progress bar DOM element that doesn't exist in embedded mode.
+    // The error is non-fatal; Playground still boots correctly.
+    useEffect(() => {
+      function suppressPlaygroundErrors(event: ErrorEvent) {
+        if (
+          event.message?.includes("Progress bar") ||
+          event.message?.includes("setProgress")
+        ) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          return true;
+        }
+      }
+      window.addEventListener("error", suppressPlaygroundErrors, true);
+      return () => window.removeEventListener("error", suppressPlaygroundErrors, true);
+    }, []);
+
     const boot = useCallback(async () => {
       if (bootedRef.current || !iframeRef.current) return;
       bootedRef.current = true;
 
       try {
         const { startPlaygroundWeb } = await import("@wp-playground/client");
-        const { ProgressTracker } = await import("@php-wasm/progress");
 
         setStatusMessage("Booting WordPress...");
         const client = await startPlaygroundWeb({
           iframe: iframeRef.current,
           remoteUrl: "https://playground.wordpress.net/remote.html",
-          progressTracker: new ProgressTracker(),
           disableProgressBar: true,
         });
 
