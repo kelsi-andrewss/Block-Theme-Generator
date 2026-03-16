@@ -53,6 +53,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isPackaging, setIsPackaging] = useState(false);
   const [themeSlug, setThemeSlug] = useState("generated-theme");
+  const themeSlugRef = useRef("generated-theme");
 
   const playgroundRef = useRef<PlaygroundHandle>(null);
   const themePathRef = useRef("/wordpress/wp-content/themes/generated-theme");
@@ -168,6 +169,7 @@ export default function Home() {
             if (parsed.step === "enrich" && parsed.status === "done" && parsed.meta?.themeSlug) {
               const slug = parsed.meta.themeSlug;
               setThemeSlug(slug);
+              themeSlugRef.current = slug;
               themePathRef.current = `/wordpress/wp-content/themes/${slug}`;
 
               // Write style.css so WP can discover the theme
@@ -185,8 +187,7 @@ export default function Home() {
 
             if (parsed.type === "theme-json") {
               await pushToPlayground(`${base}/theme.json`, parsed.content);
-              // Activate theme now that it has theme.json
-              await activateThemeInPlayground(themeSlug);
+              await activateThemeInPlayground(themeSlugRef.current);
             } else if (parsed.type === "templates" && parsed.files) {
               for (const [filename, content] of Object.entries(parsed.files)) {
                 await pushToPlayground(`${base}/templates/${filename}`, content as string);
