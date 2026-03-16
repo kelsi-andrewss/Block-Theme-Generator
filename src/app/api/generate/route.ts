@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { enrichPrompt } from "@/lib/prompts/enrichment";
 import { getProvider } from "@/lib/ai";
-import { generateThemeJson } from "@/lib/generators/theme-json";
+import { generateLightThemeJson, generateDarkMode } from "@/lib/generators/theme-json";
 import { generateTemplates } from "@/lib/generators/templates";
 import { generateParts } from "@/lib/generators/parts";
 import { generatePatterns } from "@/lib/generators/patterns";
@@ -58,17 +58,17 @@ export async function POST(request: Request) {
     // Step 2: Get AI provider
     const provider = getProvider();
 
-    // Step 3: Generate theme.json (light + dark mode)
-    const { themeJson, darkMode } = await generateThemeJson(enriched, provider);
+    // Step 3: Generate light theme.json first (everything else depends on it)
+    const themeJson = await generateLightThemeJson(enriched, provider);
 
-    // Step 4: Generate templates
-    const templates = await generateTemplates(enriched, themeJson, provider);
-
-    // Step 5: Generate parts
-    const parts = await generateParts(enriched, themeJson, provider);
-
-    // Step 6: Generate patterns
-    const patterns = await generatePatterns(enriched, themeJson, provider);
+    // Steps 4-6: Dark mode, templates, parts, patterns ALL IN PARALLEL
+    // They all need theme.json but not each other
+    const [darkMode, templates, parts, patterns] = await Promise.all([
+      generateDarkMode(themeJson, provider),
+      generateTemplates(enriched, themeJson, provider),
+      generateParts(enriched, themeJson, provider),
+      generatePatterns(enriched, themeJson, provider),
+    ]);
 
     // Step 7: Validate all block markup
     const validationErrors: string[] = [];

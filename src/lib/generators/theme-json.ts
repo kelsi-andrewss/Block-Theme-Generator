@@ -85,27 +85,37 @@ export function buildDarkModePrompt(themeJson: ThemeJson): string {
   return parts.join("\n");
 }
 
-export async function generateThemeJson(
+export async function generateLightThemeJson(
   enrichedPrompt: EnrichedPrompt,
   provider: AIProvider
-): Promise<ThemeJsonResult> {
+): Promise<ThemeJson> {
   const themePrompt = buildThemeJsonPrompt(enrichedPrompt);
-
-  const themeJson = await provider.generateJSON(
+  return provider.generateJSON(
     themePrompt,
     THEME_JSON_SYSTEM_PROMPT,
     ThemeJsonSchema,
     { temperature: 0.7 }
   );
+}
 
+export async function generateDarkMode(
+  themeJson: ThemeJson,
+  provider: AIProvider
+): Promise<DarkModeStyles> {
   const darkPrompt = buildDarkModePrompt(themeJson);
-
-  const darkMode = await provider.generateJSON(
+  return provider.generateJSON(
     darkPrompt,
     DARK_MODE_SYSTEM_PROMPT,
     DarkModeSchema,
     { temperature: 0.5 }
   );
+}
 
+export async function generateThemeJson(
+  enrichedPrompt: EnrichedPrompt,
+  provider: AIProvider
+): Promise<ThemeJsonResult> {
+  const themeJson = await generateLightThemeJson(enrichedPrompt, provider);
+  const darkMode = await generateDarkMode(themeJson, provider);
   return { themeJson, darkMode };
 }
