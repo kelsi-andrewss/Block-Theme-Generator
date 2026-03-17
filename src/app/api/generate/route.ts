@@ -81,10 +81,10 @@ export async function POST(request: Request) {
           detail: [colorPreview && `Colors: ${colorPreview}`, fontPreview && `Fonts: ${fontPreview}`].filter(Boolean).join(" · ") || "Theme configuration ready",
         });
 
-        // Steps 4-7: Dark mode + templates + parts + patterns in parallel
-        send("step", { step: "templates", status: "active", detail: "index, single, page, archive, 404, search, front-page" });
-        send("step", { step: "parts", status: "active", detail: "Header with navigation · Footer" });
-        send("step", { step: "patterns", status: "active", detail: `${enriched.archetype.sections.slice(0, 4).join(", ")}...` });
+        // Steps 4-7: Dark mode + load standard templates + parts
+        send("step", { step: "templates", status: "active", detail: "Loading clean Gutenberg fallback layouts" });
+        send("step", { step: "parts", status: "active", detail: "Structuring responsive header/footer" });
+        send("step", { step: "patterns", status: "active", detail: "Skipping pattern injection (handled by layout)" });
 
         const [darkMode, templates, parts, patterns] = await Promise.all([
           generateDarkMode(themeJson, provider).then(r => {
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
           }),
           generatePatterns(enriched, themeJson, provider).then(r => {
             send("files", { type: "patterns", files: mapToObject(r) });
-            send("step", { step: "patterns", status: "done", detail: `${r.size} block patterns built` });
+            send("step", { step: "patterns", status: "done", detail: "Pattern generation bypassed." });
             return r;
           }),
         ]);

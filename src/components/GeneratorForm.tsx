@@ -27,6 +27,8 @@ const GAP_LABELS: Record<keyof GapAnalysis, string> = {
 };
 
 interface GeneratorFormProps {
+  initialDescription?: string;
+  initialArchetype?: string;
   onSubmit: (data: {
     description: string;
     archetype?: string;
@@ -34,9 +36,13 @@ interface GeneratorFormProps {
   }) => void;
 }
 
-export default function GeneratorForm({ onSubmit }: GeneratorFormProps) {
-  const [description, setDescription] = useState("");
-  const [selectedArchetype, setSelectedArchetype] = useState<string | null>(null);
+export default function GeneratorForm({
+  initialDescription = "",
+  initialArchetype = null,
+  onSubmit,
+}: GeneratorFormProps) {
+  const [description, setDescription] = useState(initialDescription);
+  const [selectedArchetype, setSelectedArchetype] = useState<string | null>(initialArchetype);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
   const [gaps, setGaps] = useState<GapAnalysis | null>(null);
@@ -59,6 +65,13 @@ export default function GeneratorForm({ onSubmit }: GeneratorFormProps) {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, []);
+
+  // Run initial gap analysis if passing in a description from the Gallery
+  useEffect(() => {
+    if (initialDescription) {
+      updateGaps(initialDescription);
+    }
+  }, [initialDescription, updateGaps]);
 
   function handleDescriptionChange(value: string) {
     setDescription(value);

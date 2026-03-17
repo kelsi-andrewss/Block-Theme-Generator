@@ -180,39 +180,296 @@ ${themeContext}
 Generate the ${spec.name}.html template now.`;
 }
 
+import { SAAS_FRONT_PAGE_HTML } from "./saas-template";
+
 export async function generateTemplates(
-  enrichedPrompt: EnrichedPrompt,
+  enrichedPrompt: any,
   themeJson: object,
-  provider: AIProvider
+  provider: any
 ): Promise<Map<string, string>> {
   const templates = new Map<string, string>();
 
-  const results = await Promise.all(
-    TEMPLATE_SPECS.map((spec) =>
-      provider.generateText(
-        buildTemplatePrompt(spec, enrichedPrompt, themeJson),
-        TEMPLATE_SYSTEM_PROMPT,
-        { temperature: spec.temperature }
-      )
-    )
-  );
+  // Use a beautifully structured, modern SaaS-like layout that relies strictly
+  // on standard WordPress core blocks (group, columns, headings).
+  
+  templates.set("index.html", `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
+<div class="wp-block-group">
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading">Latest Posts</h1>
+<!-- /wp:heading -->
+</div>
+<!-- /wp:group -->
+<!-- wp:spacer {"height":"2rem"} -->
+<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+<!-- wp:query {"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true}} -->
+<div class="wp-block-query">
+<!-- wp:post-template -->
+<!-- wp:group {"style":{"spacing":{"padding":{"top":"1.5rem","right":"1.5rem","bottom":"1.5rem","left":"1.5rem"}}},"layout":{"type":"flex","orientation":"vertical"}} -->
+<div class="wp-block-group" style="padding-top:1.5rem;padding-right:1.5rem;padding-bottom:1.5rem;padding-left:1.5rem">
+<!-- wp:post-title {"isLink":true} /-->
+<!-- wp:post-date /-->
+<!-- wp:post-excerpt /-->
+</div>
+<!-- /wp:group -->
+<!-- /wp:post-template -->
+<!-- wp:query-pagination -->
+<!-- wp:query-pagination-previous /-->
+<!-- wp:query-pagination-numbers /-->
+<!-- wp:query-pagination-next /-->
+<!-- /wp:query-pagination -->
+<!-- wp:query-no-results -->
+<!-- wp:paragraph -->
+<p>No posts found.</p>
+<!-- /wp:paragraph -->
+<!-- /wp:query-no-results -->
+</div>
+<!-- /wp:query -->
+</main>
+<!-- /wp:group -->
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`);
 
-  for (let i = 0; i < TEMPLATE_SPECS.length; i++) {
-    let content = results[i].trim();
-    const spec = TEMPLATE_SPECS[i];
+  templates.set("single.html", `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+<!-- wp:post-featured-image {"isLink":false,"align":"wide"} /-->
+<!-- wp:spacer {"height":"2rem"} -->
+<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+<!-- wp:post-title {"level":1} /-->
+<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+<div class="wp-block-group">
+<!-- wp:post-date /-->
+<!-- wp:post-author {"showAvatar":false,"showBio":false} /-->
+</div>
+<!-- /wp:group -->
+<!-- wp:spacer {"height":"2rem"} -->
+<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+<!-- wp:post-content /-->
+</main>
+<!-- /wp:group -->
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`);
 
-    // Ensure structural templates have header/footer parts
-    if (spec.name !== "front-page") {
-      if (!content.startsWith("<!-- wp:template-part")) {
-        content = `${HEADER_PART}\n\n${content}`;
-      }
-      if (!content.endsWith("/-->") || !content.includes("footer")) {
-        content = `${content}\n\n${FOOTER_PART}`;
-      }
-    }
+  templates.set("page.html", `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+<!-- wp:post-title {"level":1} /-->
+<!-- wp:spacer {"height":"2rem"} -->
+<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+<!-- wp:post-content /-->
+</main>
+<!-- /wp:group -->
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`);
 
-    templates.set(`${spec.name}.html`, content);
-  }
+  const genericFrontPage = `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained","contentSize":"100%"}} -->
+<main class="wp-block-group">
+
+<!-- HERO SECTION -->
+<!-- wp:cover {"dimRatio":50,"overlayColor":"base","isDark":false,"align":"full"} -->
+<div class="wp-block-cover alignfull has-base-background-color">
+<span aria-hidden="true" class="wp-block-cover__background has-base-background-color has-background-dim"></span>
+<div class="wp-block-cover__inner-container">
+<!-- wp:group {"layout":{"type":"constrained","contentSize":"800px"}} -->
+<div class="wp-block-group">
+<!-- wp:heading {"textAlign":"center","level":1,"style":{"typography":{"fontSize":"clamp(2.5rem, 5vw, 4rem)","fontWeight":"700"}}} -->
+<h1 class="wp-block-heading has-text-align-center" style="font-size:clamp(2.5rem, 5vw, 4rem);font-weight:700">Digital experiences crafted for the modern web</h1>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"1.25rem"}}} -->
+<p class="has-text-align-center" style="font-size:1.25rem">We build beautiful, fast, and scalable solutions that help your business grow and reach new heights in the digital era.</p>
+<!-- /wp:paragraph -->
+<!-- wp:spacer {"height":"1.5rem"} -->
+<div style="height:1.5rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+<!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
+<div class="wp-block-buttons">
+<!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button">Get Started</a></div>
+<!-- /wp:button -->
+<!-- wp:button {"className":"is-style-outline"} -->
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button">Learn More</a></div>
+<!-- /wp:button -->
+</div>
+<!-- /wp:buttons -->
+</div>
+<!-- /wp:group -->
+</div>
+</div>
+<!-- /wp:cover -->
+
+<!-- wp:spacer {"height":"6rem"} -->
+<div style="height:6rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- FEATURES SECTION -->
+<!-- wp:group {"layout":{"type":"constrained"}} -->
+<div class="wp-block-group">
+<!-- wp:heading {"textAlign":"center","level":2} -->
+<h2 class="wp-block-heading has-text-align-center">Why choose our platform</h2>
+<!-- /wp:heading -->
+<!-- wp:spacer {"height":"3rem"} -->
+<div style="height:3rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+<!-- wp:columns -->
+<div class="wp-block-columns">
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Lightning Fast</h3>
+<!-- /wp:heading -->
+<!-- wp:paragraph -->
+<p>Optimized for speed and performance out of the box. Give your users the snappy experience they deserve.</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:column -->
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Secure by Default</h3>
+<!-- /wp:heading -->
+<!-- wp:paragraph -->
+<p>Bank-grade security protocols implemented natively so you never have to worry about data breaches.</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:column -->
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Highly Scalable</h3>
+<!-- /wp:heading -->
+<!-- wp:paragraph -->
+<p>Architecture that grows with you. From your first hundred users to your first million.</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:column -->
+</div>
+<!-- /wp:columns -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:spacer {"height":"6rem"} -->
+<div style="height:6rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- CALL TO ACTION SECTION -->
+<!-- wp:group {"style":{"spacing":{"padding":{"top":"4rem","right":"2rem","bottom":"4rem","left":"2rem"}}},"backgroundColor":"primary","textColor":"base","layout":{"type":"constrained"}} -->
+<div class="wp-block-group has-base-color has-primary-background-color has-text-color has-background" style="padding-top:4rem;padding-right:2rem;padding-bottom:4rem;padding-left:2rem">
+<!-- wp:heading {"textAlign":"center","level":2} -->
+<h2 class="wp-block-heading has-text-align-center">Ready to accelerate your growth?</h2>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"align":"center"} -->
+<p class="has-text-align-center">Join thousands of companies already building the future on our platform.</p>
+<!-- /wp:paragraph -->
+<!-- wp:spacer {"height":"1rem"} -->
+<div style="height:1rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+<!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
+<div class="wp-block-buttons">
+<!-- wp:button {"className":"is-style-fill"} -->
+<div class="wp-block-button is-style-fill"><a class="wp-block-button__link wp-element-button">Start Free Trial</a></div>
+<!-- /wp:button -->
+</div>
+<!-- /wp:buttons -->
+</div>
+<!-- /wp:group -->
+
+</main>
+<!-- /wp:group -->
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`;
+
+  const frontPageHtml = enrichedPrompt?.archetype?.id === "saas" 
+    ? SAAS_FRONT_PAGE_HTML 
+    : genericFrontPage;
+
+  templates.set("front-page.html", frontPageHtml);
+
+  templates.set("404.html", `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+<!-- wp:heading {"textAlign":"center","level":1} -->
+<h1 class="wp-block-heading has-text-align-center">404 - Page Not Found</h1>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"align":"center"} -->
+<p class="has-text-align-center">The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+<!-- /wp:paragraph -->
+<!-- wp:search {"showLabel":false,"buttonText":"Search"} /-->
+</main>
+<!-- /wp:group -->
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`);
+
+  templates.set("archive.html", `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+<!-- wp:query-title {"type":"archive","textAlign":"center"} /-->
+<!-- wp:term-description {"textAlign":"center"} /-->
+<!-- wp:spacer {"height":"2rem"} -->
+<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+<!-- wp:query {"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true}} -->
+<div class="wp-block-query">
+<!-- wp:post-template -->
+<!-- wp:group {"style":{"spacing":{"padding":{"top":"1.5rem","right":"1.5rem","bottom":"1.5rem","left":"1.5rem"}}},"layout":{"type":"flex","orientation":"vertical"}} -->
+<div class="wp-block-group" style="padding-top:1.5rem;padding-right:1.5rem;padding-bottom:1.5rem;padding-left:1.5rem">
+<!-- wp:post-title {"isLink":true} /-->
+<!-- wp:post-date /-->
+<!-- wp:post-excerpt /-->
+</div>
+<!-- /wp:group -->
+<!-- /wp:post-template -->
+<!-- wp:query-pagination -->
+<!-- wp:query-pagination-previous /-->
+<!-- wp:query-pagination-numbers /-->
+<!-- wp:query-pagination-next /-->
+<!-- /wp:query-pagination -->
+<!-- wp:query-no-results -->
+<!-- wp:paragraph -->
+<p>No results found.</p>
+<!-- /wp:paragraph -->
+<!-- /wp:query-no-results -->
+</div>
+<!-- /wp:query -->
+</main>
+<!-- /wp:group -->
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`);
+
+  templates.set("search.html", `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+<!-- wp:query-title {"type":"search","textAlign":"center"} /-->
+<!-- wp:search {"showLabel":false,"buttonText":"Search"} /-->
+<!-- wp:spacer {"height":"2rem"} -->
+<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+<!-- wp:query {"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true}} -->
+<div class="wp-block-query">
+<!-- wp:post-template -->
+<!-- wp:group {"style":{"spacing":{"padding":{"top":"1.5rem","right":"1.5rem","bottom":"1.5rem","left":"1.5rem"}}},"layout":{"type":"flex","orientation":"vertical"}} -->
+<div class="wp-block-group" style="padding-top:1.5rem;padding-right:1.5rem;padding-bottom:1.5rem;padding-left:1.5rem">
+<!-- wp:post-title {"isLink":true} /-->
+<!-- wp:post-excerpt /-->
+</div>
+<!-- /wp:group -->
+<!-- /wp:post-template -->
+<!-- wp:query-pagination -->
+<!-- wp:query-pagination-previous /-->
+<!-- wp:query-pagination-numbers /-->
+<!-- wp:query-pagination-next /-->
+<!-- /wp:query-pagination -->
+<!-- wp:query-no-results -->
+<!-- wp:paragraph -->
+<p>No results found for your search.</p>
+<!-- /wp:paragraph -->
+<!-- /wp:query-no-results -->
+</div>
+<!-- /wp:query -->
+</main>
+<!-- /wp:group -->
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`);
 
   return templates;
 }

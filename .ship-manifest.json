@@ -1,0 +1,89 @@
+{
+  "slug": "ai-wp-block-theme-generator",
+  "scope": {
+    "files": 48,
+    "stories": 12,
+    "complexity": "large"
+  },
+  "route_hint": "standard",
+  "prev": null,
+  "skill": "plan-stories",
+  "data": {
+    "epic_id": "epic-192",
+    "dev_branch": "dev/ai-powered-wordpress-block-theme-generator",
+    "stories": [
+      {
+        "id": "story-851",
+        "title": "Project scaffold - Next.js 14+ App Router, TypeScript, ESLint, Tailwind CSS, dependencies",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/story-851.md"
+      },
+      {
+        "id": "story-852",
+        "title": "AI provider abstraction layer - AIProvider interface, Gemini 2.5 Flash, retry logic",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/story-852.md"
+      },
+      {
+        "id": "story-853",
+        "title": "Prompt enrichment engine - archetype detection, gap analysis, flavor seeds, starters",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/story-853.md"
+      },
+      {
+        "id": "story-854",
+        "title": "Theme.json generation with light and dark mode - structured JSON, Zod validation",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/story-854.md"
+      },
+      {
+        "id": "story-855",
+        "title": "Template and part generation - block markup via focused Gemini calls",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/story-855.md"
+      },
+      {
+        "id": "story-856",
+        "title": "Pattern generation - 4-6 patterns per archetype, PHP format, creative variation",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/story-856.md"
+      },
+      {
+        "id": "story-857",
+        "title": "Block markup validation and design audit - WCAG, typography, spacing, score",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/story-857.md"
+      },
+      {
+        "id": "story-858",
+        "title": "ZIP packaging and theme assembly - WordPress structure, JSZip, downloadable blob",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/story-858.md"
+      },
+      {
+        "id": "story-859",
+        "title": "Frontend UI - input form, suggestions, progress, audit results, download",
+        "agent": "quick-fixer",
+        "detail_file": "/tmp/gemini/story-859.md"
+      },
+      {
+        "id": "story-860",
+        "title": "WordPress Playground live preview - iframe embed, Blueprint installTheme",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/story-860.md"
+      },
+      {
+        "id": "story-861",
+        "title": "Tests - unit tests for validation, schema, audit, packaging, e2e integration",
+        "agent": "unit-tester",
+        "detail_file": "/tmp/gemini/story-861.md"
+      },
+      {
+        "id": "story-862",
+        "title": "Documentation - README, ADR, What I'd Do Next",
+        "agent": "quick-fixer",
+        "detail_file": "/tmp/gemini/story-862.md"
+      }
+    ]
+  }
+}

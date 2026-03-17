@@ -13,7 +13,7 @@ export interface PlaygroundHandle {
   /** Write a file into the running WordPress instance */
   writeFile(path: string, content: string | Uint8Array): Promise<void>;
   /** Run arbitrary PHP in the WordPress instance */
-  runPHP(code: string): Promise<void>;
+  runPHP(code: string): Promise<{ text: string; exitCode: number } | undefined>;
   /** Refresh the current page in the Playground */
   refresh(): Promise<void>;
   /** Navigate to a path */
@@ -64,9 +64,10 @@ const WpPlayground = forwardRef<PlaygroundHandle, WpPlaygroundProps>(
         await clientRef.current.writeFile(path, data);
       },
       async runPHP(code: string) {
-        if (!clientRef.current) return;
-        await clientRef.current.run({ code });
+        if (!clientRef.current) return undefined;
+        return await clientRef.current.run({ code });
       },
+
       async refresh() {
         if (!clientRef.current) return;
         const url = await clientRef.current.getCurrentURL();
