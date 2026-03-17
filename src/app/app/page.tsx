@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import GeneratorForm from "@/components/GeneratorForm";
 import ProgressIndicator from "@/components/ProgressIndicator";
@@ -253,150 +254,257 @@ export default function Home() {
   const currentStepIndex = pipelineSteps.findIndex(s => s.status === "active");
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-zinc-900 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-bold tracking-tight">Block Theme Generator</h1>
-            <p className="text-sm text-zinc-400">AI-powered WordPress themes from a description</p>
+    <div className="h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 font-sans selection:bg-blue-500/30 overflow-hidden">
+      {/* Navbar - Fixed Height */}
+      <nav className="shrink-0 w-full z-30 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-zinc-200/50 dark:border-zinc-800/50 px-6 py-4 flex items-center justify-between shadow-sm">
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center group-hover:shadow-lg transition-all shadow-blue-500/20">
+            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+            </svg>
           </div>
+          <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
+            ForgeTheme
+          </span>
+        </Link>
+        <div className="flex items-center gap-6">
+          <Link href="/" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors hidden sm:block">
+            Home
+          </Link>
           {step !== "input" && (
             <button
               onClick={handleStartOver}
-              className="text-sm text-zinc-400 hover:text-white transition-colors"
+              className="text-sm font-medium text-white bg-zinc-900 dark:bg-white dark:text-zinc-900 px-4 py-2 rounded-full hover:scale-105 active:scale-95 transition-all duration-200 shadow-sm"
             >
               Start over
             </button>
           )}
         </div>
-      </header>
+      </nav>
 
-      <main className="flex-1 bg-white dark:bg-zinc-900">
-        
-        {/* Tab Navigation (only show on input step) */}
-        {step === "input" && (
-          <div className="border-b border-zinc-200 dark:border-zinc-800">
-            <div className="max-w-7xl mx-auto px-6">
-              <nav className="-mb-px flex space-x-8">
-                <button
-                  onClick={() => setActiveTab("generator")}
-                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === "generator"
-                      ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                      : "border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 dark:text-zinc-400 dark:hover:text-zinc-300 dark:hover:border-zinc-700"
-                  }`}
-                >
-                  Theme Generator
-                </button>
-                <button
-                  onClick={() => setActiveTab("gallery")}
-                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === "gallery"
-                      ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                      : "border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 dark:text-zinc-400 dark:hover:text-zinc-300 dark:hover:border-zinc-700"
-                  }`}
-                >
-                  Template Gallery
-                </button>
-              </nav>
-            </div>
-          </div>
-        )}
-
-        {/* Input step — Generator vs Gallery */}
-        {step === "input" && (
-          <div className={activeTab === "gallery" ? "max-w-7xl mx-auto px-6 py-10" : "max-w-3xl mx-auto px-6 py-10"}>
-            {activeTab === "generator" ? (
-              <GeneratorForm 
-                key={formKey}
-                initialDescription={initialDesc}
-                initialArchetype={initialArch ?? undefined}
-                onSubmit={handleSubmit} 
-              />
-            ) : (
-              <TemplateGallery onSelectTheme={handleSelectGalleryTheme} />
-            )}
-          </div>
-        )}
-
-        {/* Shared layout for Generating and Results steps to persist WordPress Playground */}
-        {(step === "generating" || (step === "results" && result)) && (
-          <div className="max-w-7xl mx-auto px-6 py-8">
-            {step === "results" && result && (
-              <div className="text-center mb-8">
-                <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-                  Theme generated
-                </h2>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                  {result.meta.displayName}
-                </p>
+      {/* Main Split-Pane Content Area */}
+      <main className="flex-1 flex overflow-hidden relative z-10 w-full">
+        {/* Left Sidebar Pane */}
+        <aside className="w-[480px] shrink-0 border-r border-zinc-200/50 dark:border-zinc-800/50 bg-white/70 dark:bg-zinc-900/60 backdrop-blur-2xl shadow-2xl z-20 flex flex-col">
+          {step === "input" && (
+            <>
+              {/* Segmented Controls for Sidebar */}
+              <div className="p-6 pb-2 border-b border-zinc-200/30 dark:border-zinc-800/30">
+                <div className="inline-flex w-full items-center p-1 bg-zinc-100/50 dark:bg-zinc-950/50 backdrop-blur-md rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-inner">
+                  <button
+                    onClick={() => setActiveTab("generator")}
+                    className={`flex-1 relative py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 ${
+                      activeTab === "generator"
+                        ? "text-zinc-900 dark:text-white bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-zinc-200/50 dark:ring-zinc-700/50"
+                        : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30"
+                    }`}
+                  >
+                    Theme Generator
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("gallery")}
+                    className={`flex-1 relative py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 ${
+                      activeTab === "gallery"
+                        ? "text-zinc-900 dark:text-white bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-zinc-200/50 dark:ring-zinc-700/50"
+                        : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30"
+                    }`}
+                  >
+                    Template Gallery
+                  </button>
+                </div>
               </div>
-            )}
-
-            <div className={`grid grid-cols-1 gap-8 ${step === "results" ? "lg:grid-cols-[400px_1fr]" : "lg:grid-cols-[320px_1fr]"}`}>
-              {/* Left: progress OR audit results */}
-              <div>
-                {step === "generating" ? (
-                  <>
-                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-6">
-                      Building your theme...
-                    </h2>
-                    <ProgressIndicator
-                      currentStep={currentStepIndex >= 0 ? currentStepIndex : 0}
-                      steps={pipelineSteps.map((s) => ({ name: s.name, status: s.status, detail: s.detail }))}
-                    />
-                    {error && (
-                      <div className="mt-6">
-                        <p className="text-red-600 dark:text-red-400 text-sm mb-3">{error}</p>
-                        <button
-                          onClick={handleStartOver}
-                          className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                        >
-                          Try again
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    {result && (
-                      <AuditResults
-                        result={result.audit}
-                        onDownload={handleDownload}
-                        onPreview={() => {}} // Preview is already visible
-                      />
-                    )}
-                    {isPackaging && (
-                      <p className="text-center text-sm text-zinc-500 mt-4 animate-pulse">
-                        Packaging ZIP...
-                      </p>
-                    )}
-                  </>
-                )}
-              </div>
-
-              {/* Right: live preview */}
-              <div>
-                {step === "results" && result && (
-                  <ColorSwitcher 
-                    lightThemeJsonStr={result.themeFiles.themeJson}
-                    darkThemeJsonStr={result.themeFiles.darkMode}
-                    onThemeJsonChange={handleThemeJsonChange}
+              
+              {/* Form / Gallery Scrollable Content */}
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+                {activeTab === "generator" ? (
+                  <GeneratorForm 
+                    key={formKey}
+                    initialDescription={initialDesc}
+                    initialArchetype={initialArch ?? undefined}
+                    onSubmit={handleSubmit} 
                   />
+                ) : (
+                  <TemplateGallery onSelectTheme={handleSelectGalleryTheme} />
                 )}
-                <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-3">
-                  Live Preview
-                </h3>
-                <ThemePreview 
-                  themeJson={result?.themeFiles.themeJson} 
-                  templates={result?.themeFiles.templates} 
-                  parts={result?.themeFiles.parts} 
-                  patterns={result?.themeFiles.patterns} 
-                />
               </div>
+            </>
+          )}
+
+          {(step === "generating" || step === "results") && (
+            <div className="flex-1 overflow-y-auto p-6 flex flex-col">
+              {step === "generating" ? (
+                <>
+                  <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-6 flex items-center gap-3 tracking-tight">
+                    <span className="flex h-3 w-3 rounded-full bg-blue-500 animate-pulse"></span>
+                    Building Theme...
+                  </h2>
+                  <ProgressIndicator
+                    currentStep={currentStepIndex >= 0 ? currentStepIndex : 0}
+                    steps={pipelineSteps.map((s) => ({ name: s.name, status: s.status, detail: s.detail }))}
+                  />
+                  {error && (
+                    <div className="mt-8 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl">
+                      <p className="text-red-700 dark:text-red-400 text-sm font-medium mb-3">{error}</p>
+                      <button
+                        onClick={handleStartOver}
+                        className="text-sm font-semibold text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors"
+                      >
+                        Try again &rarr;
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {result && (
+                    <div className="mb-8">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-4">
+                        <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 relative top-[0.5px]"></span>
+                        Complete
+                      </div>
+                      <h2 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight mb-2">
+                        {result.meta.displayName}
+                      </h2>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                        Theme successfully generated and analyzed. View detailed scores below.
+                      </p>
+                    </div>
+                  )}
+                  {result && (
+                    <AuditResults
+                      result={result.audit}
+                      onDownload={handleDownload}
+                      onPreview={() => {}} // Not used in split layout since it's always visible
+                    />
+                  )}
+                  {isPackaging && (
+                    <p className="text-center text-sm font-medium text-blue-600 dark:text-blue-400 mt-6 animate-pulse bg-blue-50 dark:bg-blue-500/10 py-2.5 rounded-xl border border-blue-100 dark:border-blue-500/20">
+                      Packaging ZIP for download...
+                    </p>
+                  )}
+                </>
+              )}
             </div>
+          )}
+        </aside>
+
+        {/* Right Canvas Pane */}
+        <section className="flex-1 relative overflow-hidden bg-white/50 dark:bg-zinc-950/50 flex flex-col">
+          {/* Animated Glow Orbs copied precisely from landing page */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl mx-auto pointer-events-none z-0">
+            <div className="absolute -top-48 left-1/4 w-96 h-96 bg-blue-500/20 dark:bg-blue-500/10 blur-[128px] rounded-full mix-blend-multiply dark:mix-blend-screen" />
+            <div className="absolute top-32 right-1/4 w-96 h-96 bg-indigo-500/20 dark:bg-indigo-500/10 blur-[128px] rounded-full mix-blend-multiply dark:mix-blend-screen" />
+            <div className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-purple-500/20 dark:bg-purple-500/10 blur-[128px] rounded-full mix-blend-multiply dark:mix-blend-screen" />
           </div>
-        )}
+
+          <div className="flex-1 relative z-10 flex flex-col p-6 w-full h-full overflow-hidden">
+            {step === "input" && activeTab === "generator" && (
+              <div className="flex-1 flex flex-col justify-center items-center text-center opacity-90">
+                <div className="w-16 h-16 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center p-3 shadow-xl shadow-blue-500/5 mb-8 transform -rotate-3 hover:rotate-0 transition-all">
+                  <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                  </svg>
+                </div>
+                <h1 className="text-5xl font-bold tracking-tight text-zinc-900 dark:text-white max-w-2xl mb-6">
+                  Forge your brand's digital identity {" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
+                    instantly
+                  </span>
+                </h1>
+                <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed">
+                  Start by describing your dream website on the left, or dive into one of our curated archetypes to spark your creativity.
+                </p>
+                <div className="mt-12 flex items-center justify-center gap-3 opacity-50 text-sm font-medium text-zinc-500 uppercase tracking-widest">
+                  <span className="w-8 h-[1px] bg-zinc-300 dark:bg-zinc-700"></span>
+                  AI Powered Environment
+                  <span className="w-8 h-[1px] bg-zinc-300 dark:bg-zinc-700"></span>
+                </div>
+              </div>
+            )}
+
+            {step === "input" && activeTab === "gallery" && (
+              <div className="flex-1 w-full h-full relative z-10 flex flex-col overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
+                <div className="flex-1 bg-white dark:bg-zinc-900/40 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 flex flex-col overflow-hidden shadow-2xl ring-1 ring-black/5 dark:ring-white/5">
+                  {/* Mock Browser Header */}
+                  <div className="h-14 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-4 flex items-center shrink-0">
+                    <div className="flex gap-2">
+                      <div className="w-3.5 h-3.5 rounded-full bg-red-400 dark:bg-red-500/80 border border-black/10"></div>
+                      <div className="w-3.5 h-3.5 rounded-full bg-amber-400 dark:bg-amber-500/80 border border-black/10"></div>
+                      <div className="w-3.5 h-3.5 rounded-full bg-green-400 dark:bg-green-500/80 border border-black/10"></div>
+                    </div>
+                    <div className="ml-auto mr-auto px-4 py-1.5 bg-white dark:bg-zinc-900 text-zinc-400 dark:text-zinc-500 text-xs font-mono rounded-md border border-zinc-200 dark:border-zinc-800 flex items-center gap-2 shadow-inner">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                      forge-saas-blueprint.local
+                    </div>
+                  </div>
+                  <div className="flex-1 w-full bg-zinc-100 dark:bg-zinc-950">
+                    <iframe 
+                      src="/templates/saas" 
+                      className="w-full h-full border-0"
+                      title="SaaS Template Preview"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {step === "generating" && !result && (
+              <div className="flex-1 flex justify-center items-center">
+                <div className="bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 rounded-3xl p-10 flex flex-col items-center justify-center text-center shadow-2xl max-w-sm w-full mx-auto">
+                  <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center border border-blue-200/50 dark:border-blue-500/30 shadow-lg shadow-blue-500/10 mb-8 relative">
+                    <svg className="w-10 h-10 text-blue-600 dark:text-blue-400 animate-spin absolute" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight mb-3">Booting Sandbox...</h3>
+                  <p className="text-zinc-500 dark:text-zinc-400 leading-relaxed text-sm">
+                    Deploying virtual WordPress instance to preview your generated block theme in real-time.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {step === "results" && result && (
+              <div className="flex-1 bg-white dark:bg-zinc-900/40 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 flex flex-col overflow-hidden shadow-2xl ring-1 ring-black/5 dark:ring-white/5">
+                {/* Embedded Browser Header */}
+                <div className="h-14 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-4 flex items-center justify-between z-10 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 mr-4">
+                      <div className="w-3 h-3 rounded-full bg-red-400 border border-black/10" />
+                      <div className="w-3 h-3 rounded-full bg-amber-400 border border-black/10" />
+                      <div className="w-3 h-3 rounded-full bg-green-400 border border-black/10" />
+                    </div>
+                    <div className="px-4 py-1.5 bg-white dark:bg-zinc-900 text-zinc-400 dark:text-zinc-500 text-xs font-mono rounded-md border border-zinc-200 dark:border-zinc-800 flex items-center gap-2">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                      local_sandbox_env:3000
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <ColorSwitcher 
+                      lightThemeJsonStr={result.themeFiles.themeJson}
+                      darkThemeJsonStr={result.themeFiles.darkMode}
+                      onThemeJsonChange={handleThemeJsonChange}
+                    />
+                  </div>
+                </div>
+                {/* Theme Preview Flex Container */}
+                <div className="flex-1 w-full bg-zinc-100 dark:bg-black/20 relative z-0 p-4 lg:p-6 overflow-hidden flex flex-col">
+                  <ThemePreview 
+                    themeJson={result?.themeFiles.themeJson} 
+                    templates={result?.themeFiles.templates} 
+                    parts={result?.themeFiles.parts} 
+                    patterns={result?.themeFiles.patterns} 
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
       </main>
     </div>
   );

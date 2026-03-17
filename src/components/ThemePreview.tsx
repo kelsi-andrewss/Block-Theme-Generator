@@ -238,9 +238,9 @@ export default function ThemePreview({ themeJson, templates, parts }: ThemePrevi
   }, [themeJson, templates, parts]);
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col h-full w-full space-y-3">
       {/* Toolbar */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between shrink-0">
         <div className="flex items-center gap-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 p-1">
           {(Object.keys(VIEWPORT_WIDTHS) as ViewportSize[]).map((size) => (
             <button
@@ -260,11 +260,11 @@ export default function ThemePreview({ themeJson, templates, parts }: ThemePrevi
       </div>
 
       {/* Preview container */}
-      <div className="relative rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-zinc-50 dark:bg-zinc-950 flex justify-center h-[600px]">
+      <div className="relative rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-zinc-50 dark:bg-zinc-950 flex flex-1 justify-center w-full">
         <iframe
           ref={iframeRef}
           title="Theme Preview"
-          className="border-0 bg-white transition-[width] duration-300 ease-in-out h-full mx-auto shadow-sm"
+          className="border-0 bg-white transition-[width] duration-300 ease-in-out h-full xl:mx-auto shadow-sm"
           style={{ width: VIEWPORT_WIDTHS[viewport] }}
         />
       </div>
