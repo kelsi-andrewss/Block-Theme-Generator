@@ -78,6 +78,10 @@ function generateBaseThemeJson(arch: ThemeArchetype): ThemeJson {
         ],
       },
     },
+    templateParts: [
+      { area: "header", name: "header", title: "Header" },
+      { area: "footer", name: "footer", title: "Footer" }
+    ],
     styles: {
       color: {
         background: "var(--wp--preset--color--base)",
