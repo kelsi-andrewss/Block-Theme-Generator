@@ -28,6 +28,10 @@ export function generateFunctionsPHP(meta: ThemeMeta): string {
     `add_action('after_setup_theme', function () {`,
     `    add_theme_support('wp-block-styles');`,
     `});`,
+    "",
+    `add_action('wp_enqueue_scripts', function () {`,
+    `    wp_enqueue_script('tailwindcss', 'https://cdn.tailwindcss.com', [], null, false);`,
+    `});`,
   ];
 
   const googleFonts = (meta.fontFamilies ?? []).filter(

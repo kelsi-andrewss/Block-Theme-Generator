@@ -164,8 +164,8 @@ function generateDarkModeStyles(arch: ThemeArchetype): DarkModeStyles {
           { name: "Primary", slug: "primary", color: palette.primary },
           { name: "Secondary", slug: "secondary", color: palette.text }, // Darker secondary
           { name: "Accent", slug: "accent", color: palette.accent },
-          { name: "Base", slug: "base", color: "#0f172a" }, // Dark background
-          { name: "Contrast", slug: "contrast", color: "#f8fafc" }, // Light text
+          { name: "Base", slug: "base", color: "#09090b" }, // Match React bg-zinc-950 exactly
+          { name: "Contrast", slug: "contrast", color: "#fafafa" }, // Match React text-zinc-50 exactly
         ],
       },
     },

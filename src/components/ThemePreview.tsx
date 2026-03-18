@@ -218,6 +218,7 @@ export default function ThemePreview({ themeJson, templates, parts }: ThemePrevi
       <!DOCTYPE html>
       <html>
         <head>
+          <script src="https://cdn.tailwindcss.com"></script>
           <style>
             ${cssVars}
             ${baseCss}

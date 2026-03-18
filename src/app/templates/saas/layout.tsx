@@ -1,6 +1,6 @@
 import Link from "next/link";
-import '../../globals.css';
 import TemplateProvider from "@/components/TemplateProvider";
+import NativeIframeController from "@/components/NativeIframeController";
 import { Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -17,6 +17,7 @@ export default function SaaSLayout({
 }) {
   return (
     <TemplateProvider>
+      <NativeIframeController />
       <div className={`min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 selection:bg-[var(--color-primary-500)]/30 selection:text-[var(--color-primary-600)] dark:selection:text-[var(--color-primary-200)] antialiased ${inter.className}`}>
         
         {/* Navigation */}

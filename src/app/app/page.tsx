@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import GeneratorForm from "@/components/GeneratorForm";
 import ProgressIndicator from "@/components/ProgressIndicator";
 import AuditResults from "@/components/AuditResults";
-import type { AuditResult } from "@/lib/validation/design-audit";
 import ThemePreview from "@/components/ThemePreview";
 import ColorSwitcher from "@/components/ColorSwitcher";
 import TemplateGallery from "@/components/TemplateGallery";
+import IterationChat, { SelectedBlockEvent } from "@/components/IterationChat";
 import type { ThemeArchetype } from "@/lib/prompts/archetypes";
 import type { PremadeTheme } from "@/lib/premade-themes";
 import { SAAS_FRONT_PAGE_HTML } from "@/lib/generators/saas-template";
@@ -53,6 +53,7 @@ export default function Home() {
   const [pipelineSteps, setPipelineSteps] = useState<StepState[]>(INITIAL_STEPS);
   const [error, setError] = useState<string | null>(null);
   const [isPackaging, setIsPackaging] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
   const [themeSlug, setThemeSlug] = useState("generated-theme");
   const [archetypeId, setArchetypeId] = useState("blog");
   const themeSlugRef = useRef("generated-theme");
@@ -62,6 +63,29 @@ export default function Home() {
   const [formKey, setFormKey] = useState(0); // Used to force remount GeneratorForm when initial data changes
   const [initialDesc, setInitialDesc] = useState("");
   const [initialArch, setInitialArch] = useState<string | null>(null);
+
+  const [isIterating, setIsIterating] = useState(false);
+  const [selectedBlock, setSelectedBlock] = useState<SelectedBlockEvent | null>(null);
+  const [iframeState, setIframeState] = useState<{ isDarkMode: boolean; activeThemeId: string; activeFontId: string; colors: any } | null>(null);
+
+  useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      if (event.data?.type === 'BLOCK_SELECTED') {
+        setSelectedBlock(event.data.payload);
+      } else if (event.data?.type === 'TEMPLATE_STATE_CHANGE') {
+        setIframeState(event.data.payload);
+      }
+    }
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  const handleSendMessage = useCallback(async (message: string) => {
+    setIsIterating(true);
+    // Simulate iterative generation
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsIterating(false);
+  }, []);
 
   const updateStep = useCallback((key: string, status: StepState["status"], detail?: string) => {
     setPipelineSteps(prev =>
@@ -182,6 +206,113 @@ export default function Home() {
     }
   }
 
+  async function handlePreview() {
+    if (!result) return;
+    setIsPreviewing(true);
+    
+    try {
+      // 0. Sync WP Blueprint settings with the active layout toggles in the React Iframe (Dark Mode & Colors)
+      let activeThemeJsonStr = result.themeFiles.themeJson;
+      let activeDarkModeStr = result.themeFiles.darkMode;
+      
+      try {
+        const parsedJson = JSON.parse(activeThemeJsonStr);
+        
+        // If dark mode is active, cleanly merge dark colors into the root theme.json so we don't lose typography/layout!
+        if (iframeState?.isDarkMode && result.themeFiles.darkMode) {
+          const parsedDark = JSON.parse(result.themeFiles.darkMode);
+          if (parsedDark.settings?.color?.palette) {
+            parsedJson.settings.color.palette = parsedDark.settings.color.palette;
+          }
+          if (parsedDark.styles?.color) {
+            parsedJson.styles = parsedJson.styles || {};
+            parsedJson.styles.color = parsedDark.styles.color;
+          }
+        }
+        
+        // Inject live color palette overrides
+        if (iframeState?.colors) {
+          const palette = parsedJson.settings?.color?.palette;
+          if (Array.isArray(palette)) {
+            const primary = palette.find((p: any) => p.slug === 'primary');
+            if (primary && iframeState.colors.primary) primary.color = iframeState.colors.primary[500];
+            
+            const secondary = palette.find((p: any) => p.slug === 'secondary');
+            if (secondary && iframeState.colors.secondary) secondary.color = iframeState.colors.secondary[500];
+          }
+        }
+
+        // Inject live font overrides
+        if (iframeState?.activeFontId) {
+          const fontFamilies = parsedJson.settings?.typography?.fontFamilies;
+          if (Array.isArray(fontFamilies)) {
+            const fontMap: Record<string, string> = {
+              'sans': 'Inter, ui-sans-serif, system-ui, sans-serif',
+              'serif': 'ui-serif, Georgia, Cambria, "Times New Roman", Times, serif',
+              'mono': 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace'
+            };
+            const activeFontFamily = fontMap[iframeState.activeFontId] || fontMap['sans'];
+            
+            const headingFont = fontFamilies.find((f: any) => f.slug === 'heading');
+            if (headingFont) headingFont.fontFamily = activeFontFamily;
+            
+            const bodyFont = fontFamilies.find((f: any) => f.slug === 'body');
+            if (bodyFont) bodyFont.fontFamily = activeFontFamily;
+          }
+        }
+
+        activeThemeJsonStr = JSON.stringify(parsedJson, null, 2);
+      } catch (e) {
+        console.error("Failed to inject CSS palette variables into theme.json", e);
+      }
+      
+      const exportedThemeFiles = {
+        ...result.themeFiles,
+        themeJson: activeThemeJsonStr,
+        darkMode: activeDarkModeStr
+      };
+
+      // 1. Get the compiled zip blob
+      const pkgRes = await fetch("/api/package", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ themeFiles: exportedThemeFiles, meta: result.meta }),
+      });
+      if (!pkgRes.ok) throw new Error("Packaging failed");
+      const blob = await pkgRes.blob();
+      
+      // 2. Convert blob to base64
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = async () => {
+        const base64data = (reader.result as string).split(',')[1];
+        
+        // 3. Generate blueprint using backend generator to get the Zip bundle
+        const bpRes = await fetch("/api/blueprint", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ zipBase64: base64data, meta: result.meta }),
+        });
+        
+        if (!bpRes.ok) throw new Error("Blueprint generation failed");
+        
+        const { bundleBase64 } = await bpRes.json();
+        
+        // 4. Open WordPress Playground in a new tab using properly URL-encoded data URI
+        const dataUri = `data:application/zip;base64,${bundleBase64}`;
+        window.open(`https://playground.wordpress.net/?blueprint-url=${encodeURIComponent(dataUri)}`, "_blank");
+        setIsPreviewing(false);
+      };
+      
+      reader.onerror = () => {
+        setIsPreviewing(false);
+      };
+    } catch (err) {
+      console.error(err);
+      setIsPreviewing(false);
+    }
+  }
+
   function handleStartOver() {
     setStep("input");
     setResult(null);
@@ -205,8 +336,8 @@ export default function Home() {
     };
 
     const parts = {
-      "header.html": `<!-- wp:group {"tagName":"header","layout":{"type":"constrained"}} -->\n<header class="wp-block-group">\n<!-- wp:group {"style":{"spacing":{"padding":{"top":"1.5rem","bottom":"1.5rem"}}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->\n<div class="wp-block-group" style="padding-top:1.5rem;padding-bottom:1.5rem">\n<!-- wp:site-title {"level":0} /-->\n<!-- wp:navigation {"layout":{"type":"flex","orientation":"horizontal"}} /-->\n</div>\n<!-- /wp:group -->\n</header>\n<!-- /wp:group -->`,
-      "footer.html": `<!-- wp:group {"tagName":"footer","style":{"spacing":{"padding":{"top":"3rem","bottom":"3rem","left":"2rem","right":"2rem"}}},"backgroundColor":"primary","textColor":"base","layout":{"type":"constrained","contentSize":"100%"}} -->\n<footer class="wp-block-group has-base-color has-primary-background-color has-text-color has-background" style="padding-top:3rem;padding-right:2rem;padding-bottom:3rem;padding-left:2rem">\n<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->\n<div class="wp-block-group">\n<!-- wp:site-title {"level":0,"style":{"typography":{"fontStyle":"normal","fontWeight":"700"}}} /-->\n<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.875rem"}}} -->\n<p style="font-size:0.875rem">© ${new Date().getFullYear()} All rights reserved.</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:group -->\n</footer>\n<!-- /wp:group -->`
+      "header.html": `<!-- wp:group {"tagName":"header","style":{"spacing":{"padding":{"top":"1.5rem","right":"2rem","bottom":"1.5rem","left":"2rem"}}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->\n<header class="wp-block-group" style="padding-top:1.5rem;padding-right:2rem;padding-bottom:1.5rem;padding-left:2rem">\n<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->\n<div class="wp-block-group">\n<!-- wp:group {"style":{"spacing":{"padding":{"top":"0.25rem","right":"0.75rem","bottom":"0.25rem","left":"0.75rem"},"blockGap":"0"},"border":{"radius":"0.5rem"}},"backgroundColor":"primary","textColor":"base","layout":{"type":"flex","flexWrap":"nowrap"}} -->\n<div class="wp-block-group has-base-color has-primary-background-color has-text-color has-background" style="border-radius:0.5rem;padding-top:0.25rem;padding-right:0.75rem;padding-bottom:0.25rem;padding-left:0.75rem">\n<!-- wp:paragraph {"style":{"typography":{"fontWeight":"700"}}} -->\n<p style="font-weight:700">S</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:group -->\n<!-- wp:paragraph {"style":{"typography":{"fontWeight":"700","fontSize":"1.25rem"}}} -->\n<p style="font-size:1.25rem;font-weight:700">SaaS<span style="color:var(--wp--preset--color--primary)">Flow</span></p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:group -->\n<!-- wp:navigation {"layout":{"type":"flex","setCascadingProperties":true,"justifyContent":"center"},"style":{"typography":{"fontSize":"0.875rem"}}} -->\n<!-- wp:navigation-link {"label":"Features","url":"#features"} /-->\n<!-- wp:navigation-link {"label":"Customers","url":"#testimonials"} /-->\n<!-- wp:navigation-link {"label":"Pricing","url":"#pricing"} /-->\n<!-- /wp:navigation -->\n<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->\n<div class="wp-block-group">\n<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.875rem","fontWeight":"500"}}} -->\n<p style="font-size:0.875rem;font-weight:500">Log in</p>\n<!-- /wp:paragraph -->\n<!-- wp:buttons -->\n<div class="wp-block-buttons">\n<!-- wp:button {"backgroundColor":"contrast","textColor":"base","style":{"border":{"radius":"9999px"},"typography":{"fontSize":"0.875rem"}}} -->\n<div class="wp-block-button"><a class="wp-block-button__link has-base-color has-contrast-background-color has-text-color has-background wp-element-button" style="border-radius:9999px;font-size:0.875rem">Get Started</a></div>\n<!-- /wp:button -->\n</div>\n<!-- /wp:buttons -->\n</div>\n<!-- /wp:group -->\n</header>\n<!-- /wp:group -->`,
+      "footer.html": `<!-- wp:group {"tagName":"footer","style":{"spacing":{"padding":{"top":"4rem","bottom":"2rem","left":"2rem","right":"2rem"},"blockGap":"3rem"}},"layout":{"type":"constrained","contentSize":"100%"}} -->\n<footer class="wp-block-group" style="padding-top:4rem;padding-right:2rem;padding-bottom:2rem;padding-left:2rem;border-top:1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)">\n<!-- wp:columns {"style":{"spacing":{"blockGap":{"top":"2rem","left":"2rem"}}}} -->\n<div class="wp-block-columns">\n<!-- wp:column {"width":"33.33%"} -->\n<div class="wp-block-column" style="flex-basis:33.33%">\n<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->\n<div class="wp-block-group">\n<!-- wp:group {"style":{"spacing":{"padding":{"top":"0.25rem","right":"0.75rem","bottom":"0.25rem","left":"0.75rem"},"blockGap":"0"},"border":{"radius":"0.5rem"}},"backgroundColor":"primary","textColor":"base","layout":{"type":"flex","flexWrap":"nowrap"}} -->\n<div class="wp-block-group has-base-color has-primary-background-color has-text-color has-background" style="border-radius:0.5rem;padding-top:0.25rem;padding-right:0.75rem;padding-bottom:0.25rem;padding-left:0.75rem">\n<!-- wp:paragraph {"style":{"typography":{"fontWeight":"700"}}} -->\n<p style="font-weight:700">S</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:group -->\n<!-- wp:paragraph {"style":{"typography":{"fontWeight":"700","fontSize":"1.25rem"}}} -->\n<p style="font-size:1.25rem;font-weight:700">SaaSFlow</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:group -->\n<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.875rem"}}} -->\n<p style="color:color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent);font-size:0.875rem">Building the next generation of powerful, scalable SaaS tools for modern teams.</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:column -->\n<!-- wp:column {"width":"22.22%"} -->\n<div class="wp-block-column" style="flex-basis:22.22%">\n<!-- wp:paragraph {"style":{"typography":{"fontWeight":"600","fontSize":"0.875rem"}}} -->\n<p style="font-size:0.875rem;font-weight:600">Product</p>\n<!-- /wp:paragraph -->\n<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.875rem"}}} -->\n<p style="color:color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent);font-size:0.875rem">Features<br>Integrations<br>Pricing<br>Changelog</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:column -->\n<!-- wp:column {"width":"22.22%"} -->\n<div class="wp-block-column" style="flex-basis:22.22%">\n<!-- wp:paragraph {"style":{"typography":{"fontWeight":"600","fontSize":"0.875rem"}}} -->\n<p style="font-size:0.875rem;font-weight:600">Company</p>\n<!-- /wp:paragraph -->\n<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.875rem"}}} -->\n<p style="color:color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent);font-size:0.875rem">About Us<br>Careers<br>Blog<br>Contact</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:column -->\n<!-- wp:column {"width":"22.22%"} -->\n<div class="wp-block-column" style="flex-basis:22.22%">\n<!-- wp:paragraph {"style":{"typography":{"fontWeight":"600","fontSize":"0.875rem"}}} -->\n<p style="font-size:0.875rem;font-weight:600">Legal</p>\n<!-- /wp:paragraph -->\n<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.875rem"}}} -->\n<p style="color:color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent);font-size:0.875rem">Privacy Policy<br>Terms of Service</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:column -->\n</div>\n<!-- /wp:columns -->\n<!-- wp:separator {"className":"is-style-wide"} -->\n<hr class="wp-block-separator has-alpha-channel-opacity is-style-wide" style="margin-top:2rem;margin-bottom:2rem"/>\n<!-- /wp:separator -->\n<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->\n<div class="wp-block-group">\n<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.875rem"}}} -->\n<p style="color:color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent);font-size:0.875rem">© 2026 SaaSFlow Inc. All rights reserved.</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:group -->\n</footer>\n<!-- /wp:group -->`
     };
 
     setThemeSlug(theme.id);
@@ -355,34 +486,42 @@ export default function Home() {
                   )}
                 </>
               ) : (
-                <>
-                  {result && (
-                    <div className="mb-8">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-4">
-                        <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 relative top-[0.5px]"></span>
-                        Complete
-                      </div>
-                      <h2 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight mb-2">
-                        {result.meta.displayName}
-                      </h2>
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                        Theme successfully generated and analyzed. View detailed scores below.
-                      </p>
-                    </div>
-                  )}
-                  {result && (
-                    <AuditResults
-                      result={result.audit}
-                      onDownload={handleDownload}
-                      onPreview={() => {}} // Not used in split layout since it's always visible
-                    />
-                  )}
-                  {isPackaging && (
-                    <p className="text-center text-sm font-medium text-blue-600 dark:text-blue-400 mt-6 animate-pulse bg-blue-50 dark:bg-blue-500/10 py-2.5 rounded-xl border border-blue-100 dark:border-blue-500/20">
-                      Packaging ZIP for download...
-                    </p>
-                  )}
-                </>
+                <div className="flex-1 flex flex-col h-full z-10">
+                  <div className="flex-1 p-0 flex flex-col -m-6 mb-0 shadow-lg relative z-20">
+                    {result && (
+                      <IterationChat
+                        onSendMessage={handleSendMessage}
+                        onRegenerateLayout={() => {}}
+                        isProcessing={isIterating}
+                        selectedBlock={selectedBlock}
+                        onClearSelection={() => setSelectedBlock(null)}
+                      />
+                    )}
+                  </div>
+                  <div className="mt-6 pt-6 border-t border-zinc-200 dark:border-zinc-800 flex flex-col gap-3">
+                    <button
+                      onClick={handleDownload}
+                      disabled={isPackaging || isPreviewing}
+                      className="w-full py-2.5 rounded-lg border border-zinc-200 dark:border-zinc-700 font-semibold bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {isPackaging ? "Packaging..." : "Download ZIP"}
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                    </button>
+
+                    <button
+                      onClick={handlePreview}
+                      disabled={isPackaging || isPreviewing}
+                      className="w-full py-2.5 rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-md transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {isPreviewing ? "Generating Blueprint..." : "Preview in WordPress"}
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           )}
@@ -468,38 +607,39 @@ export default function Home() {
             )}
 
             {step === "results" && result && (
-              <div className="flex-1 bg-white dark:bg-zinc-900/40 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 flex flex-col overflow-hidden shadow-2xl ring-1 ring-black/5 dark:ring-white/5">
-                {/* Embedded Browser Header */}
-                <div className="h-14 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-4 flex items-center justify-between z-10 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 mr-4">
-                      <div className="w-3 h-3 rounded-full bg-red-400 border border-black/10" />
-                      <div className="w-3 h-3 rounded-full bg-amber-400 border border-black/10" />
-                      <div className="w-3 h-3 rounded-full bg-green-400 border border-black/10" />
+              <div className="flex-1 w-full h-full relative z-10 flex flex-col overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
+                <div className="flex-1 bg-white dark:bg-zinc-900/40 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 flex flex-col overflow-hidden shadow-2xl ring-1 ring-black/5 dark:ring-white/5">
+                  {/* Mock Browser Header */}
+                  <div className="h-14 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-4 flex items-center shrink-0">
+                    <div className="flex gap-2">
+                      <div className="w-3.5 h-3.5 rounded-full bg-red-400 dark:bg-red-500/80 border border-black/10"></div>
+                      <div className="w-3.5 h-3.5 rounded-full bg-amber-400 dark:bg-amber-500/80 border border-black/10"></div>
+                      <div className="w-3.5 h-3.5 rounded-full bg-green-400 dark:bg-green-500/80 border border-black/10"></div>
                     </div>
-                    <div className="px-4 py-1.5 bg-white dark:bg-zinc-900 text-zinc-400 dark:text-zinc-500 text-xs font-mono rounded-md border border-zinc-200 dark:border-zinc-800 flex items-center gap-2">
+                    <div className="ml-auto mr-auto px-4 py-1.5 bg-white dark:bg-zinc-900 text-zinc-400 dark:text-zinc-500 text-xs font-mono rounded-md border border-zinc-200 dark:border-zinc-800 flex items-center gap-2 shadow-inner">
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                       </svg>
-                      local_sandbox_env:3000
+                      forge-{themeSlug || 'saas'}-blueprint.local
                     </div>
                   </div>
-                  <div className="flex items-center">
-                    <ColorSwitcher 
-                      lightThemeJsonStr={result.themeFiles.themeJson}
-                      darkThemeJsonStr={result.themeFiles.darkMode}
-                      onThemeJsonChange={handleThemeJsonChange}
-                    />
+                  {/* Theme Preview Flex Container */}
+                  <div className="flex-1 w-full bg-zinc-100 dark:bg-zinc-950 relative z-0 overflow-hidden flex flex-col">
+                    {(themeSlug && themeSlug !== "generated-theme") ? (
+                      <iframe 
+                        src={`/templates/${themeSlug}`}
+                        className="w-full h-full border-0"
+                        title={`${themeSlug} Template Iteration Preview`}
+                      />
+                    ) : (
+                      <ThemePreview 
+                        themeJson={result?.themeFiles.darkMode || result?.themeFiles.themeJson} 
+                        templates={result?.themeFiles.templates} 
+                        parts={result?.themeFiles.parts} 
+                        patterns={result?.themeFiles.patterns} 
+                      />
+                    )}
                   </div>
-                </div>
-                {/* Theme Preview Flex Container */}
-                <div className="flex-1 w-full bg-zinc-100 dark:bg-black/20 relative z-0 p-4 lg:p-6 overflow-hidden flex flex-col">
-                  <ThemePreview 
-                    themeJson={result?.themeFiles.themeJson} 
-                    templates={result?.themeFiles.templates} 
-                    parts={result?.themeFiles.parts} 
-                    patterns={result?.themeFiles.patterns} 
-                  />
                 </div>
               </div>
             )}

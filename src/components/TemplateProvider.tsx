@@ -83,6 +83,21 @@ export default function TemplateProvider({ children }: { children: React.ReactNo
   // Font family class logic
   const fontClass = activeFont.id === 'sans' ? 'font-sans' : activeFont.id === 'serif' ? 'font-serif' : 'font-mono';
 
+  // Sync state upward to parent (used for WordPress blueprint generation)
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'TEMPLATE_STATE_CHANGE',
+        payload: {
+          isDarkMode,
+          activeThemeId: activeTheme.id,
+          activeFontId: activeFont.id,
+          colors: activeTheme.colors
+        }
+      }, '*');
+    }
+  }, [isDarkMode, activeTheme, activeFont]);
+
   return (
     <div className={fontClass}>
       {children}
@@ -127,18 +142,6 @@ export default function TemplateProvider({ children }: { children: React.ReactNo
         )}
 
         <div className="flex gap-2">
-          {/* Back Button */}
-          <Link 
-            href="/" 
-            className="flex items-center gap-2 px-5 h-12 bg-white text-black dark:bg-white dark:text-black rounded-full shadow-lg hover:scale-105 transition-transform font-bold text-sm"
-            title="Back to Gallery"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to main site
-          </Link>
-          
           {/* Main Toggle Controls */}
           <button 
             onClick={() => setIsDarkMode(!isDarkMode)}
