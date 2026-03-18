@@ -148,200 +148,170 @@ export const SAAS_FRONT_PAGE_HTML = `<!-- wp:template-part {"slug":"header","tag
 </div>
 <!-- /wp:group -->
 
-<!-- wp:html -->
+
+
+<!-- Stats/Testimonials Section -->
+<!-- wp:group {"layout":{"type":"constrained"},"style":{"spacing":{"padding":{"top":"6rem","bottom":"6rem"}}}} -->
+<div class="wp-block-group" style="padding-top:6rem;padding-bottom:6rem;background-color:#09090b;color:#ffffff;position:relative;overflow:hidden;">
+   <!-- Background glow -->
+   <!-- wp:html -->
+   <div style="position:absolute;right:0;bottom:0;width:600px;height:600px;background-color:var(--wp--preset--color--primary);opacity:0.2;filter:blur(100px);border-radius:50%;pointer-events:none;"></div>
+   <!-- /wp:html -->
+   
+   <!-- wp:columns {"verticalAlignment":"center","align":"wide","style":{"spacing":{"blockGap":"4rem"}}} -->
+   <div class="wp-block-columns alignwide are-vertically-aligned-center" style="gap:4rem">
+      <!-- wp:column {"verticalAlignment":"center"} -->
+      <div class="wp-block-column is-vertically-aligned-center">
+         <!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"clamp(2rem, 4vw, 3rem)","fontWeight":"700"}}} -->
+         <h2 class="wp-block-heading" style="font-size:clamp(2rem, 4vw, 3rem);font-weight:700;margin-bottom:2rem">Loved by builders everywhere.</h2>
+         <!-- /wp:heading -->
+         
+         <!-- wp:html -->
+         <div style="position:relative;">
+            <svg style="position:absolute;top:-1.5rem;left:-2rem;width:4rem;height:4rem;color:var(--wp--preset--color--primary);opacity:0.3" fill="currentColor" viewBox="0 0 32 32" aria-hidden="true"><path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z"/></svg>
+            <p style="font-size:1.25rem;font-weight:500;line-height:1.6;margin-bottom:2rem;position:relative;z-index:10;">"Switching to SaaSFlow was the best decision we made this year. It allowed our team to ship features 40% faster and cut our infrastructure costs in half."</p>
+            <div style="display:flex;align-items:center;gap:1rem;">
+               <div style="width:3.5rem;height:3.5rem;border-radius:50%;background-image:url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&amp;w=200&amp;auto=format&amp;fit=crop');background-size:cover;border:2px solid #27272a"></div>
+               <div>
+                  <h4 style="font-weight:700;margin:0">Sarah Jenkins</h4>
+                  <p style="color:#a1a1aa;font-size:0.875rem;margin:0">CTO at TechNova</p>
+               </div>
+            </div>
+         </div>
+         <!-- /wp:html -->
+      </div>
+      <!-- /wp:column -->
       
-      <section id="testimonials" class="py-24 bg-zinc-900 dark:bg-black text-white relative overflow-hidden">
-        
-        <div class="absolute right-0 bottom-0 w-[600px] h-[600px] bg-[var(--wp--preset--color--primary)]/20 blur-[100px] rounded-full pointer-events-none" />
-        
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            
-            <div>
-              <h2 class="text-3xl md:text-5xl font-bold tracking-tight mb-8">
-                Loved by builders everywhere.
-              </h2>
-              <div class="relative">
-                <svg class="absolute -top-6 -left-8 w-16 h-16 text-[var(--wp--preset--color--primary)]/30" fill="currentColor" viewBox="0 0 32 32" aria-hidden="true">
-                  <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
-                </svg>
-                <p class="text-xl md:text-2xl font-medium leading-relaxed mb-8 relative z-10">
-                  "Switching to SaaSFlow was the best decision we made this year. It allowed our team to ship features 40% faster and cut our infrastructure costs in half."
-                </p>
-                <div class="flex items-center gap-4">
-                  <div class="w-14 h-14 rounded-full bg-[url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop')] bg-cover border-2 border-zinc-800" />
-                  <div>
-                    <h4 class="font-bold">Sarah Jenkins</h4>
-                    <p class="text-zinc-400 text-sm">CTO at TechNova</p>
-                  </div>
-                </div>
-              </div>
+      <!-- wp:column {"verticalAlignment":"center"} -->
+      <div class="wp-block-column is-vertically-aligned-center">
+         <!-- wp:html -->
+         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+            <div style="background-color:rgba(39,39,42,0.5);backdrop-filter:blur(4px);padding:2rem;border-radius:1rem;border:1px solid rgba(63,63,70,0.5);">
+               <div style="font-size:2.5rem;font-weight:800;color:var(--wp--preset--color--primary);margin-bottom:0.5rem">99.9%</div>
+               <p style="color:#a1a1aa;font-weight:500;margin:0;font-size:0.875rem">Uptime</p>
             </div>
-
-            <div class="grid grid-cols-2 gap-6">
-              <div class="bg-zinc-800/50 backdrop-blur-sm p-8 rounded-2xl border border-zinc-700/50">
-                <div class="text-5xl font-extrabold text-[var(--wp--preset--color--primary)] mb-2">99.9%</div>
-                <p class="text-zinc-400 font-medium">Uptime Guarantee</p>
-              </div>
-              <div class="bg-zinc-800/50 backdrop-blur-sm p-8 rounded-2xl border border-zinc-700/50 translate-y-6">
-                <div class="text-5xl font-extrabold text-[var(--wp--preset--color--primary)] mb-2">10M+</div>
-                <p class="text-zinc-400 font-medium">Requests per day</p>
-              </div>
-              <div class="bg-zinc-800/50 backdrop-blur-sm p-8 rounded-2xl border border-zinc-700/50">
-                <div class="text-5xl font-extrabold text-[var(--wp--preset--color--secondary)] mb-2">5,000+</div>
-                <p class="text-zinc-400 font-medium">Active Teams</p>
-              </div>
-              <div class="bg-zinc-800/50 backdrop-blur-sm p-8 rounded-2xl border border-zinc-700/50 translate-y-6">
-                <div class="text-5xl font-extrabold text-[var(--wp--preset--color--secondary)] mb-2">24/7</div>
-                <p class="text-zinc-400 font-medium">Expert Support</p>
-              </div>
+            <div style="background-color:rgba(39,39,42,0.5);backdrop-filter:blur(4px);padding:2rem;border-radius:1rem;border:1px solid rgba(63,63,70,0.5);transform:translateY(1.5rem);">
+               <div style="font-size:2.5rem;font-weight:800;color:var(--wp--preset--color--primary);margin-bottom:0.5rem">10M+</div>
+               <p style="color:#a1a1aa;font-weight:500;margin:0;font-size:0.875rem">Requests</p>
             </div>
+            <div style="background-color:rgba(39,39,42,0.5);backdrop-filter:blur(4px);padding:2rem;border-radius:1rem;border:1px solid rgba(63,63,70,0.5);">
+               <div style="font-size:2.5rem;font-weight:800;color:var(--wp--preset--color--secondary);margin-bottom:0.5rem">5,000+</div>
+               <p style="color:#a1a1aa;font-weight:500;margin:0;font-size:0.875rem">Teams</p>
+            </div>
+            <div style="background-color:rgba(39,39,42,0.5);backdrop-filter:blur(4px);padding:2rem;border-radius:1rem;border:1px solid rgba(63,63,70,0.5);transform:translateY(1.5rem);">
+               <div style="font-size:2.5rem;font-weight:800;color:var(--wp--preset--color--secondary);margin-bottom:0.5rem">24/7</div>
+               <p style="color:#a1a1aa;font-weight:500;margin:0;font-size:0.875rem">Support</p>
+            </div>
+         </div>
+         <!-- /wp:html -->
+      </div>
+      <!-- /wp:column -->
+   </div>
+   <!-- /wp:columns -->
+</div>
+<!-- /wp:group -->
 
-          </div>
-        </div>
-      </section>
+<!-- Pricing Section -->
+<!-- wp:group {"layout":{"type":"constrained"},"style":{"spacing":{"padding":{"top":"6rem","bottom":"8rem"}}}} -->
+<div class="wp-block-group" style="padding-top:6rem;padding-bottom:8rem;position:relative;">
+   <!-- wp:group {"layout":{"type":"constrained","contentSize":"768px"},"style":{"spacing":{"margin":{"bottom":"4rem"}}}} -->
+   <div class="wp-block-group" style="margin-bottom:4rem;text-align:center">
+      <!-- wp:heading {"textAlign":"center","level":2,"style":{"typography":{"fontSize":"clamp(2.25rem, 4vw, 3rem)","fontWeight":"700"}}} -->
+      <h2 class="wp-block-heading has-text-align-center" style="font-size:clamp(2.25rem, 4vw, 3rem);font-weight:700;margin-bottom:1.5rem">Simple, transparent pricing</h2>
+      <!-- /wp:heading -->
+      <!-- wp:paragraph {"align":"center"} -->
+      <p class="has-text-align-center" style="font-size:1.125rem;color:color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent);line-height:1.625;margin-bottom:2rem">Choose the plan that best fits your needs. All plans include a 14-day free trial.</p>
+      <!-- /wp:paragraph -->
+      <!-- wp:html -->
+      <div style="display:inline-flex;align-items:center;padding:0.25rem;background-color:color-mix(in srgb, var(--wp--preset--color--contrast) 5%, transparent);border-radius:9999px;border:1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent);">
+         <button style="padding:0.5rem 1.5rem;border-radius:9999px;background-color:var(--wp--preset--color--base);color:var(--wp--preset--color--contrast);font-weight:500;font-size:0.875rem;border:none;box-shadow:0 1px 2px rgba(0,0,0,0.05);">Monthly</button>
+         <button style="padding:0.5rem 1.5rem;border-radius:9999px;background-color:transparent;color:color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent);font-weight:500;font-size:0.875rem;border:none;">Annually <span style="margin-left:0.25rem;font-size:0.75rem;color:var(--wp--preset--color--primary);font-weight:700">-20%</span></button>
+      </div>
+      <!-- /wp:html -->
+   </div>
+   <!-- /wp:group -->
 
+   <!-- wp:html -->
+   <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:2rem;max-width:1024px;margin:0 auto;align-items:center;">
       
-      <section id="pricing" class="py-24 md:py-32 relative">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="text-center max-w-3xl mx-auto mb-16">
-            <h2 class="text-4xl md:text-5xl font-bold text-zinc-900 dark:text-white tracking-tight mb-6">
-              Simple, transparent pricing
-            </h2>
-            <p class="text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed mb-8">
-              Choose the plan that best fits your needs. All plans include a 14-day free trial.
-            </p>
-            
-            
-            <div class="inline-flex items-center p-1 bg-zinc-100 dark:bg-zinc-900 rounded-full border border-zinc-200 dark:border-zinc-800">
-              <button class="px-6 py-2 rounded-full bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-medium text-sm shadow-sm transition-all focus:outline-none">Monthly</button>
-              <button class="px-6 py-2 rounded-full text-zinc-500 dark:text-zinc-400 font-medium text-sm hover:text-zinc-900 dark:hover:text-white transition-all focus:outline-none">Annually <span class="ml-1 text-xs text-[var(--wp--preset--color--primary)] dark:text-[var(--wp--preset--color--primary)] font-bold">-20%</span></button>
-            </div>
-          </div>
+      <!-- Starter Plan -->
+      <div style="padding:2rem;border-radius:1.5rem;border:1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent);background-color:color-mix(in srgb, var(--wp--preset--color--base) 50%, transparent);display:flex;flex-direction:column;">
+         <h3 style="font-size:1.25rem;font-weight:700;color:var(--wp--preset--color--contrast);margin-bottom:0.5rem">Starter</h3>
+         <p style="color:color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent);font-size:0.875rem;margin-bottom:1.5rem">Perfect for side projects and small teams.</p>
+         <div style="margin-bottom:1.5rem">
+            <span style="font-size:2.25rem;font-weight:800;color:var(--wp--preset--color--contrast)">$19</span>
+            <span style="color:color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)">/mo</span>
+         </div>
+         <a href="#" style="display:block;width:100%;padding:0.75rem;border-radius:0.5rem;border:1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 20%, transparent);background-color:var(--wp--preset--color--base);color:var(--wp--preset--color--contrast);font-weight:500;text-align:center;text-decoration:none;margin-bottom:2rem;">Start Free Trial</a>
+         <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:1rem;font-size:0.875rem;color:color-mix(in srgb, var(--wp--preset--color--contrast) 70%, transparent);">
+            <li style="display:flex;align-items:center;gap:0.75rem;"><svg style="width:1.25rem;height:1.25rem;color:#22c55e" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Up to 5 users</li>
+            <li style="display:flex;align-items:center;gap:0.75rem;"><svg style="width:1.25rem;height:1.25rem;color:#22c55e" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Basic analytics</li>
+            <li style="display:flex;align-items:center;gap:0.75rem;"><svg style="width:1.25rem;height:1.25rem;color:#22c55e" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Community support</li>
+         </ul>
+      </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            
-            
-            <div class="rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 flex flex-col">
-              <h3 class="text-xl font-bold text-zinc-900 dark:text-white mb-2">Starter</h3>
-              <p class="text-zinc-500 dark:text-zinc-400 text-sm mb-6">Perfect for side projects and small teams.</p>
-              <div class="mb-6">
-                <span class="text-4xl font-extrabold text-zinc-900 dark:text-white">$19</span>
-                <span class="text-zinc-500 dark:text-zinc-400">/mo</span>
-              </div>
-              <a href="#" class="w-full py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-medium text-center hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors mb-8">
-                Start Free Trial
-              </a>
-              <div class="flex-1">
-                <ul class="space-y-4 text-sm text-zinc-600 dark:text-zinc-300">
-                  <li class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    Up to 5 users
-                  </li>
-                  <li class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    Basic analytics
-                  </li>
-                  <li class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    Community support
-                  </li>
-                </ul>
-              </div>
-            </div>
+      <!-- Professional Plan -->
+      <div style="padding:2rem;border-radius:1.5rem;border:2px solid var(--wp--preset--color--primary);background-color:var(--wp--preset--color--base);display:flex;flex-direction:column;position:relative;box-shadow:0 20px 25px -5px color-mix(in srgb, var(--wp--preset--color--primary) 10%, transparent);transform:translateY(-1rem);">
+         <div style="position:absolute;top:-0.5rem;left:50%;transform:translateX(-50%);background-color:var(--wp--preset--color--primary);color:var(--wp--preset--color--base);font-size:0.75rem;font-weight:700;padding:0.25rem 0.75rem;border-radius:9999px;text-transform:uppercase;letter-spacing:0.05em;">Most Popular</div>
+         <h3 style="font-size:1.25rem;font-weight:700;color:var(--wp--preset--color--primary);margin-bottom:0.5rem">Professional</h3>
+         <p style="color:color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent);font-size:0.875rem;margin-bottom:1.5rem">For growing companies and established teams.</p>
+         <div style="margin-bottom:1.5rem">
+            <span style="font-size:2.25rem;font-weight:800;color:var(--wp--preset--color--contrast)">$49</span>
+            <span style="color:color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)">/mo</span>
+         </div>
+         <a href="#" style="display:block;width:100%;padding:0.75rem;border-radius:0.5rem;background-color:var(--wp--preset--color--primary);color:var(--wp--preset--color--base);font-weight:700;text-align:center;text-decoration:none;margin-bottom:2rem;">Get Started</a>
+         <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:1rem;font-size:0.875rem;color:color-mix(in srgb, var(--wp--preset--color--contrast) 70%, transparent);">
+            <li style="display:flex;align-items:center;gap:0.75rem;"><svg style="width:1.25rem;height:1.25rem;color:var(--wp--preset--color--primary)" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Unlimited users</li>
+            <li style="display:flex;align-items:center;gap:0.75rem;"><svg style="width:1.25rem;height:1.25rem;color:var(--wp--preset--color--primary)" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Advanced analytics</li>
+            <li style="display:flex;align-items:center;gap:0.75rem;"><svg style="width:1.25rem;height:1.25rem;color:var(--wp--preset--color--primary)" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Priority email support</li>
+            <li style="display:flex;align-items:center;gap:0.75rem;"><svg style="width:1.25rem;height:1.25rem;color:var(--wp--preset--color--primary)" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Custom integrations</li>
+         </ul>
+      </div>
 
-            
-            <div class="rounded-3xl p-8 border-2 border-[var(--wp--preset--color--primary)] bg-white dark:bg-zinc-900 relative shadow-xl shadow-[var(--wp--preset--color--primary)]/10 flex flex-col transform md:-translate-y-4">
-              <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--wp--preset--color--primary)] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                Most Popular
-              </div>
-              <h3 class="text-xl font-bold text-[var(--wp--preset--color--primary)] dark:text-[var(--wp--preset--color--primary)] mb-2">Professional</h3>
-              <p class="text-zinc-500 dark:text-zinc-400 text-sm mb-6">For growing companies and established teams.</p>
-              <div class="mb-6">
-                <span class="text-4xl font-extrabold text-zinc-900 dark:text-white">$49</span>
-                <span class="text-zinc-500 dark:text-zinc-400">/mo</span>
-              </div>
-              <a href="#" class="w-full py-3 rounded-lg bg-[var(--wp--preset--color--primary)] dark:bg-[var(--wp--preset--color--primary)] text-white font-bold text-center hover:opacity-90 transition-opacity mb-8 shadow-md">
-                Get Started
-              </a>
-              <div class="flex-1">
-                <ul class="space-y-4 text-sm text-zinc-600 dark:text-zinc-300">
-                  <li class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-[var(--wp--preset--color--primary)] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    Unlimited users
-                  </li>
-                  <li class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-[var(--wp--preset--color--primary)] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    Advanced analytics
-                  </li>
-                  <li class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-[var(--wp--preset--color--primary)] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    Priority email support
-                  </li>
-                  <li class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-[var(--wp--preset--color--primary)] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    Custom integrations
-                  </li>
-                </ul>
-              </div>
-            </div>
+      <!-- Enterprise Plan -->
+      <div style="padding:2rem;border-radius:1.5rem;border:1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent);background-color:color-mix(in srgb, var(--wp--preset--color--base) 50%, transparent);display:flex;flex-direction:column;">
+         <h3 style="font-size:1.25rem;font-weight:700;color:var(--wp--preset--color--contrast);margin-bottom:0.5rem">Enterprise</h3>
+         <p style="color:color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent);font-size:0.875rem;margin-bottom:1.5rem">Custom solutions for large organizations.</p>
+         <div style="margin-bottom:1.5rem">
+            <span style="font-size:2.25rem;font-weight:800;color:var(--wp--preset--color--contrast)">$99</span>
+            <span style="color:color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)">/mo</span>
+         </div>
+         <a href="#" style="display:block;width:100%;padding:0.75rem;border-radius:0.5rem;border:1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 20%, transparent);background-color:var(--wp--preset--color--base);color:var(--wp--preset--color--contrast);font-weight:500;text-align:center;text-decoration:none;margin-bottom:2rem;">Contact Sales</a>
+         <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:1rem;font-size:0.875rem;color:color-mix(in srgb, var(--wp--preset--color--contrast) 70%, transparent);">
+            <li style="display:flex;align-items:center;gap:0.75rem;"><svg style="width:1.25rem;height:1.25rem;color:var(--wp--preset--color--contrast)" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Everything in Pro</li>
+            <li style="display:flex;align-items:center;gap:0.75rem;"><svg style="width:1.25rem;height:1.25rem;color:var(--wp--preset--color--contrast)" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Dedicated account manager</li>
+            <li style="display:flex;align-items:center;gap:0.75rem;"><svg style="width:1.25rem;height:1.25rem;color:var(--wp--preset--color--contrast)" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> SLA guarantees</li>
+            <li style="display:flex;align-items:center;gap:0.75rem;"><svg style="width:1.25rem;height:1.25rem;color:var(--wp--preset--color--contrast)" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> SSO & Advanced Security</li>
+         </ul>
+      </div>
 
-            
-            <div class="rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 flex flex-col">
-              <h3 class="text-xl font-bold text-zinc-900 dark:text-white mb-2">Enterprise</h3>
-              <p class="text-zinc-500 dark:text-zinc-400 text-sm mb-6">Custom solutions for large organizations.</p>
-              <div class="mb-6">
-                <span class="text-4xl font-extrabold text-zinc-900 dark:text-white">$99</span>
-                <span class="text-zinc-500 dark:text-zinc-400">/mo</span>
-              </div>
-              <a href="#" class="w-full py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-medium text-center hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors mb-8">
-                Contact Sales
-              </a>
-              <div class="flex-1">
-                <ul class="space-y-4 text-sm text-zinc-600 dark:text-zinc-300">
-                  <li class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-zinc-900 dark:text-white flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    Everything in Pro
-                  </li>
-                  <li class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-zinc-900 dark:text-white flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    Dedicated account manager
-                  </li>
-                  <li class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-zinc-900 dark:text-white flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    SLA guarantees
-                  </li>
-                  <li class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-zinc-900 dark:text-white flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    SSO & Advanced Security
-                  </li>
-                </ul>
-              </div>
-            </div>
+   </div>
+   <!-- /wp:html -->
+</div>
+<!-- /wp:group -->
 
-          </div>
-        </div>
-      </section>
-
-      
-      <section class="py-24 relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[var(--color-primary-50)] dark:to-[var(--wp--preset--color--primary)]/20 pointer-events-none" />
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 class="text-4xl md:text-5xl font-bold text-zinc-900 dark:text-white tracking-tight mb-6">
-            Ready to supercharge your workflow?
-          </h2>
-          <p class="text-xl text-zinc-600 dark:text-zinc-400 mb-10">
-            Join thousands of teams who are already building faster and better.
-          </p>
-          <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="#" class="px-8 py-4 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black font-bold hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-colors shadow-lg shadow-zinc-900/20 dark:shadow-white/20">
-              Get Started for Free
-            </a>
-          </div>
-        </div>
-      </section>
-
-<!-- /wp:html -->
+<!-- CTA Section -->
+<!-- wp:group {"layout":{"type":"constrained"},"style":{"spacing":{"padding":{"top":"6rem","bottom":"6rem"}}}} -->
+<div class="wp-block-group" style="padding-top:6rem;padding-bottom:6rem;position:relative;overflow:hidden;background:linear-gradient(to bottom, transparent, color-mix(in srgb, var(--wp--preset--color--primary) 10%, transparent));">
+   <!-- wp:group {"layout":{"type":"constrained","contentSize":"800px"},"style":{"spacing":{"blockGap":"2rem"}}} -->
+   <div class="wp-block-group" style="text-align:center;position:relative;z-index:10;">
+      <!-- wp:heading {"textAlign":"center","level":2,"style":{"typography":{"fontSize":"clamp(2.25rem, 4vw, 3rem)","fontWeight":"700"}}} -->
+      <h2 class="wp-block-heading has-text-align-center" style="font-size:clamp(2.25rem, 4vw, 3rem);font-weight:700;margin-bottom:1.5rem">Ready to supercharge your workflow?</h2>
+      <!-- /wp:heading -->
+      <!-- wp:paragraph {"align":"center"} -->
+      <p class="has-text-align-center" style="font-size:1.25rem;color:color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent);margin-bottom:2.5rem">Join thousands of teams who are already building faster and better.</p>
+      <!-- /wp:paragraph -->
+      <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
+      <div class="wp-block-buttons">
+         <!-- wp:button {"style":{"border":{"radius":"9999px"}}} -->
+         <div class="wp-block-button"><a class="wp-block-button__link wp-element-button" style="border-radius:9999px;padding:16px 32px;font-weight:700;background-color:var(--wp--preset--color--contrast);color:var(--wp--preset--color--base);box-shadow:0 10px 15px -3px color-mix(in srgb, var(--wp--preset--color--contrast) 20%, transparent)">Get Started for Free</a></div>
+         <!-- /wp:button -->
+      </div>
+      <!-- /wp:buttons -->
+   </div>
+   <!-- /wp:group -->
+</div>
+<!-- /wp:group -->
 
 </main>
 <!-- /wp:group -->
