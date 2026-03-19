@@ -73,7 +73,7 @@ function extractLayoutAttrs(
   blockAttrs: Record<string, unknown>,
 ): Record<string, unknown> {
   const display = styles.display;
-  if (!display || (display !== 'flex' && display !== 'grid')) return {};
+  if (!display || (display !== 'flex' && display !== 'inline-flex' && display !== 'grid')) return {};
 
   if (display === 'grid') {
     const layout: Record<string, unknown> = { type: 'grid' };
@@ -84,7 +84,11 @@ function extractLayoutAttrs(
   }
 
   const layout: Record<string, unknown> = { type: 'flex' };
-  delete residualStyles.display;
+  // For inline-flex: keep display in residual so inline sizing is preserved.
+  // The layout:flex prevents WP's flow margins; inline style overrides WP's display:flex.
+  if (display === 'flex') {
+    delete residualStyles.display;
+  }
 
   if (styles.flexDirection) {
     delete residualStyles.flexDirection;

@@ -83,6 +83,9 @@ function generateBaseThemeJson(arch: ThemeArchetype): ThemeJson {
       { area: "footer", name: "footer", title: "Footer" }
     ],
     styles: {
+      spacing: {
+        blockGap: "0",
+      },
       color: {
         background: "var(--wp--preset--color--base)",
         text: "var(--wp--preset--color--contrast)",
@@ -130,14 +133,6 @@ function generateBaseThemeJson(arch: ThemeArchetype): ThemeJson {
         },
       },
       blocks: {
-        "core/group": {
-          spacing: {
-            padding: {
-              top: "var(--wp--preset--spacing--60)",
-              bottom: "var(--wp--preset--spacing--60)",
-            },
-          },
-        },
         "core/site-title": {
           typography: {
             fontFamily: "var(--wp--preset--font-family--heading)",

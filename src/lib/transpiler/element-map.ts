@@ -17,7 +17,7 @@ const groupTagExtract = (_props: Record<string, unknown>, tagName: string): Reco
     return { tagName, layout: { type: 'constrained', contentSize: '100%' } };
   }
   if (tagName === 'section') {
-    return { tagName, layout: { type: 'constrained' } };
+    return { tagName };
   }
   if (tagName === 'div') return {};
   return { tagName };

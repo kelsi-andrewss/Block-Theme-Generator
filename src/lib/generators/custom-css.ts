@@ -136,6 +136,35 @@ ${featureIconRules}
   gap: 2rem;
 }
 
+/* WordPress block margin/spacing resets inside SaaS sections */
+:root :where(.saas-pricing-card) .wp-block-heading,
+:root :where(.saas-pricing-card) p,
+:root :where(.saas-feature-card) .wp-block-heading,
+:root :where(.saas-feature-card) p,
+:root :where(.saas-stat-card) .wp-block-heading,
+:root :where(.saas-stat-card) p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Full-width buttons inside pricing cards */
+:root :where(.saas-pricing-card) .wp-block-buttons {
+  width: 100%;
+}
+:root :where(.saas-pricing-card) .wp-block-button {
+  width: 100%;
+}
+:root :where(.saas-pricing-card) .wp-block-button__link {
+  width: 100%;
+  display: block;
+  text-align: center;
+}
+
+/* Prevent WP flow layout from adding unwanted vertical spacing between blocks */
+:where(.wp-block-group.is-layout-flow) > * + * {
+  margin-block-start: 0;
+}
+
 @media (max-width: 768px) {
   :root :where(.saas-features-grid),
   :root :where(.saas-pricing-grid),
