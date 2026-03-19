@@ -220,7 +220,7 @@ export function generateFlavorSeed(): FlavorSeed {
 }
 
 const NEGATIVE_CONSTRAINTS = [
-  "Do NOT use wp:html blocks or custom HTML blocks.",
+  "Generate static JSX only — no React hooks, no event handlers, no dynamic logic. Use WP-specific components for dynamic blocks.",
   "Do NOT use Inter or Roboto as font choices — pick more distinctive typefaces.",
   "Do NOT use generic card grids with placeholder icons — every section should have a clear purpose.",
   "Do NOT use lorem ipsum or placeholder text — generate real, contextual content.",

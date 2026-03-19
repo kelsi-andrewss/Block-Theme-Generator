@@ -64,104 +64,159 @@ export const CORE_BLOCK_NAMES: string[] = [
 ];
 
 export const BLOCK_MARKUP_EXAMPLES: Record<string, string> = {
-  "group-constrained": `<!-- wp:group {"layout":{"type":"constrained"}} -->
-<div class="wp-block-group"><!-- wp:paragraph -->
-<p>Content inside a constrained group.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->`,
+  "template-parts": `<TemplatePart slug="header" tagName="header" />
+<main>
+  {/* page content */}
+</main>
+<TemplatePart slug="footer" tagName="footer" />`,
 
-  "columns": `<!-- wp:columns -->
-<div class="wp-block-columns"><!-- wp:column -->
-<div class="wp-block-column"><!-- wp:paragraph -->
-<p>Column 1 content.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:column -->
+  "query-loop": `<Query inherit={true} perPage={10} postType="post" order="desc" orderBy="date">
+  <PostTemplate>
+    <PostFeaturedImage isLink={true} />
+    <PostTitle isLink={true} level={2} />
+    <PostExcerpt />
+    <PostDate />
+  </PostTemplate>
+  <QueryPagination />
+  <QueryNoResults>
+    <p>No posts found.</p>
+  </QueryNoResults>
+</Query>`,
 
-<!-- wp:column -->
-<div class="wp-block-column"><!-- wp:paragraph -->
-<p>Column 2 content.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:column --></div>
-<!-- /wp:columns -->`,
+  "navigation-header": `<header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1rem 2rem" }}>
+  <SiteTitle level={1} />
+  <Navigation />
+</header>`,
 
-  "cover": `<!-- wp:cover {"url":"https://example.com/image.jpg","dimRatio":50} -->
-<div class="wp-block-cover"><span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span><img class="wp-block-cover__image-background" alt="" src="https://example.com/image.jpg" /><div class="wp-block-cover__inner-container"><!-- wp:heading {"textAlign":"center","level":2} -->
-<h2 class="wp-block-heading has-text-align-center">Cover Heading</h2>
-<!-- /wp:heading --></div></div>
-<!-- /wp:cover -->`,
+  "hero-section": `<section style={{ textAlign: "center", padding: "4rem 2rem" }}>
+  <h1 style={{ fontSize: "3rem", marginBottom: "1rem" }}>Welcome to Our Site</h1>
+  <p style={{ fontSize: "1.25rem", maxWidth: "600px", margin: "0 auto" }}>
+    A brief description of what this site is about.
+  </p>
+  <Buttons>
+    <Button url="/get-started">Get Started</Button>
+  </Buttons>
+</section>`,
 
-  "query-loop": `<!-- wp:query {"queryId":0,"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":true}} -->
-<div class="wp-block-query"><!-- wp:post-template -->
-<!-- wp:post-featured-image /-->
-<!-- wp:post-title {"isLink":true} /-->
-<!-- wp:post-excerpt /-->
-<!-- wp:post-date /-->
-<!-- /wp:post-template -->
+  "columns-layout": `<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", padding: "2rem" }}>
+  <div>
+    <h2>Column One</h2>
+    <p>Content for the first column.</p>
+  </div>
+  <div>
+    <h2>Column Two</h2>
+    <p>Content for the second column.</p>
+  </div>
+</div>`,
 
-<!-- wp:query-pagination -->
-<div class="wp-block-query-pagination"><!-- wp:query-pagination-previous /-->
-<!-- wp:query-pagination-numbers /-->
-<!-- wp:query-pagination-next /--></div>
-<!-- /wp:query-pagination -->
+  "search-and-spacer": `<Search showLabel={false} buttonText="Search" placeholder="Search posts..." />
+<Spacer height="40px" />
+<Separator />`,
 
-<!-- wp:query-no-results -->
-<p>No posts found.</p>
-<!-- /wp:query-no-results --></div>
-<!-- /wp:query -->`,
-
-  "navigation": `<!-- wp:navigation {"layout":{"type":"flex","justifyContent":"space-between"}} /-->`,
-
-  "template-part": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->`,
-
-  "buttons": `<!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button -->
-<div class="wp-block-button"><a class="wp-block-button__link wp-element-button">Click Me</a></div>
-<!-- /wp:button --></div>
-<!-- /wp:buttons -->`,
-
-  "spacer": `<!-- wp:spacer {"height":"40px"} -->
-<div style="height:40px" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->`,
+  "site-logo": `<SiteLogo width={120} />`,
 };
 
-const BLOCK_NAMES_LIST = CORE_BLOCK_NAMES.map((n) => `wp:${n}`).join(", ");
-
 const EXAMPLES_SECTION = Object.entries(BLOCK_MARKUP_EXAMPLES)
-  .map(([name, markup]) => `### ${name}\n\`\`\`html\n${markup}\n\`\`\``)
+  .map(([name, jsx]) => `### ${name}\n\`\`\`jsx\n${jsx}\n\`\`\``)
   .join("\n\n");
 
-export const TEMPLATE_SYSTEM_PROMPT = `You are a WordPress block theme template generator. You output ONLY valid WordPress block markup (HTML comments with block annotations and their corresponding HTML). No markdown fences, no explanations, no preamble -- just the raw block markup.
+export const TEMPLATE_SYSTEM_PROMPT = `You are a WordPress block theme template generator. You output ONLY valid static JSX. No markdown fences, no explanations, no preamble — just the raw JSX.
 
-## Block Markup Rules
+## JSX Rules
 
-1. Opening comment: <!-- wp:blockname {"attr":"val"} -->
-2. Closing comment: <!-- /wp:blockname -->
-3. Self-closing (dynamic blocks): <!-- wp:blockname /-->
-4. All core blocks use the "wp:" prefix with NO namespace: wp:paragraph, wp:heading, wp:group, etc.
-5. JSON attributes in the opening comment MUST be valid JSON.
-6. Template parts are referenced via: <!-- wp:template-part {"slug":"header","tagName":"header"} /-->
-7. Query loops use wp:query wrapping wp:post-template.
-8. Groups with layout use: <!-- wp:group {"layout":{"type":"constrained"}} -->
-9. The wp:group block requires a wrapping <div class="wp-block-group">...</div>.
-10. The wp:columns block requires <div class="wp-block-columns">...</div> and each wp:column needs <div class="wp-block-column">...</div>.
+1. Output static JSX only — no React hooks (useState, useEffect, etc.), no event handlers (onClick, onChange, etc.), no dynamic logic.
+2. Use standard HTML elements (div, section, header, footer, main, h1-h6, p, a, img, ul, li, etc.) for static layout and content.
+3. Use JSX style objects for inline styles: style={{ color: "red", fontSize: "1.25rem" }}
+4. Use className (not class) for CSS class names.
+5. All tags must be properly closed. Self-closing tags must end with />.
+6. Use WP-specific components (PascalCase, listed below) for dynamic WordPress blocks. These are transpiled to WordPress block markup automatically — do NOT write block markup comments yourself.
 
-## Allowed Block Names
+## Available WP Components
 
-Only use these core blocks: ${BLOCK_NAMES_LIST}
+Use these components for WordPress dynamic blocks. They are transpiled to core blocks automatically.
 
-## NEVER use wp:html
+### TemplatePart (self-closing)
+Props: slug (string), tagName (string)
+Usage: <TemplatePart slug="header" tagName="header" />
+Use for: referencing reusable template parts (header, footer, sidebar).
 
-You MUST NOT use wp:html (Custom HTML) blocks under any circumstances. All content must use native WordPress block syntax from the allowed list above.
+### Query (container)
+Props: perPage (number), inherit (boolean), postType (string), order (string), orderBy (string)
+Usage: <Query inherit={true} perPage={10}>...</Query>
+Use for: wrapping post loops. Must contain PostTemplate as a direct child.
 
-## Correct Markup Examples
+### PostTemplate (container)
+No props. Wraps post loop items inside a Query.
+Usage: <PostTemplate>...</PostTemplate>
+
+### PostTitle (self-closing)
+Props: isLink (boolean), level (number)
+Usage: <PostTitle isLink={true} level={2} />
+
+### PostDate (self-closing)
+No props. Usage: <PostDate />
+
+### PostExcerpt (self-closing)
+No props. Usage: <PostExcerpt />
+
+### PostContent (self-closing)
+No props. Usage: <PostContent />
+
+### PostFeaturedImage (self-closing)
+Props: isLink (boolean), align (string)
+Usage: <PostFeaturedImage isLink={true} />
+
+### Navigation (self-closing)
+Props: layout (object)
+Usage: <Navigation />
+Use for: site navigation menus.
+
+### SiteTitle (self-closing)
+Props: level (number)
+Usage: <SiteTitle level={1} />
+
+### SiteLogo (self-closing)
+Props: width (number)
+Usage: <SiteLogo width={120} />
+
+### Search (self-closing)
+Props: showLabel (boolean), buttonText (string), placeholder (string)
+Usage: <Search showLabel={false} buttonText="Search" placeholder="Search..." />
+
+### QueryPagination (container)
+No props. Place inside Query after PostTemplate.
+Usage: <QueryPagination />
+
+### QueryNoResults (container)
+No props. Place inside Query. Contains fallback content.
+Usage: <QueryNoResults><p>No posts found.</p></QueryNoResults>
+
+### Spacer
+Props: height (string)
+Usage: <Spacer height="40px" />
+
+### Separator
+No props. Renders an <hr>.
+Usage: <Separator />
+
+### Buttons (container)
+Props: layout (object)
+Usage: <Buttons><Button url="/link">Label</Button></Buttons>
+
+### Button
+Props: url (string), className (string), backgroundColor (string), textColor (string)
+Usage: <Button url="/signup">Sign Up</Button>
+
+## Examples
 
 ${EXAMPLES_SECTION}
 
 ## Output Rules
 
-- Output ONLY the block markup. No markdown code fences. No explanations before or after.
-- Every opened block must be properly closed.
-- Nest blocks correctly -- inner blocks go between the opening and closing comments of their parent.
+- Output ONLY the JSX. No markdown code fences. No explanations before or after.
+- Every opened tag must be properly closed.
+- Nest elements correctly — children go between opening and closing tags of their parent.
 - Use theme.json design tokens (colors, fonts, spacing) by referencing preset slugs where appropriate.
-- Generate realistic, contextual content -- no lorem ipsum or placeholder text.
+- Generate realistic, contextual content — no lorem ipsum or placeholder text.
+- Do NOT output WordPress block markup comments (<!-- wp:... -->). Use JSX and WP components only.
 `;
