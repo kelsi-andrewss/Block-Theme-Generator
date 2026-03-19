@@ -116,7 +116,7 @@ export default function NativeControls({
                   title={theme.name}
                   className={`w-10 h-10 rounded-full border-2 transition-all mx-auto ${activeThemeId === theme.id ? 'border-zinc-900 dark:border-white scale-110 shadow-md' : 'border-transparent hover:scale-105 shadow-sm'}`}
                   style={{
-                    background: `linear-gradient(135deg, ${theme.colors.primary[500]} 0%, ${theme.colors.secondary[500]} 100%)`
+                    background: `linear-gradient(135deg, ${theme.lightColors.primary[500]} 0%, ${theme.lightColors.secondary[500]} 100%)`
                   }}
                 />
               ))}

@@ -117,12 +117,12 @@ export function buildContentPHP(
   // Insert pages
   ${pageInserts}
 
-  // Set static front page
-  update_option('show_on_front', 'page');
-  ${pages.length > 0 ? `$front = get_page_by_path('${esc(pages[0].slug)}');
-  if ($front) {
-    update_option('page_on_front', $front->ID);
-  }` : ""}
+  // Create Home page and set as static front page
+  $home_id = wp_insert_post(array('post_title' => 'Home', 'post_content' => '', 'post_status' => 'publish', 'post_type' => 'page', 'post_name' => 'home'));
+  if ($home_id && !is_wp_error($home_id)) {
+    update_option('show_on_front', 'page');
+    update_option('page_on_front', $home_id);
+  }
 
   // Create navigation menu
   $menu_id = wp_create_nav_menu('Primary');
@@ -169,9 +169,22 @@ export function buildEnhancedBlueprint(
       },
       {
         step: "setSiteOptions",
-        options: { stylesheet: themeSlug, template: themeSlug },
+        options: {
+          stylesheet: themeSlug,
+          template: themeSlug,
+          show_on_front: "page",
+          page_on_front: 0,
+        },
       },
-      { step: "runPHP", code: php },
+      {
+        step: "runPHP",
+        code: `<?php
+require '/wordpress/wp-load.php';
+$home = wp_insert_post(array('post_title'=>'Home','post_status'=>'publish','post_type'=>'page'));
+if ($home && !is_wp_error($home)) { update_option('page_on_front', $home); }
+echo 'OK';
+?>`,
+      },
     ],
   };
 }

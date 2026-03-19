@@ -62,7 +62,7 @@ export function buildThemeJsonPrompt(enrichedPrompt: EnrichedPrompt): string {
   }
 
   parts.push("");
-  parts.push("Generate a complete theme.json v3 for this theme. Use Google Fonts for fontFamilies. Include fontFace entries with src arrays using file: references (e.g., file:./assets/fonts/FontName.woff2). All color values must be valid hex codes. Sizes should use clamp() or rem units where appropriate.");
+  parts.push("Generate a complete theme.json v3 for this theme. Use Google Fonts for fontFamilies. Do NOT include fontFace entries with src arrays — fonts are loaded via Google Fonts CDN in functions.php. All color values must be valid hex codes. Sizes should use clamp() or rem units where appropriate.");
 
   return parts.join("\n");
 }

@@ -38,11 +38,11 @@ interface GeneratorFormProps {
 
 export default function GeneratorForm({
   initialDescription = "",
-  initialArchetype = null,
+  initialArchetype,
   onSubmit,
 }: GeneratorFormProps) {
   const [description, setDescription] = useState(initialDescription);
-  const [selectedArchetype, setSelectedArchetype] = useState<string | null>(initialArchetype);
+  const [selectedArchetype, setSelectedArchetype] = useState<string | null>(initialArchetype ?? null);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
   const [gaps, setGaps] = useState<GapAnalysis | null>(null);

@@ -277,47 +277,14 @@ export default function Home() {
         darkMode: activeDarkModeStr
       };
 
-      // 1. Get the compiled zip blob
-      const pkgRes = await fetch("/api/package", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ themeFiles: exportedThemeFiles, meta: result.meta }),
-      });
-      if (!pkgRes.ok) throw new Error("Packaging failed");
-      const blob = await pkgRes.blob();
-      
-      // 2. Convert blob to base64
-      const reader = new FileReader();
-      reader.readAsDataURL(blob);
-      reader.onloadend = async () => {
-        const base64data = (reader.result as string).split(',')[1];
-        
-        // 3. Generate blueprint using backend generator to get the Zip bundle
-        const bpRes = await fetch("/api/blueprint", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            zipBase64: base64data,
-            meta: result.meta,
-            archetypeId,
-            templateMarkup: Object.values(result.themeFiles.templates).join("\n") +
-              "\n" + Object.values(result.themeFiles.parts).join("\n"),
-          }),
-        });
-        
-        if (!bpRes.ok) throw new Error("Blueprint generation failed");
-        
-        const { bundleBase64 } = await bpRes.json();
-        
-        // 4. Open WordPress Playground in a new tab using properly URL-encoded data URI
-        const dataUri = `data:application/zip;base64,${bundleBase64}`;
-        window.open(`https://playground.wordpress.net/?blueprint-url=${encodeURIComponent(dataUri)}`, "_blank");
-        setIsPreviewing(false);
-      };
-      
-      reader.onerror = () => {
-        setIsPreviewing(false);
-      };
+      // Store theme data in sessionStorage and open local preview page
+      // This avoids the slow data URI + blueprint bundle approach
+      sessionStorage.setItem("playground-theme", JSON.stringify({
+        ...exportedThemeFiles,
+        meta: result.meta,
+      }));
+      window.open("/playground-preview", "_blank");
+      setIsPreviewing(false);
     } catch (err) {
       console.error(err);
       setIsPreviewing(false);

@@ -1,88 +1,52 @@
 {
-  "slug": "ai-wp-block-theme-generator",
+  "slug": "jsx-wp-transpiler-skeleton-blueprint",
   "scope": {
-    "files": 48,
-    "stories": 12,
+    "files": 10,
+    "stories": 6,
     "complexity": "large"
   },
   "route_hint": "standard",
   "prev": null,
   "skill": "plan-stories",
   "data": {
-    "epic_id": "epic-192",
-    "dev_branch": "dev/ai-powered-wordpress-block-theme-generator",
+    "epic_id": "epic-201",
+    "dev_branch": "dev/jsx-to-wordpress-block-transpiler-functional-skeleton-blueprint",
     "stories": [
       {
-        "id": "story-851",
-        "title": "Project scaffold - Next.js 14+ App Router, TypeScript, ESLint, Tailwind CSS, dependencies",
+        "id": "story-903",
+        "title": "Build JSX→WP block transpiler core",
         "agent": "architect",
-        "detail_file": "/tmp/gemini/story-851.md"
+        "detail_file": "/tmp/gemini/story-903.md"
       },
       {
-        "id": "story-852",
-        "title": "AI provider abstraction layer - AIProvider interface, Gemini 2.5 Flash, retry logic",
+        "id": "story-904",
+        "title": "Define WP-specific JSX components",
         "agent": "architect",
-        "detail_file": "/tmp/gemini/story-852.md"
+        "detail_file": "/tmp/gemini/story-904.md"
       },
       {
-        "id": "story-853",
-        "title": "Prompt enrichment engine - archetype detection, gap analysis, flavor seeds, starters",
+        "id": "story-905",
+        "title": "Build archetype-aware skeleton page generator",
         "agent": "architect",
-        "detail_file": "/tmp/gemini/story-853.md"
+        "detail_file": "/tmp/gemini/story-905.md"
       },
       {
-        "id": "story-854",
-        "title": "Theme.json generation with light and dark mode - structured JSON, Zod validation",
+        "id": "story-906",
+        "title": "Build Blueprint enhancement",
         "agent": "architect",
-        "detail_file": "/tmp/gemini/story-854.md"
+        "detail_file": "/tmp/gemini/story-906.md"
       },
       {
-        "id": "story-855",
-        "title": "Template and part generation - block markup via focused Gemini calls",
+        "id": "story-907",
+        "title": "Wire transpiler into generation pipeline",
         "agent": "architect",
-        "detail_file": "/tmp/gemini/story-855.md"
+        "detail_file": "/tmp/gemini/story-907.md"
       },
       {
-        "id": "story-856",
-        "title": "Pattern generation - 4-6 patterns per archetype, PHP format, creative variation",
-        "agent": "architect",
-        "detail_file": "/tmp/gemini/story-856.md"
-      },
-      {
-        "id": "story-857",
-        "title": "Block markup validation and design audit - WCAG, typography, spacing, score",
-        "agent": "architect",
-        "detail_file": "/tmp/gemini/story-857.md"
-      },
-      {
-        "id": "story-858",
-        "title": "ZIP packaging and theme assembly - WordPress structure, JSZip, downloadable blob",
-        "agent": "architect",
-        "detail_file": "/tmp/gemini/story-858.md"
-      },
-      {
-        "id": "story-859",
-        "title": "Frontend UI - input form, suggestions, progress, audit results, download",
+        "id": "story-908",
+        "title": "Update Gemini system prompt for JSX generation",
         "agent": "quick-fixer",
-        "detail_file": "/tmp/gemini/story-859.md"
-      },
-      {
-        "id": "story-860",
-        "title": "WordPress Playground live preview - iframe embed, Blueprint installTheme",
-        "agent": "architect",
-        "detail_file": "/tmp/gemini/story-860.md"
-      },
-      {
-        "id": "story-861",
-        "title": "Tests - unit tests for validation, schema, audit, packaging, e2e integration",
-        "agent": "unit-tester",
-        "detail_file": "/tmp/gemini/story-861.md"
-      },
-      {
-        "id": "story-862",
-        "title": "Documentation - README, ADR, What I'd Do Next",
-        "agent": "quick-fixer",
-        "detail_file": "/tmp/gemini/story-862.md"
+        "detail_file": "/tmp/gemini/story-908.md"
       }
     ]
   }

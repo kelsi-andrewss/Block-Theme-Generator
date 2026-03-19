@@ -78,7 +78,7 @@ const ElementStyleSchema = z
 
 const BlockStyleSchema = z.record(z.unknown());
 
-const TemplatPartSchema = z.object({
+const TemplatePartSchema = z.object({
   area: z.string(),
   name: z.string(),
   title: z.string(),
@@ -135,7 +135,7 @@ export const ThemeJsonSchema = z
         blocks: z.record(z.string(), BlockStyleSchema).optional(),
       })
       .passthrough(),
-    templateParts: z.array(TemplatPartSchema),
+    templateParts: z.array(TemplatePartSchema),
     customTemplates: z.array(CustomTemplateSchema).optional(),
   })
   .passthrough();

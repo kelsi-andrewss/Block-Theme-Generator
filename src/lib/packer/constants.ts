@@ -33,12 +33,8 @@ export function generateFunctionsPHP(meta: ThemeMeta): string {
 
   if (meta.hasCustomCss) {
     lines.push("");
-    lines.push(`add_action('init', function () {`);
-    lines.push(`    wp_enqueue_block_style('core/group', [`);
-    lines.push(`        'handle' => '${meta.slug}-saas-sections',`);
-    lines.push(`        'src'    => get_theme_file_uri('assets/css/saas-sections.css'),`);
-    lines.push(`        'path'   => get_theme_file_path('assets/css/saas-sections.css'),`);
-    lines.push(`    ]);`);
+    lines.push(`add_action('wp_enqueue_scripts', function () {`);
+    lines.push(`    wp_enqueue_style('${meta.slug}-saas-sections', get_theme_file_uri('assets/css/saas-sections.css'), array(), '${meta.version}');`);
     lines.push(`});`);
   }
 
