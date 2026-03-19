@@ -4,6 +4,7 @@ export interface ThemeMeta {
   description: string;
   version: string;
   fontFamilies?: string[];
+  hasCustomCss?: boolean;
 }
 
 export function generateStyleCss(meta: ThemeMeta): string {
@@ -28,11 +29,18 @@ export function generateFunctionsPHP(meta: ThemeMeta): string {
     `add_action('after_setup_theme', function () {`,
     `    add_theme_support('wp-block-styles');`,
     `});`,
-    "",
-    `add_action('wp_enqueue_scripts', function () {`,
-    `    wp_enqueue_script('tailwindcss', 'https://cdn.tailwindcss.com', [], null, false);`,
-    `});`,
   ];
+
+  if (meta.hasCustomCss) {
+    lines.push("");
+    lines.push(`add_action('init', function () {`);
+    lines.push(`    wp_enqueue_block_style('core/group', [`);
+    lines.push(`        'handle' => '${meta.slug}-saas-sections',`);
+    lines.push(`        'src'    => get_theme_file_uri('assets/css/saas-sections.css'),`);
+    lines.push(`        'path'   => get_theme_file_path('assets/css/saas-sections.css'),`);
+    lines.push(`    ]);`);
+    lines.push(`});`);
+  }
 
   const googleFonts = (meta.fontFamilies ?? []).filter(
     (f) => !isSystemFont(f)
