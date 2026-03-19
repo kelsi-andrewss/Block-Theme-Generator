@@ -13,6 +13,7 @@ export interface ThemeFiles {
   parts: Map<string, string>;
   patterns: Map<string, string>;
   meta: ThemeMeta;
+  customCss?: string;
 }
 
 export async function packageTheme(themeFiles: ThemeFiles): Promise<Blob> {
@@ -41,6 +42,11 @@ export async function packageTheme(themeFiles: ThemeFiles): Promise<Blob> {
 
   const stylesDir = root.folder("styles")!;
   stylesDir.file("dark.json", themeFiles.darkMode);
+
+  if (themeFiles.customCss) {
+    const cssDir = root.folder("assets")!.folder("css")!;
+    cssDir.file("saas-sections.css", themeFiles.customCss);
+  }
 
   return zip.generateAsync({ type: "blob" });
 }
