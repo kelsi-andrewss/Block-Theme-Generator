@@ -4,6 +4,7 @@ import { generateLightThemeJson, generateDarkMode } from "@/lib/generators/theme
 import { generateTemplates } from "@/lib/generators/templates";
 import { generateParts } from "@/lib/generators/parts";
 import { generatePatterns } from "@/lib/generators/patterns";
+import { generateSaasCustomCss } from "@/lib/generators/custom-css";
 import { validateBlockMarkup } from "@/lib/validation/block-validator";
 import { auditThemeDesign } from "@/lib/validation/design-audit";
 
@@ -139,6 +140,11 @@ export async function POST(request: Request) {
           detail: `Score: ${audit.score}/100 (${audit.grade})${validationErrors.length > 0 ? ` · ${validationErrors.length} warnings` : ""}`,
         });
 
+        // Step 9: Custom CSS (archetype-specific)
+        const customCss = enriched.archetype.id === "saas"
+          ? generateSaasCustomCss()
+          : undefined;
+
         // Final result
         send("complete", {
           themeFiles: {
@@ -147,6 +153,7 @@ export async function POST(request: Request) {
             templates: mapToObject(templates),
             parts: mapToObject(parts),
             patterns: mapToObject(patterns),
+            customCss,
           },
           audit,
           validationErrors: validationErrors.length > 0 ? validationErrors : undefined,
