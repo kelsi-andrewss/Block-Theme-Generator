@@ -48,7 +48,8 @@ export const SAAS_JSX_SOURCE = `<main>
   <div style={{maxWidth:"1280px",margin:"0 auto",padding:"0 2rem",position:"relative",zIndex:"10",textAlign:"center"}}>
 
     <div style={{display:"inline-flex",alignItems:"center",gap:"0.5rem",padding:"0.5rem 1rem",borderRadius:"9999px",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 20%, transparent)",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 5%, transparent)",boxShadow:"0 1px 2px rgba(0,0,0,0.05)",marginBottom:"2rem",marginTop:"2rem",backdropFilter:"blur(4px)"}}>
-      <p>{"<span style=\\"display:block;width:8px;height:8px;border-radius:50%;background-color:var(--wp--preset--color--primary)\\"></span><span style=\\"font-size:0.875rem;font-weight:500;color:var(--wp--preset--color--contrast)\\">Introducing SaaSFlow 2.0</span>"}</p>
+      <div style={{width:"8px",height:"8px",borderRadius:"50%",backgroundColor:"var(--wp--preset--color--primary)"}}></div>
+      <p style={{fontSize:"0.875rem",fontWeight:"500",color:"var(--wp--preset--color--contrast)"}}>Introducing SaaSFlow 2.0</p>
     </div>
 
     <h1 style={{fontSize:"clamp(3rem, 6vw, 4.5rem)",fontWeight:"800",lineHeight:"1.1",marginBottom:"2rem",maxWidth:"1024px",marginLeft:"auto",marginRight:"auto"}}>{"Build faster with our <br><span style=\\"background: linear-gradient(to right, var(--wp--preset--color--primary), var(--wp--preset--color--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;\\">advanced platform</span>"}</h1>

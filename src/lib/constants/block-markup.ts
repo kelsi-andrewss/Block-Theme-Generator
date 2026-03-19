@@ -61,6 +61,7 @@ export const CORE_BLOCK_NAMES: string[] = [
   "file",
   "embed",
   "pattern",
+  "post-author-biography",
 ];
 
 export const BLOCK_MARKUP_EXAMPLES: Record<string, string> = {
@@ -219,4 +220,5 @@ ${EXAMPLES_SECTION}
 - Use theme.json design tokens (colors, fonts, spacing) by referencing preset slugs where appropriate.
 - Generate realistic, contextual content — no lorem ipsum or placeholder text.
 - Do NOT output WordPress block markup comments (<!-- wp:... -->). Use JSX and WP components only.
+- Do NOT put multiple visual elements (icons, badges, labels) inside a single <p> tag. Each visual element should be its own element so flex/grid layout can arrange them. Use separate <div> and <p> siblings instead.
 `;
