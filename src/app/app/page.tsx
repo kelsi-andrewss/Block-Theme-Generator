@@ -296,7 +296,13 @@ export default function Home() {
         const bpRes = await fetch("/api/blueprint", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ zipBase64: base64data, meta: result.meta }),
+          body: JSON.stringify({
+            zipBase64: base64data,
+            meta: result.meta,
+            archetypeId,
+            templateMarkup: Object.values(result.themeFiles.templates).join("\n") +
+              "\n" + Object.values(result.themeFiles.parts).join("\n"),
+          }),
         });
         
         if (!bpRes.ok) throw new Error("Blueprint generation failed");

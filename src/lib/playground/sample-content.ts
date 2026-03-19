@@ -10,7 +10,7 @@ interface SampleContent {
   menuItems: string[];
 }
 
-const ARCHETYPE_CONTENT: Record<string, SampleContent> = {
+export const ARCHETYPE_CONTENT: Record<string, SampleContent> = {
   portfolio: {
     siteTitle: "Alex Rivera Photography",
     siteTagline: "Capturing moments that matter",
