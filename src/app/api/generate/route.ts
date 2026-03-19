@@ -5,6 +5,7 @@ import { generateTemplates } from "@/lib/generators/templates";
 import { generateParts } from "@/lib/generators/parts";
 import { generatePatterns } from "@/lib/generators/patterns";
 import { generateSaasCustomCss } from "@/lib/generators/custom-css";
+import { generateSkeletonPages } from "@/lib/generators/skeleton-pages";
 import { validateBlockMarkup } from "@/lib/validation/block-validator";
 import { auditThemeDesign } from "@/lib/validation/design-audit";
 
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
         });
 
         // Steps 4-7: Dark mode + load standard templates + parts
-        send("step", { step: "templates", status: "active", detail: "Loading clean Gutenberg fallback layouts" });
+        send("step", { step: "templates", status: "active", detail: "Generating page layouts (AI-powered front page)..." });
         send("step", { step: "parts", status: "active", detail: "Structuring responsive header/footer" });
         send("step", { step: "patterns", status: "active", detail: "Skipping pattern injection (handled by layout)" });
 
@@ -110,10 +111,26 @@ export async function POST(request: Request) {
           }),
         ]);
 
-        // Step 8: Validate
+        // Step 8: Skeleton pages
+        send("step", { step: "skeleton-pages", status: "active", detail: "Generating content pages..." });
+        const skeletonPages = generateSkeletonPages(enriched.archetype.id);
+        const skeletonMarkup = new Map<string, string>();
+        const skeletonPayload: Record<string, { title: string; slug: string; content: string }> = {};
+        for (const [slug, page] of skeletonPages) {
+          skeletonMarkup.set(slug, page.content);
+          skeletonPayload[slug] = { title: page.title, slug: page.slug, content: page.content };
+        }
+        send("files", { type: "skeleton-pages", files: skeletonPayload });
+        send("step", {
+          step: "skeleton-pages",
+          status: "done",
+          detail: `${skeletonPages.size} content pages generated`,
+        });
+
+        // Step 9: Validate
         send("step", { step: "validate", status: "active", detail: "Checking block markup, WCAG contrast, typography..." });
         const validationErrors: string[] = [];
-        const allMarkup = new Map([...templates, ...parts]);
+        const allMarkup = new Map([...templates, ...parts, ...skeletonMarkup]);
         for (const [filename, content] of allMarkup) {
           const result = validateBlockMarkup(content);
           if (!result.valid) {
@@ -140,7 +157,7 @@ export async function POST(request: Request) {
           detail: `Score: ${audit.score}/100 (${audit.grade})${validationErrors.length > 0 ? ` · ${validationErrors.length} warnings` : ""}`,
         });
 
-        // Step 9: Custom CSS (archetype-specific)
+        // Step 10: Custom CSS (archetype-specific)
         const customCss = enriched.archetype.id === "saas"
           ? generateSaasCustomCss()
           : undefined;
@@ -153,6 +170,7 @@ export async function POST(request: Request) {
             templates: mapToObject(templates),
             parts: mapToObject(parts),
             patterns: mapToObject(patterns),
+            skeletonPages: skeletonPayload,
             customCss,
           },
           audit,

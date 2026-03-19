@@ -1,6 +1,7 @@
 import type { AIProvider } from "../ai/provider";
 import type { EnrichedPrompt } from "../prompts/enrichment";
 import { TEMPLATE_SYSTEM_PROMPT } from "../constants/block-markup";
+import { transpileJSXToBlocks } from "../transpiler/jsx-to-blocks";
 
 interface TemplateSpec {
   name: string;
@@ -382,9 +383,27 @@ export async function generateTemplates(
 <!-- /wp:group -->
 <!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`;
 
-  const frontPageHtml = enrichedPrompt?.archetype?.id === "saas" 
-    ? SAAS_FRONT_PAGE_HTML 
-    : genericFrontPage;
+  let frontPageHtml: string;
+  try {
+    const frontPageSpec = TEMPLATE_SPECS.find(s => s.name === "front-page")!;
+    const frontPagePrompt = buildTemplatePrompt(frontPageSpec, enrichedPrompt, themeJson);
+
+    const jsxString = await provider.generateText(
+      frontPagePrompt,
+      TEMPLATE_SYSTEM_PROMPT,
+      { temperature: frontPageSpec.temperature }
+    );
+
+    frontPageHtml = transpileJSXToBlocks(jsxString);
+  } catch (err) {
+    console.warn(
+      "[templates] Front-page AI generation/transpilation failed, using fallback:",
+      err instanceof Error ? err.message : err
+    );
+    frontPageHtml = enrichedPrompt?.archetype?.id === "saas"
+      ? SAAS_FRONT_PAGE_HTML
+      : genericFrontPage;
+  }
 
   templates.set("front-page.html", frontPageHtml);
 
