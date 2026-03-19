@@ -1,58 +1,31 @@
 import { NextResponse } from "next/server";
 import JSZip from "jszip";
+import { buildEnhancedBlueprint } from "@/lib/playground/blueprint-builder";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { zipBase64, meta } = body as {
+    const { zipBase64, meta, archetypeId, templateMarkup } = body as {
       zipBase64: string;
-      meta: {
-        themeName: string;
-      };
+      meta: { themeName: string };
+      archetypeId?: string;
+      templateMarkup?: string;
     };
 
     if (!zipBase64 || !meta?.themeName) {
       return NextResponse.json({ error: "Missing zipBase64 or theme metadata" }, { status: 400 });
     }
 
-    const slug = meta.themeName;
+    const blueprint = buildEnhancedBlueprint(
+      meta.themeName,
+      archetypeId ?? "blog",
+      templateMarkup ?? ""
+    );
 
-    const blueprint = {
-      $schema: "https://playground.wordpress.net/blueprint-schema.json",
-      landingPage: "/",
-      preferredVersions: {
-        php: "8.2",
-        wp: "latest"
-      },
-      steps: [
-        {
-          step: "login",
-          username: "admin",
-          password: "password"
-        },
-        {
-          step: "installTheme",
-          themeData: {
-            resource: "bundled",
-            path: "theme.zip"
-          }
-        },
-        {
-          step: "setSiteOptions",
-          options: {
-            stylesheet: slug,
-            template: slug
-          }
-        }
-      ]
-    };
-
-    // WordPress Playground supports "Blueprint Bundles" (.zip files containing blueprint.json at the root)
     const bundleZip = new JSZip();
     bundleZip.file("blueprint.json", JSON.stringify(blueprint));
     bundleZip.file("theme.zip", Buffer.from(zipBase64, "base64"));
 
-    // The entire bundle is generated as a base64 string
     const bundleBase64 = await bundleZip.generateAsync({ type: "base64" });
 
     return NextResponse.json({ bundleBase64 });
