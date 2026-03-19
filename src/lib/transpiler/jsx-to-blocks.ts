@@ -1,6 +1,6 @@
 import { parse } from '@babel/parser';
 import * as t from '@babel/types';
-import { getElementMapping } from './element-map';
+import { getElementMapping, isInlineTag } from './element-map';
 import { convertStylesToBlockAttrs } from './style-map';
 import { getNestingAction, isSpecialBlock, renderSpecialBlock } from './nesting-rules';
 
@@ -157,7 +157,17 @@ function processNode(node: t.Node, parentWpName: string | null): string {
     tagName = tagName.toLowerCase();
   }
 
+  // Inline elements (span, strong, em, a without role=button, etc.) render as raw HTML, not blocks
   const props = extractProps(opening.attributes);
+  if (isInlineTag(tagName) && !(tagName === 'a' && props.role === 'button')) {
+    const children = processChildren(node.children, parentWpName);
+    const styleObj = typeof props.style === 'object' && props.style !== null ? props.style as Record<string, string> : null;
+    const styleStr = styleObj ? ` style="${stylesToString(styleObj)}"` : '';
+    const cls = props.className ? ` class="${props.className}"` : '';
+    const href = typeof props.href === 'string' ? ` href="${props.href}"` : '';
+    if (tagName === 'br') return '<br />';
+    return `<${tagName}${cls}${styleStr}${href}>${children}</${tagName}>`;
+  }
   const mapping = getElementMapping(tagName, props);
   const wpName = mapping.wpName;
 
@@ -173,7 +183,8 @@ function processNode(node: t.Node, parentWpName: string | null): string {
   for (const [key, value] of Object.entries(props)) {
     if (key === 'style' && typeof value === 'object' && value !== null) {
       const styleObj = value as Record<string, string>;
-      const result = convertStylesToBlockAttrs(styleObj);
+      const skipLayout = wpName === 'list-item' || wpName === 'list';
+      const result = convertStylesToBlockAttrs(styleObj, skipLayout);
       mergeDeep(blockAttrs, result.blockAttrs);
       mergeDeep(blockAttrs, result.layoutAttrs);
       residualStyles = { ...residualStyles, ...result.residualStyles };
@@ -231,7 +242,14 @@ function processNode(node: t.Node, parentWpName: string | null): string {
     const attrs = buildHtmlAttrs(mapping.cssClass, extraClasses, residualStyles, htmlAttrs);
 
     lines.push(emitBlockOpen(wpName, blockAttrs));
-    lines.push(`<${actualTag}${attrs}>${childContent}</${actualTag}>`);
+    const hasBlockChildren = childContent.includes('<!-- wp:');
+    if (hasBlockChildren) {
+      lines.push(`<${actualTag}${attrs}>`);
+      lines.push(childContent);
+      lines.push(`</${actualTag}>`);
+    } else {
+      lines.push(`<${actualTag}${attrs}>${childContent}</${actualTag}>`);
+    }
     lines.push(emitBlockClose(wpName));
   }
 

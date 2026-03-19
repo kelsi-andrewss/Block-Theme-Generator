@@ -13,7 +13,10 @@ const headingExtract = (_props: Record<string, unknown>, tagName: string): Recor
 };
 
 const groupTagExtract = (_props: Record<string, unknown>, tagName: string): Record<string, unknown> => {
-  if (tagName === 'section' || tagName === 'main') {
+  if (tagName === 'main') {
+    return { tagName, layout: { type: 'constrained', contentSize: '100%' } };
+  }
+  if (tagName === 'section') {
     return { tagName, layout: { type: 'constrained' } };
   }
   if (tagName === 'div') return {};
@@ -140,6 +143,9 @@ elementMap['blockquote'] = {
   selfClosing: false,
 };
 
+// Inline elements pass through as raw HTML — they can't be WP blocks
+const INLINE_TAGS = new Set(['span', 'strong', 'em', 'b', 'i', 'br', 'small', 'sub', 'sup', 'abbr', 'code', 'mark', 'a']);
+
 const FALLBACK_MAPPING: ElementMapping = {
   blockName: 'core/group',
   wpName: 'group',
@@ -147,6 +153,10 @@ const FALLBACK_MAPPING: ElementMapping = {
   cssClass: 'wp-block-group',
   selfClosing: false,
 };
+
+export function isInlineTag(tagName: string): boolean {
+  return INLINE_TAGS.has(tagName);
+}
 
 export function getElementMapping(tagName: string, props: Record<string, unknown>): ElementMapping {
   if (tagName === 'a' && props.role === 'button') {

@@ -66,7 +66,8 @@ export function renderSpecialBlock(
 ): string {
   if (wpName === 'button') {
     const styleAttr = inlineStyle ? ` style="${inlineStyle}"` : '';
-    return `<div class="wp-block-button"><a class="wp-block-button__link wp-element-button"${styleAttr}>${children}</a></div>`;
+    const hrefAttr = _attrs.url ? ` href="${_attrs.url}"` : '';
+    return `<div class="wp-block-button"><a class="wp-block-button__link wp-element-button"${hrefAttr}${styleAttr}>${children}</a></div>`;
   }
 
   if (wpName === 'image') {
