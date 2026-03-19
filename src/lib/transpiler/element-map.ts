@@ -13,6 +13,9 @@ const headingExtract = (_props: Record<string, unknown>, tagName: string): Recor
 };
 
 const groupTagExtract = (_props: Record<string, unknown>, tagName: string): Record<string, unknown> => {
+  if (tagName === 'section' || tagName === 'main') {
+    return { tagName, layout: { type: 'constrained' } };
+  }
   if (tagName === 'div') return {};
   return { tagName };
 };

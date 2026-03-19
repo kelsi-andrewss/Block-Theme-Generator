@@ -24,6 +24,7 @@ export function parseShorthandSpacing(value: string): { top: string; right: stri
 interface StyleConversionResult {
   blockAttrs: Record<string, unknown>;
   residualStyles: Record<string, string>;
+  layoutAttrs: Record<string, unknown>;
 }
 
 function deepSet(obj: Record<string, unknown>, path: string[], value: unknown): void {
@@ -65,6 +66,57 @@ const BORDER_PROPS: Record<string, string> = {
   borderWidth: 'width',
   borderStyle: 'style',
 };
+
+function extractLayoutAttrs(
+  styles: Record<string, string>,
+  residualStyles: Record<string, string>,
+  blockAttrs: Record<string, unknown>,
+): Record<string, unknown> {
+  const display = styles.display;
+  if (!display || (display !== 'flex' && display !== 'grid')) return {};
+
+  if (display === 'grid') {
+    const layout: Record<string, unknown> = { type: 'default' };
+    if (styles.gap) {
+      deepSet(blockAttrs, ['style', 'spacing', 'blockGap'], styles.gap);
+    }
+    return { layout };
+  }
+
+  const layout: Record<string, unknown> = { type: 'flex' };
+  delete residualStyles.display;
+
+  if (styles.flexDirection) {
+    delete residualStyles.flexDirection;
+    if (styles.flexDirection === 'column') {
+      layout.orientation = 'vertical';
+    }
+  }
+
+  if (styles.justifyContent) {
+    delete residualStyles.justifyContent;
+    layout.justifyContent = styles.justifyContent;
+  }
+
+  if (styles.alignItems) {
+    delete residualStyles.alignItems;
+    layout.verticalAlignment = styles.alignItems;
+  }
+
+  if (styles.flexWrap) {
+    delete residualStyles.flexWrap;
+    if (styles.flexWrap === 'wrap') {
+      layout.flexWrap = 'wrap';
+    }
+  }
+
+  if (styles.gap) {
+    delete residualStyles.gap;
+    deepSet(blockAttrs, ['style', 'spacing', 'blockGap'], styles.gap);
+  }
+
+  return { layout };
+}
 
 export function convertStylesToBlockAttrs(styles: Record<string, string>): StyleConversionResult {
   const blockAttrs: Record<string, unknown> = {};
@@ -123,5 +175,7 @@ export function convertStylesToBlockAttrs(styles: Record<string, string>): Style
     residualStyles[prop] = value;
   }
 
-  return { blockAttrs, residualStyles };
+  const layoutAttrs = extractLayoutAttrs(styles, residualStyles, blockAttrs);
+
+  return { blockAttrs, residualStyles, layoutAttrs };
 }

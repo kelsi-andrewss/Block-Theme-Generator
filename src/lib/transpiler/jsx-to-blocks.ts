@@ -175,6 +175,7 @@ function processNode(node: t.Node, parentWpName: string | null): string {
       const styleObj = value as Record<string, string>;
       const result = convertStylesToBlockAttrs(styleObj);
       mergeDeep(blockAttrs, result.blockAttrs);
+      mergeDeep(blockAttrs, result.layoutAttrs);
       residualStyles = { ...residualStyles, ...result.residualStyles };
       continue;
     }
