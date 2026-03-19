@@ -11,6 +11,7 @@ export async function POST(request: Request) {
         templates: Record<string, string>;
         parts: Record<string, string>;
         patterns: Record<string, string>;
+        customCss?: string;
       };
       meta: {
         themeName: string;
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
       templates: new Map(Object.entries(themeFiles.templates)),
       parts: new Map(Object.entries(themeFiles.parts)),
       patterns: new Map(Object.entries(themeFiles.patterns)),
+      customCss: themeFiles.customCss,
       meta: {
         name: meta.displayName,
         slug: meta.themeName,

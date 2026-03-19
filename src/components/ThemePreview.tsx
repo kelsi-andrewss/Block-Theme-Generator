@@ -15,9 +15,10 @@ export interface ThemePreviewProps {
   templates?: Record<string, string>;
   parts?: Record<string, string>;
   patterns?: Record<string, string>;
+  customCss?: string;
 }
 
-export default function ThemePreview({ themeJson, templates, parts }: ThemePreviewProps) {
+export default function ThemePreview({ themeJson, templates, parts, customCss }: ThemePreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [viewport, setViewport] = useState<ViewportSize>("desktop");
 
@@ -223,6 +224,7 @@ export default function ThemePreview({ themeJson, templates, parts }: ThemePrevi
             ${cssVars}
             ${baseCss}
           </style>
+          ${customCss ? `<style>${customCss}</style>` : ""}
         </head>
         <body>
           ${rawHtml}
@@ -236,7 +238,7 @@ export default function ThemePreview({ themeJson, templates, parts }: ThemePrevi
     } catch (e) {
       console.error("Preview render error:", e);
     }
-  }, [themeJson, templates, parts]);
+  }, [themeJson, templates, parts, customCss]);
 
   return (
     <div className="flex flex-col h-full w-full space-y-3">

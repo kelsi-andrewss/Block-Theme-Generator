@@ -22,6 +22,7 @@ interface ThemeFilesData {
   templates: Record<string, string>;
   parts: Record<string, string>;
   patterns: Record<string, string>;
+  customCss?: string;
 }
 
 interface GenerationResult {
@@ -632,11 +633,12 @@ export default function Home() {
                         title={`${themeSlug} Template Iteration Preview`}
                       />
                     ) : (
-                      <ThemePreview 
-                        themeJson={result?.themeFiles.darkMode || result?.themeFiles.themeJson} 
-                        templates={result?.themeFiles.templates} 
-                        parts={result?.themeFiles.parts} 
-                        patterns={result?.themeFiles.patterns} 
+                      <ThemePreview
+                        themeJson={result?.themeFiles.darkMode || result?.themeFiles.themeJson}
+                        templates={result?.themeFiles.templates}
+                        parts={result?.themeFiles.parts}
+                        patterns={result?.themeFiles.patterns}
+                        customCss={result?.themeFiles.customCss}
                       />
                     )}
                   </div>
