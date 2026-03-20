@@ -32,12 +32,16 @@ The site uses these CSS variables (set on documentElement):
 - --color-border, --color-border-subtle: Border colors
 - --color-bg-card, --color-border-card: Card colors
 
+You will receive the current values for ALL these variables so you can see the full palette.
+
 RULES:
-1. Return CSS variable overrides to achieve the requested change.
-2. Use actual color values (hex, rgb, hsl, named). Not references to other variables.
-3. Override the minimum variables needed. For a "make yellow" request, primary shades are usually enough.
-4. Generate appropriate shade variants (400=lighter, 500=base, 700=darker, 900=darkest).
-5. Keep explanation to one sentence.
+1. When the user asks for a theme-level change (e.g. "make it yellow", "warmer colors", "dark mode"), generate a COMPLETE coherent palette — primary, secondary, backgrounds, text, borders, and cards. Not just primary.
+2. Use actual color values (hex). Not references to other variables.
+3. Generate appropriate shade variants (400=lighter, 500=base, 700=darker, 900=darkest).
+4. Ensure contrast: text must be readable on backgrounds, borders must be visible against cards/backgrounds.
+5. Secondary colors should complement the primary — not be identical.
+6. For narrow requests (e.g. "make the borders thicker" — not color-related), only override what's relevant.
+7. Keep explanation to one sentence.
 
 RESPONSE FORMAT — JSON only, no markdown fences:
 {

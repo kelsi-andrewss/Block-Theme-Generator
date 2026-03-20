@@ -78,8 +78,24 @@ export default function Home() {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  // Build a compact palette string from theme.json for color context
+  // Read current CSS variable values from the iframe for full palette context
   function getPaletteContext(): string {
+    const CSS_VARS = [
+      "--color-primary-400", "--color-primary-500", "--color-primary-700", "--color-primary-900",
+      "--color-secondary-400", "--color-secondary-500", "--color-secondary-700", "--color-secondary-900",
+      "--color-bg", "--color-text", "--color-bg-secondary", "--color-bg-tertiary",
+      "--color-text-muted", "--color-text-secondary",
+      "--color-border", "--color-border-subtle", "--color-bg-card", "--color-border-card",
+    ];
+
+    const iframe = document.querySelector('iframe');
+    const root = iframe?.contentDocument?.documentElement;
+    if (root) {
+      const computed = iframe.contentWindow!.getComputedStyle(root);
+      return CSS_VARS.map(v => `${v}: ${computed.getPropertyValue(v).trim() || "(unset)"}`).join("\n");
+    }
+
+    // Fallback: theme.json palette slugs
     if (!result) return "";
     try {
       const parsed = JSON.parse(result.themeFiles.themeJson);
