@@ -1,0 +1,142 @@
+{
+  "angle": "WordPress Core Block Styling Limits & Sanctioned Workarounds",
+  "findings": [
+    {
+      "claim": "WordPress 6.2 introduced the 'css' property in theme.json (styles.css for global, styles.blocks.[name].css for per-block) allowing raw CSS strings with '&' selector nesting for pseudo-classes and pseudo-elements",
+      "source_url": "https://make.wordpress.org/core/2023/03/06/custom-css-for-global-styles-and-per-block/",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress 6.6 expanded the css property to elements (styles.elements.[name].css) and block style variations (styles.blocks.[name].variations.[name].css), requiring theme.json version 3",
+      "source_url": "https://developer.wordpress.org/news/2024/07/11/custom-css-for-elements-and-block-variations-in-wordpress-6-6/",
+      "confidence": "high"
+    },
+    {
+      "claim": "theme.json has NO structured fields for: animation, transition, transform, filter (except duotone), clip-path, mask-image, backdrop-filter, scroll-snap, object-fit, object-position. All require the css string escape hatch.",
+      "source_url": "https://developer.wordpress.org/block-editor/reference-guides/theme-json-reference/theme-json-living-document/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The 'content' CSS property is BLOCKED by WordPress sanitization (safecss_filter_attr) when styles are saved via the Site Editor to the database, making ::before/::after pseudo-elements with content difficult to use via Global Styles UI",
+      "source_url": "https://github.com/WordPress/gutenberg/issues/48439",
+      "confidence": "high"
+    },
+    {
+      "claim": "The 'pointer-events' property is blocked by default sanitization to prevent clickjacking attacks",
+      "source_url": "https://make.wordpress.org/core/2023/03/06/custom-css-for-blocks-in-wordpress-6-2/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "position: fixed and position: absolute are restricted/stripped in Site Editor context to prevent UI hijacking; sticky and relative are generally allowed",
+      "source_url": "https://make.wordpress.org/core/2023/03/06/custom-css-for-blocks-in-wordpress-6-2/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "@import and @keyframes are blocked or unreliable within theme.json css strings. Official recommendation is to define @keyframes in style.css and reference animation names in theme.json css property.",
+      "source_url": "https://github.com/WordPress/gutenberg/pull/46571",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Critical 'disk vs database' distinction: theme.json on disk is trusted and bypasses KSES sanitization, but when users edit the same styles via Site Editor, they are saved to database and subject to KSES filtering that strips 'unsafe' properties like content and pointer-events",
+      "source_url": "https://make.wordpress.org/core/2023/03/06/custom-css-for-blocks-in-wordpress-6-2/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Developers can bypass sanitization restrictions using the 'safe_style_css' PHP filter to add specific properties (like 'content') to the allow-list",
+      "source_url": "https://developer.wordpress.org/reference/hooks/safe_style_css/",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress 6.6 introduced 0-1-0 specificity for all global styles output using the pattern ':root :where(.selector)' where :root provides 0-1-0 weight and :where() nullifies internal selector specificity to zero",
+      "source_url": "https://make.wordpress.org/core/2024/06/21/wordpress-6-6-css-specificity/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The 0-1-0 specificity standardization means cascade order (not selector complexity) determines which styles win, enabling Section Styles where nested block variations override parent styles by appearing later in the stylesheet",
+      "source_url": "https://make.wordpress.org/core/2024/06/21/styling-sections-nested-elements-and-more-with-block-style-variations-in-wordpress-6-6/",
+      "confidence": "high"
+    },
+    {
+      "claim": "WP_Style_Engine class is marked 'final' and cannot be extended. Developers must use wp_style_engine_get_styles() wrapper function.",
+      "source_url": "https://github.com/WordPress/gutenberg/issues/51749",
+      "confidence": "high"
+    },
+    {
+      "claim": "register_block_style (since WP 5.3) adds .is-style-{name} class to blocks, but users can only select ONE style at a time per block -- no combining multiple styles, leading to combinatorial bloat",
+      "source_url": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-styles/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Block style registration has a race condition: JavaScript-registered styles cannot be unregistered using PHP's unregister_block_style, making cleanup difficult",
+      "source_url": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-styles/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "WordPress 6.6 introduced native CSS Grid layout as a Group block variation with two modes: Auto (auto-fill based on minimum column width) and Manual (fixed column count with drag-to-span UI handles)",
+      "source_url": "https://make.wordpress.org/core/2024/06/18/grid-layout-type/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The Grid layout has no CSS Subgrid support (tracked in Gutenberg Issue #49084), no granular row height control in Auto mode, and the UI slider limits manual column count",
+      "source_url": "https://github.com/WordPress/gutenberg/issues/49084",
+      "confidence": "high"
+    },
+    {
+      "claim": "The legacy Columns block is limited to maximum 6 columns, uses Flexbox (1D), and has a fixed mobile breakpoint at 782px. Grid variation has no column limit and fluid responsive behavior.",
+      "source_url": "https://make.wordpress.org/core/2024/06/18/grid-layout-type/",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress Theme Review Team rejects themes that use wp:html blocks in templates/patterns for: layout structures achievable with core blocks, script injection, hardcoded navigation/site titles bypassing Site Editor APIs, and non-translatable text",
+      "source_url": "https://developer.wordpress.org/themes/review/",
+      "confidence": "high"
+    },
+    {
+      "claim": "wp:html blocks bypass the Global Styles interface, meaning users cannot change colors, typography, or spacing through the editor for content in HTML blocks -- violating the 'no-code' promise of block themes",
+      "source_url": "https://developer.wordpress.org/themes/review/review-guidelines/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Inline styles on core blocks have higher specificity than external CSS, creating specificity wars. Gutenberg issue #40159 documents how layout inline styles override theme spacing.",
+      "source_url": "https://github.com/WordPress/gutenberg/issues/40159",
+      "confidence": "high"
+    },
+    {
+      "claim": "Gutenberg issue #23893 tracks the long-running initiative to move away from inline styles for block markup, noting data portability concerns when users switch themes",
+      "source_url": "https://github.com/WordPress/gutenberg/issues/23893",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress inlines block stylesheets under 20kb by default. Developers can force external loading with add_filter('styles_inline_size_limit', '__return_zero') or load per-block assets with add_filter('should_load_separate_core_block_assets', '__return_true')",
+      "source_url": "https://developer.wordpress.org/block-editor/reference-guides/packages/packages-style-engine/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Custom CSS variables defined in settings.custom of theme.json generate --wp--custom--[key]--[subkey] tokens, while presets generate --wp--preset--{type}--{slug} tokens. These are the sanctioned design token systems.",
+      "source_url": "https://developer.wordpress.org/themes/advanced-topics/theme-json/",
+      "confidence": "high"
+    },
+    {
+      "claim": "theme.json css property values must be single-line JSON strings with escaped double quotes. Internal newline characters are allowed but actual line breaks in JSON are not.",
+      "source_url": "https://developer.wordpress.org/news/2023/03/08/custom-css-for-blocks-in-theme-json/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Block variations (registerBlockVariation) allow pre-configured blocks with specific attributes and inner blocks, providing a sanctioned alternative to wp:html for complex pre-styled components",
+      "source_url": "https://github.com/WordPress/gutenberg/blob/trunk/docs/reference-guides/block-api/block-variations.md",
+      "confidence": "high"
+    }
+  ],
+  "key_insights": [
+    "The theme.json 'css' escape hatch (WP 6.2+) enables nearly any CSS property for on-disk themes, but the KSES sanitization gap between disk-based theme.json (trusted, unfiltered) and Site Editor database saves (sanitized, strips content/pointer-events/position) creates a two-tier system where theme authors can do things users cannot replicate in the UI.",
+    "WordPress 6.6's 0-1-0 specificity standardization via :root :where() is a fundamental architectural shift that makes all global styles compete on cascade order rather than selector weight -- this means a block theme generator's CSS output strategy should match this specificity pattern to integrate cleanly with the WP style engine.",
+    "The sanctioned styling stack for block themes (in order of preference) is: theme.json structured properties > theme.json css escape hatch > register_block_style > block variations > custom class + style.css > enqueued stylesheets. wp:html is essentially prohibited for .org themes and should be treated as a last resort even for self-hosted themes."
+  ],
+  "gaps": [
+    "Could not find a specific Make WordPress Themes team post with a Trac ticket number explicitly documenting the wp:html rejection policy -- the policy is inferred from general theme review requirements rather than a single definitive ruling",
+    "The exact list of CSS properties stripped by safecss_filter_attr is not comprehensively documented in one place -- it is scattered across source code and various dev notes",
+    "Limited information on whether WordPress 7.0 (March 2026) actually shipped structured :hover/:focus/:active support for all block types or just link/button elements -- the Gemini response mentioned WP 7.0 but this needs verification",
+    "No clear documentation on the maximum complexity or length limits of the css string property in theme.json -- whether extremely long CSS strings cause performance issues or are truncated",
+    "CSS Subgrid timeline for WordPress core remains unclear beyond 'future releases' per Gutenberg Issue #49084"
+  ]
+}

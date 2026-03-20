@@ -1,0 +1,127 @@
+{
+  "angle": "Engineering Culture & Remote Work",
+  "findings": [
+    {
+      "claim": "Automattic has been fully distributed since its founding in 2005, with no central office. The original WordPress contributors were spread across Texas, Ireland, and California, and Mullenweg built the company around distributed talent rather than requiring relocation.",
+      "source_url": "https://trueventures.com/blog/automattic-distributed-not-remote",
+      "confidence": "high"
+    },
+    {
+      "claim": "Automattic uses the term 'distributed, not remote' intentionally -- 'remote' implies a center that some employees are away from, while 'distributed' means every employee is on equal footing regardless of location.",
+      "source_url": "https://automattic.com/about/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Matt Mullenweg created the 'Five Levels of Distributed Work' framework: Level 1 (Non-deliberate), Level 2 (Recreating the Office via Zoom/Slack), Level 3 (Adapting with better tools and written communication), Level 4 (Asynchronous -- the sweet spot), Level 5 (Nirvana -- distributed teams outperform in-person). Automattic operates primarily at Level 4.",
+      "source_url": "https://mullenweg.com/2020/04/01/the-five-levels-of-distributed-work/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The Automattic Creed includes nine principles: 'I will never stop learning', 'I won't just work on things that are assigned to me', 'I know there's no such thing as a status quo', commitment to sustainable business, helping colleagues, being 'more motivated by impact than money' with Open Source as 'one of the most powerful ideas of our generation', communication as 'the oxygen of a distributed company', marathon mentality, and 'given time, there is no problem that's insurmountable'.",
+      "source_url": "https://automattic.com/creed/",
+      "confidence": "high"
+    },
+    {
+      "claim": "P2 is Automattic's internal WordPress-based blogging/communication platform -- the primary tool for asynchronous communication. It serves as a searchable knowledge base where nearly all discussions, decisions, and project updates are documented in threaded format.",
+      "source_url": "https://wordpress.com/p2/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Engineers at Automattic have near-total control over their daily schedule with no mandatory 9-to-5 hours. Performance is measured by output (code shipped, P2 posts, Slack activity) rather than time spent online.",
+      "source_url": "https://codebytom.com/working-at-automattic-as-a-software-engineer/",
+      "confidence": "high"
+    },
+    {
+      "claim": "A typical engineer day involves: morning catch-up on Slack/P2, 4-6 hours of deep work (coding, PR reviews, technical design), 'citizenship time' for mentoring and cross-team feedback, and an end-of-day 'hand-off' post summarizing progress for colleagues in other time zones.",
+      "source_url": "https://codebytom.com/working-at-automattic-as-a-software-engineer/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Synchronous meetings are rare at Automattic. When they occur (e.g., weekly team syncs), they are recorded and transcribed for colleagues in other time zones. Teams typically find 1-2 hours of 'live' overlap for quick Slack discussions.",
+      "source_url": "https://ma.tt/2020/04/distributed-work-at-automattic/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Automattic's hiring process centers on a paid trial period lasting 3-6 weeks, where candidates log 25-40 total hours at a flat rate of $25 USD/hour. The trial is conducted asynchronously via Slack and P2 to test professional fit, communication skills, and technical ability in real-world remote conditions.",
+      "source_url": "https://automattic.com/work-with-us/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The hiring pipeline includes: initial application, a text-based (chat) interview (no phone/video), a code test or design exercise, the paid trial project working on real tasks with a real team, and a final interview with Matt Mullenweg.",
+      "source_url": "https://www.ycombinator.com/library/4H-how-automattic-hires",
+      "confidence": "high"
+    },
+    {
+      "claim": "Automattic's primary GitHub organization hosts approximately 1,300 repositories. Major open-source projects include wp-calypso (React/Redux/TypeScript SPA for WordPress.com management), WooCommerce, Jetpack, and Gutenberg (block editor).",
+      "source_url": "https://github.com/Automattic/wp-calypso",
+      "confidence": "high"
+    },
+    {
+      "claim": "Calypso is built with React, Redux, TypeScript, and Node.js (for server-side rendering). It manages WordPress.com sites and Jetpack-connected self-hosted sites via the WordPress.com REST API, licensed under GNU GPL v2.0.",
+      "source_url": "https://github.com/Automattic/wp-calypso",
+      "confidence": "high"
+    },
+    {
+      "claim": "Automattic's core tech stack is a hybrid of PHP (WordPress core, WooCommerce) and modern JavaScript (React for Calypso and Gutenberg). The block editor (Gutenberg) is primarily driven by Automattic engineers.",
+      "source_url": "https://github.com/Automattic/wp-calypso",
+      "confidence": "high"
+    },
+    {
+      "claim": "Pre-2025, Automattic sponsored approximately 3,900 hours per week of WordPress core contribution through the Five for the Future initiative, with over 100 full-time employees dedicated. For WordPress 6.6 (late 2024), Automattic-sponsored contributions accounted for over 50% of all contributions. Approximately 37% (13 of 35) of WordPress core committers were Automattic employees.",
+      "source_url": "https://www.searchenginejournal.com",
+      "confidence": "high"
+    },
+    {
+      "claim": "In January 2025, Automattic drastically reduced WordPress core contribution from ~3,900 hours/week to just 45 hours/week, citing the WP Engine legal dispute and stating it would 'match' competitor contribution levels.",
+      "source_url": "https://wpbarista.com/automattic-cuts-contributions/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Employee benefits include: $250/month co-working stipend, home office setup budget (hardware, ergonomic furniture), open vacation policy with minimum 25 days encouraged, 3-month paid sabbatical after 5 years, 6 months fully paid parental leave, 100% health/dental/vision premium coverage (US employees + dependents), and a learning budget for books/conferences/coaching.",
+      "source_url": "https://automattic.com/work-with-us/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The Grand Meetup (GM) is Automattic's historically annual all-hands gathering, held since 2006. Past locations include Orlando (2018-2019), Whistler (2016-2017), Park City (2014-2015), and Santa Cruz (2013). The GM has been on pause since September 2019.",
+      "source_url": "https://distributed.blog",
+      "confidence": "high"
+    },
+    {
+      "claim": "With the Grand Meetup paused, Automattic uses a multi-tiered meetup strategy: Division Meetups (entire business units every 12-18 months), Team Meetups (10-20 people, 1-2 times/year in global locations like Tokyo, Amsterdam, Lisbon), and Mega-Meetups (cross-functional groups of 20+ as needed).",
+      "source_url": "https://automattic.com",
+      "confidence": "high"
+    },
+    {
+      "claim": "In early 2024, Automattic had approximately 1,900+ employees across 90+ countries. By April 2025, headcount dropped to approximately 1,495 after 159 departures from the October 2024 voluntary 'alignment' buyout ($30,000 or 6 months' salary) and a 16% layoff (281 employees) in April 2025 focused on AI productivity restructuring.",
+      "source_url": "https://en.wikipedia.org/wiki/Automattic",
+      "confidence": "high"
+    },
+    {
+      "claim": "In October 2024, a second buyout offer of 9 months' salary was made via Slack with a reported 4-hour decision window, leading to 156 additional departures. Total October 2024 departures reached 315 employees (~16% of workforce). Over 79% of those who left were from the Ecosystem division (WordPress.com, WooCommerce, Jetpack).",
+      "source_url": "https://wptavern.com/second-alignment-offer-leads-to-more-resignations-at-automattic",
+      "confidence": "high"
+    },
+    {
+      "claim": "In early 2025, Automattic introduced more rigorous performance tracking with internal dashboards tracking code shipped, P2 participation, and Slack responsiveness. Engineers can still rotate between products (e.g., WooCommerce to Pocket Casts) to prevent burnout.",
+      "source_url": "https://timbroddin.be/2025/01/10/life-at-after-automattic/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Despite workforce reductions, Automattic continued acquisitions including the messaging app Beeper (April 2024) and relationship platform Clay (June 2025).",
+      "source_url": "https://en.wikipedia.org/wiki/Automattic",
+      "confidence": "high"
+    }
+  ],
+  "key_insights": [
+    "Automattic is one of the longest-running fully-distributed companies (since 2005), with a deeply intentional 'distributed, not remote' philosophy formalized in Mullenweg's Five Levels framework. Their infrastructure (P2, async-first communication, output-based performance measurement) represents nearly two decades of iteration on distributed work patterns.",
+    "The hiring process is uniquely designed for distributed work: text-based interviews, no phone/video screens, and a 3-6 week paid trial ($25/hr) working asynchronously on real projects with real teams. This filters specifically for people who thrive in written, async communication -- the core skill for their culture.",
+    "2024-2025 marked a turbulent period: the WP Engine legal dispute triggered 315 employee departures via buyout offers, a subsequent 16% layoff in April 2025, and a dramatic reduction in WordPress core contributions from ~3,900 hours/week to 45 hours/week. This fundamentally altered the company's relationship with the open-source community it helped build."
+  ],
+  "gaps": [
+    "Specific internal engineering team structure and sizes (how many engineers per squad/team) -- most sources describe the distributed model generically without org chart details",
+    "Detailed information on the current 2025-2026 hiring trial process -- most detailed accounts are from 2016-2024, and the process may have evolved after the layoffs and restructuring",
+    "Concrete data on how the April 2025 AI-focused restructuring changed engineering workflows, tooling, or daily practices beyond the headline announcement",
+    "Internal engineering practices around code review, deployment pipelines, CI/CD specifics, and incident response in a fully async environment",
+    "Whether the Grand Meetup has resumed or remains on pause as of early 2026"
+  ]
+}

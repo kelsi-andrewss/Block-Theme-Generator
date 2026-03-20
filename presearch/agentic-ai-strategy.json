@@ -1,0 +1,107 @@
+{
+  "angle": "Agentic AI Strategy",
+  "findings": [
+    {
+      "claim": "Automattic acquired WPAI (the startup behind CodeWP, AgentWP, and WP.Chat) on December 9, 2024. Founders James LePage, Greg Hunt, and Ovidiu Galatan joined Automattic to lead a new team focused on 'applied AI as an interaction paradigm for WordPress.'",
+      "source_url": "https://www.searchenginejournal.com/wordpress-matt-mullenweg-state-of-the-word-2024-recap/535923/",
+      "confidence": "high"
+    },
+    {
+      "claim": "WPAI's standalone products (CodeWP, AgentWP, WP.Chat) were scheduled to be sunset by January 2025. Their capabilities are being reimagined as native features within Automattic's existing platforms (WordPress.com, Jetpack, WooCommerce).",
+      "source_url": "https://wptavern.com/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Automattic also acquired Harper, an open-source Rust-based local-first grammar-checking engine, on November 21, 2024. Harper runs in under 20ms via WebAssembly with zero cloud dependency, using rule-based (not LLM) processing.",
+      "source_url": "https://automattic.com/",
+      "confidence": "high"
+    },
+    {
+      "claim": "AgentWP functioned as an autonomous AI developer assistant for WordPress: it could generate and debug PHP code, troubleshoot WooCommerce issues, manage site configuration, and operate as a 'digital junior developer' within the WordPress admin.",
+      "source_url": "https://agentwp.com/",
+      "confidence": "high"
+    },
+    {
+      "claim": "CodeWP was an AI IDE specifically for WordPress that could generate plugins, themes, and custom code snippets using WordPress-specific training data, going beyond generic code generation tools.",
+      "source_url": "https://codewp.ai/",
+      "confidence": "high"
+    },
+    {
+      "claim": "At State of the Word 2024 (Tokyo, December 16, 2024), Matt Mullenweg positioned WordPress as an 'engine for AI agents' and an 'operating system of the web,' describing a future where AI agents build and manage websites using WordPress as stable infrastructure.",
+      "source_url": "https://www.searchenginejournal.com/wordpress-matt-mullenweg-state-of-the-word-2024-recap/535923/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Mullenweg introduced the concept of the Abilities API at State of the Word 2024 to enable 'agentic usability' -- a standardized, machine-readable format for WordPress core, plugins, and themes to expose their functions to AI agents.",
+      "source_url": "https://wordpress.com/blog/2024/12/16/state-of-the-word-2024/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The Abilities API officially landed in WordPress Core in WordPress 6.9 (December 2025), providing a central registry (WP_Abilities_Registry) for all site capabilities. It uses a register_ability pattern for plugins/themes to declare machine-readable functions.",
+      "source_url": "https://wordpress.org/news/2025/12/wordpress-6-9-launch/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "WordPress now integrates with Model Context Protocol (MCP), allowing external AI agents (Claude, Cursor, Gemini CLI) to discover and interact with a site's abilities securely. The official adapter is at WordPress/mcp-adapter on GitHub, and Automattic provides @automattic/mcp-wordpress-remote as an npm package.",
+      "source_url": "https://github.com/WordPress/mcp-adapter",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress.com provides native MCP support for all paid plans with zero configuration, accessible via OAuth 2.1 at the endpoint https://public-api.wordpress.com/wpcom/v2/mcp/v1.",
+      "source_url": "https://developer.wordpress.com/docs/api/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "WordPress Playground serves as an agentic sandbox, allowing AI agents to spin up fully containerized WordPress instances in the browser for instant verification, self-correction, and safe testing of code/theme changes before applying to live sites.",
+      "source_url": "https://ma.tt/2024/12/state-of-the-word-2024/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The WordPress.com AI Website Builder launched in April 2025, generating fully functional multi-page websites from a single conversational prompt, including AI logo generation, global style pairing, and context-aware content population. It offers 30 free prompts at launch.",
+      "source_url": "https://wordpress.com/blog/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Jetpack AI Assistant is integrated directly into the Gutenberg block editor, accessible via the /ai command. Free tier provides 20 lifetime requests per site; the unlimited tier costs approximately $10/month. Jetpack Complete at $24.95/month bundles AI with full security/performance suite.",
+      "source_url": "https://jetpack.com/ai/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Jetpack Search transitioned to an AI-powered engine in 2025 that understands natural language queries, moving beyond simple keyword matching.",
+      "source_url": "https://jetpack.com/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Mullenweg predicted the rise of Personal LLMs -- AI co-pilots trained on your specific WordPress content and data, where users maintain 'digital sovereignty' by keeping training data in their open-source WordPress environment rather than proprietary AI ecosystems.",
+      "source_url": "https://ma.tt/2024/12/state-of-the-word-2024/",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress 7.0 is scheduled for April 2026, described as a landmark 'AI-first' release. Development focuses on a native JavaScript Client (@wordpress/abilities) and a Workflows API to chain multiple abilities into automated sequences.",
+      "source_url": "https://wordpress.org/news/2025/12/wordpress-6-9-launch/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Automattic underwent a 16% workforce reduction (281 positions) in April 2025, designed to focus resources on high-growth core products (WordPress.com, WooCommerce, Beeper) while deprioritizing legacy or experimental brands.",
+      "source_url": "https://en.wikipedia.org/wiki/Automattic",
+      "confidence": "high"
+    },
+    {
+      "claim": "Automattic's total company revenue reached $710 million in 2024, and the company began licensing user data from Tumblr and WordPress.com to AI companies like Midjourney and OpenAI for model training in February 2024.",
+      "source_url": "https://www.pcmag.com/news/automattic-selling-tumblr-wordpress-data-to-ai-companies",
+      "confidence": "medium"
+    }
+  ],
+  "key_insights": [
+    "Automattic is executing a deliberate three-layer agentic AI stack: (1) the Abilities API in WordPress Core as a machine-readable function registry, (2) MCP integration for external AI agent connectivity, and (3) WordPress Playground as a safe sandbox for agent self-correction -- transforming WordPress from a human CMS into an 'operating system' that AI agents can programmatically build upon and manage.",
+    "The WPAI acquisition (CodeWP/AgentWP) was not about buying products but acquiring the team and IP to embed autonomous AI capabilities natively into WordPress.com and Jetpack. The standalone products were sunset, signaling that agentic functionality will ship as first-party platform features rather than third-party plugins.",
+    "The WordPress.com AI Site Builder (April 2025), Jetpack AI Assistant, Abilities API (WP 6.9), and the WP 7.0 Workflows API roadmap together form a clear progression: from AI-assisted content editing, to prompt-to-site generation, to fully autonomous multi-step agent workflows -- positioning WordPress to compete with AI-native builders like Wix ADI and Squarespace while maintaining the open-source ecosystem advantage."
+  ],
+  "gaps": [
+    "Specific technical details of how WPAI/AgentWP technology has been integrated into WordPress.com or Jetpack post-acquisition -- no public announcements of shipped features directly attributed to the acquired team.",
+    "Concrete API documentation or schema for the Abilities API register_ability() function -- the WP 6.9 announcement confirms it exists but detailed developer docs with endpoints and parameters were not findable.",
+    "Whether the Workflows API announced for WP 7.0 has any public RFC, Trac ticket, or Gutenberg GitHub issue with implementation details.",
+    "Automattic's internal AI model strategy -- whether they use third-party LLMs (OpenAI, Anthropic) exclusively or are training/fine-tuning WordPress-specific models, and what the WPAI team's approach was with CodeWP's training data.",
+    "Competitive response from WP Engine, GoDaddy, or other managed WordPress hosts to the agentic AI capabilities being built into WordPress Core and WordPress.com."
+  ]
+}

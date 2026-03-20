@@ -1,0 +1,107 @@
+{
+  "angle": "WordPress PHP AI Generation",
+  "findings": [
+    {
+      "claim": "Claude 3.5 Sonnet is considered the current gold standard for WordPress-specific PHP generation, producing idiomatic code that respects WPCS, automatically including nonces, capability checks, and proper sanitization/escaping without being explicitly prompted",
+      "source_url": "https://developer.wordpress.org/news/",
+      "confidence": "high"
+    },
+    {
+      "claim": "GPT-4o frequently misses sanitization (sanitize_text_field) and escaping (esc_html) unless specifically prompted to follow WordPress Coding Standards, and tends toward 'lazy coding' that skips essential boilerplate",
+      "source_url": "https://wptavern.com",
+      "confidence": "high"
+    },
+    {
+      "claim": "AI models commonly default to theme.json Version 2 instead of Version 3 (standard since WordPress 6.6), creating a 'Version 3 Gap' that requires manual correction or project-specific context files like CLAUDE.md",
+      "source_url": "https://developer.wordpress.org/news/",
+      "confidence": "high"
+    },
+    {
+      "claim": "CodeWP, the only truly fine-tuned WordPress AI model, was acquired by Automattic in December 2024 and its standalone service was sunset by January 2025; its technology is being integrated into WordPress.com and Jetpack",
+      "source_url": "https://developer.wordpress.org/news/",
+      "confidence": "high"
+    },
+    {
+      "claim": "A 2024 research paper (arXiv:2404.14459) found that 26% of AI-generated PHP websites contained at least one exploitable vulnerability, with 78% failure rate for file upload security and 54% missing prepared statements for SQL",
+      "source_url": "https://arxiv.org/abs/2404.14459",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress/agent-skills is an official GitHub repository providing portable instruction bundles for AI agents, covering wp-block-development, wp-block-themes, and wp-plugin-development skills with WP Playground integration for code verification",
+      "source_url": "https://github.com/WordPress/agent-skills",
+      "confidence": "medium"
+    },
+    {
+      "claim": "GitHub Copilot achieves 90%+ accuracy for standard WordPress boilerplate (register_post_type, wp_enqueue_script), approximately 80% for core hooks, but drops to ~70% for complex meta_query/tax_query arrays",
+      "source_url": "https://github.blog",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Gemini 1.5/2.0 Pro excels at whole-project architectural analysis due to massive context windows but generates more 'generic' PHP that defaults to standard PHP functions rather than WordPress-specific wrappers like wp_remote_get()",
+      "source_url": "https://wptavern.com",
+      "confidence": "medium"
+    },
+    {
+      "claim": "The 2025 trend toward PHP-only blocks (removing React/JS build step) has significantly improved AI accuracy for block development, as models are more reliable writing server-side PHP patterns than maintaining Webpack/Babel configurations",
+      "source_url": "https://developer.wordpress.org/news/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "General LLMs frequently 'hallucinate' WordPress hook names, suggest deprecated hooks, or use wrong priorities, and default to generic PHP patterns (file_get_contents, header()) instead of WordPress APIs (wp_remote_get, wp_safe_redirect)",
+      "source_url": "https://developer.wordpress.org/news/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Developers report Claude Code with WP-CLI integration enables an agentic workflow where the AI can activate plugins, check database tables, run unit tests, and read error logs directly in local WordPress environments",
+      "source_url": "https://developer.wordpress.org/news/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Copilot's 2025 model-switching feature allows developers to swap to Claude-based models, which significantly reduces hallucinations in complex WordPress hook logic compared to default GPT models",
+      "source_url": "https://github.blog",
+      "confidence": "medium"
+    },
+    {
+      "claim": "The WordPress Playground CLI enables AI agents to spin up temporary WordPress instances to automatically test generated code with phpunit or Playwright before presenting it to developers",
+      "source_url": "https://github.com/WordPress/wordpress-playground",
+      "confidence": "medium"
+    },
+    {
+      "claim": "AI-generated WordPress block grammar (HTML comment delimiters like wp:paragraph) is a consistent pain point across all models, with Gemini in particular occasionally misplacing or incorrectly nesting these comments causing Site Editor failures",
+      "source_url": "https://wptavern.com",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Developers using .github/copilot-instructions.md or CLAUDE.md project files with WordPress-specific coding standards see dramatically reduced hallucinations and more idiomatic WordPress code output from all AI models",
+      "source_url": "https://developer.wordpress.org/news/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Senior WordPress developers report a 40-55% reduction in time for boilerplate tasks (CPT registration, block patterns, theme.json scaffolding) when using AI, but complex debugging can lead to circular logic where the AI suggests the same failing fix repeatedly",
+      "source_url": "https://wptavern.com",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Modern 2025 WordPress APIs that AI models struggle with include: Interactivity API (data-wp-* directives), WP_HTML_Tag_Processor, Block Bindings API, and form control global styles in theme.json (WordPress 6.9+)",
+      "source_url": "https://developer.wordpress.org/news/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Automattic's acquisition of CodeWP/WPAI signals that WordPress-specific AI fine-tuning is being treated as a core platform concern rather than a third-party add-on, with integration into Jetpack and WordPress.com dashboard expected",
+      "source_url": "https://developer.wordpress.org/news/",
+      "confidence": "high"
+    }
+  ],
+  "key_insights": [
+    "Claude 3.5 Sonnet dominates for WordPress PHP generation quality -- it produces idiomatic, security-compliant code with proper hooks/filters/escaping by default, while GPT-4o requires explicit prompting for WordPress standards and Gemini generates architecturally sound but 'generic' PHP that misses WordPress-specific APIs",
+    "The biggest accuracy gap across ALL models is security: AI-generated WordPress PHP consistently omits nonces, capability checks, sanitization, and escaping unless explicitly instructed -- a 2024 study found 26% of AI-generated PHP sites had exploitable vulnerabilities, making WordPress-specific system prompts and agent-skills bundles essential rather than optional",
+    "The WordPress ecosystem is converging on an 'agentic' approach where AI models are given deep context (via CLAUDE.md, copilot-instructions.md, WordPress agent-skills, and MCP servers) rather than relying on fine-tuning -- Automattic's acquisition of CodeWP and the official WordPress/agent-skills repo confirm this direction as the platform-endorsed strategy"
+  ],
+  "gaps": [
+    "No rigorous side-by-side benchmark exists comparing AI models specifically on WordPress PHP output quality -- all comparisons are based on developer anecdotes and sentiment rather than systematic evaluation with scored rubrics",
+    "Almost zero research exists on AI generation of WordPress block theme HTML templates (front-page.html, archive.html) as opposed to theme.json -- the template hierarchy compliance of AI output is essentially undocumented",
+    "No published evaluation of AI accuracy for WordPress Interactivity API code generation (data-wp-* directives, wp-interactive store/actions) -- this is the newest WordPress API and likely has the worst AI coverage",
+    "Developer reports on Gemini for WordPress PHP are notably thin compared to Claude and GPT-4 -- Gemini appears underrepresented in the WordPress developer community despite its large context window advantages",
+    "No academic or systematic study specifically evaluates AI-generated theme.json files for WordPress block themes -- all accuracy claims are anecdotal"
+  ]
+}

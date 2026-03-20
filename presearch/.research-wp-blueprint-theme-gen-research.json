@@ -1,0 +1,81 @@
+{
+  "slug": "wp-blueprint-theme-gen-research",
+  "skill": "research",
+  "scope": { "files": null, "stories": null, "complexity": null },
+  "route_hint": null,
+  "prev": [".scope-wp-blueprint-theme-gen-research.json"],
+  "data": {
+    "topic": "WordPress Playground blueprint packages for block theme generation",
+    "angles_generated": 5,
+    "partial_research": false,
+    "synthesized_findings": [
+      {
+        "theme": "Blueprint API Capabilities",
+        "claims": [
+          { "claim": "No existing library or tool specifically targets programmatic block theme generation via the Blueprint API. The space is open.", "source_urls": ["https://wordpress.github.io/wordpress-playground/blueprints/steps/"], "confidence": "high", "agent_attribution": "both" },
+          { "claim": "Blueprint supports installTheme from bundled zips, literal inline content, git:directory references, and URLs. writeFile can write theme files directly without a zip.", "source_urls": ["https://wordpress.github.io/wordpress-playground/blueprints/steps/resources/"], "confidence": "high", "agent_attribution": "both" },
+          { "claim": "The recommended block theme development workflow uses Playground + Create Block Theme plugin + GitHub — GUI-driven, not API-driven.", "source_urls": ["https://developer.wordpress.org/news/2026/01/streamlining-block-theme-development-with-wordpress-playground-and-github/"], "confidence": "high", "agent_attribution": "claude" }
+        ],
+        "key_insight": "Our project is in an underserved niche — no tool combines browser-based live preview + AI-driven generation + direct CSS export for block themes."
+      },
+      {
+        "theme": "WordPress CSS Architecture for Block Themes",
+        "claims": [
+          { "claim": "theme.json should be the first choice for block styling. The official docs state: 'you should always do so via the theme.json styles property if possible.'", "source_urls": ["https://developer.wordpress.org/news/2025/07/you-dont-need-theme-json-for-block-theme-styles/"], "confidence": "high", "agent_attribution": "both" },
+          { "claim": "WordPress 6.2 introduced per-block CSS via theme.json using a 'css' string property under styles.blocks.[block-name]. The & ampersand allows nesting, pseudo-selectors, and targeting child elements.", "source_urls": ["https://developer.wordpress.org/news/2023/04/per-block-css-with-theme-json/"], "confidence": "high", "agent_attribution": "both" },
+          { "claim": "wp_enqueue_block_style() loads CSS only when the block is present on a page. When the 'path' parameter is provided, the stylesheet is inlined in <head> rather than loaded as a separate HTTP request.", "source_urls": ["https://developer.wordpress.org/themes/features/block-stylesheets/"], "confidence": "high", "agent_attribution": "both" },
+          { "claim": "The recommended specificity pattern is :root :where() to lower specificity, allowing users to override via the Styles interface.", "source_urls": ["https://developer.wordpress.org/news/2025/07/you-dont-need-theme-json-for-block-theme-styles/"], "confidence": "high", "agent_attribution": "claude" },
+          { "claim": "CSS written inside theme.json's css property must be on a single line (no line breaks) and double quotes must be escaped, due to JSON string constraints.", "source_urls": ["https://fullsiteediting.com/lessons/how-to-use-custom-css-in-theme-json/"], "confidence": "high", "agent_attribution": "claude" },
+          { "claim": "register_block_style() with style_data (WP 6.6+) enables user-customizable style variations that appear in the Editor's Styles panel.", "source_urls": ["https://wordpress.com/blog/2025/05/07/custom-block-styles/"], "confidence": "high", "agent_attribution": "both" }
+        ],
+        "key_insight": "The sanctioned CSS hierarchy is: theme.json structured props → theme.json css strings → wp_enqueue_block_style() → register_block_style(). External CSS files are fine but should use wp_enqueue_block_style for conditional loading."
+      },
+      {
+        "theme": "theme.json Limitations Requiring Supplemental CSS",
+        "claims": [
+          { "claim": "theme.json CANNOT express: CSS transitions/animations, complex grid-template-areas, flex-grow/flex-shrink, container queries, clip-paths/masks, multiple background images, background-blend-mode, or media queries.", "source_urls": ["https://github.com/WordPress/gutenberg"], "confidence": "high", "agent_attribution": "gemini" },
+          { "claim": "Responsive design in block themes relies on fluid typography/spacing (clamp() in theme.json) and supplemental CSS files for media queries.", "source_urls": ["https://developer.wordpress.org/themes/global-settings-and-styles/"], "confidence": "high", "agent_attribution": "gemini" },
+          { "claim": "The theme.json css property is not a replacement for enqueueing CSS files for substantial stylesheets. It is intended for minor styling adjustments.", "source_urls": ["https://fullsiteediting.com/lessons/how-to-use-custom-css-in-theme-json/"], "confidence": "high", "agent_attribution": "claude" },
+          { "claim": "None of the 14 documented CSS methods for WordPress block themes require wp:html. All operate at the theme, pattern, or block registration level.", "source_urls": ["https://gutenbergtimes.com/14-ways-to-add-custom-css-in-wordpress-block-editor/"], "confidence": "high", "agent_attribution": "claude" }
+        ],
+        "key_insight": "Professional SaaS-quality layouts REQUIRE supplemental CSS beyond theme.json — but it should be loaded via wp_enqueue_block_style(), NOT wp:html blocks."
+      },
+      {
+        "theme": "Reference Implementations",
+        "claims": [
+          { "claim": "Twenty Twenty-Five ships 70+ block patterns with ~0.7% CSS by language distribution. All styling handled through theme.json and Global Styles.", "source_urls": ["https://github.com/WordPress/twentytwentyfive"], "confidence": "high", "agent_attribution": "both" },
+          { "claim": "Twenty Twenty-Four explicitly targets 'as little CSS as possible' — all visual treatments via Block Editor and Global Styles.", "source_urls": ["https://github.com/WordPress/twentytwentyfour"], "confidence": "high", "agent_attribution": "both" },
+          { "claim": "Ollie block theme includes 50+ professionally designed patterns, uses Mona Sans variable font, ships with multiple Global Style Variations, achieves 100% Core Web Vitals.", "source_urls": ["https://github.com/OllieWP/ollie"], "confidence": "high", "agent_attribution": "gemini" },
+          { "claim": "Pattern best practice: top-level wp:group set to 'wide' width, container blocks (Grid, Columns, Row, Stack) nested inside. Patterns adapt to active theme via global style tokens.", "source_urls": ["https://developer.wordpress.org/themes/patterns/introduction-to-patterns/"], "confidence": "high", "agent_attribution": "claude" }
+        ],
+        "key_insight": "Official WordPress themes prove complex layouts are possible with core blocks + inline styles in block JSON + minimal supplemental CSS. They do NOT use wp:html."
+      },
+      {
+        "theme": "Existing AI Theme Generators",
+        "claims": [
+          { "claim": "Yetty AI (yetty.ai) generates native WordPress block themes from natural language, free tier with 5 daily credits.", "source_urls": ["https://yetty.ai"], "confidence": "medium", "agent_attribution": "gemini" },
+          { "claim": "WPTurbo offers AI-powered Block Theme Generator with No Code and Advanced variants.", "source_urls": ["https://wpturbo.dev"], "confidence": "medium", "agent_attribution": "gemini" },
+          { "claim": "WordPress.com Claude Cowork plugin (Feb 2026) generates complete block themes through conversational AI.", "source_urls": ["https://wordpress.com/blog/2026/02/13/new-plugin-and-skills-for-claude-cowork/"], "confidence": "medium", "agent_attribution": "claude" },
+          { "claim": "QuickWP by Codeinwp is open-source AI WordPress theme builder, but its generation pipeline is not publicly documented.", "source_urls": ["https://github.com/Codeinwp/quickwp"], "confidence": "medium", "agent_attribution": "both" }
+        ],
+        "key_insight": "Multiple AI theme generators exist but none document their CSS architecture publicly. How they handle the wp:html vs core blocks question is unknown."
+      }
+    ],
+    "citations": [
+      { "url": "https://developer.wordpress.org/news/2025/07/you-dont-need-theme-json-for-block-theme-styles/", "title": "You don't need theme.json for block theme styles", "quality": "authoritative", "referenced_by": ["CSS Architecture"] },
+      { "url": "https://developer.wordpress.org/news/2023/04/per-block-css-with-theme-json/", "title": "Per-block CSS with theme.json", "quality": "authoritative", "referenced_by": ["CSS Architecture"] },
+      { "url": "https://developer.wordpress.org/themes/features/block-stylesheets/", "title": "Block Stylesheets — Theme Handbook", "quality": "authoritative", "referenced_by": ["CSS Architecture"] },
+      { "url": "https://developer.wordpress.org/themes/features/block-style-variations/", "title": "Block Style Variations — Theme Handbook", "quality": "authoritative", "referenced_by": ["CSS Architecture"] },
+      { "url": "https://wordpress.github.io/wordpress-playground/blueprints/steps/", "title": "Blueprint Steps — WordPress Playground", "quality": "authoritative", "referenced_by": ["Blueprint API"] },
+      { "url": "https://github.com/WordPress/twentytwentyfive", "title": "Twenty Twenty-Five — GitHub", "quality": "authoritative", "referenced_by": ["Reference Implementations"] },
+      { "url": "https://github.com/OllieWP/ollie", "title": "Ollie Block Theme — GitHub", "quality": "authoritative", "referenced_by": ["Reference Implementations"] },
+      { "url": "https://gutenbergtimes.com/14-ways-to-add-custom-css-in-wordpress-block-editor/", "title": "14 Ways to Add Custom CSS in WordPress Block Editor", "quality": "informative", "referenced_by": ["wp:html Alternatives"] }
+    ],
+    "conflicts": [],
+    "gaps": [
+      "No explicit WordPress.org theme review rule found regarding wp:html blocks — gap between 'not recommended' and 'will be rejected' is unresolved",
+      "How commercial AI theme generators (Yetty, WPTurbo, Claude Cowork) handle the wp:html vs core blocks question internally is undocumented",
+      "No file size threshold documented for when theme.json css property becomes inappropriate vs dedicated stylesheet"
+    ]
+  }
+}

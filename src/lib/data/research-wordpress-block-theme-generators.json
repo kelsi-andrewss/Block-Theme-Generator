@@ -1,0 +1,117 @@
+{
+  "angle": "WordPress Block Theme Generator Projects",
+  "findings": [
+    {
+      "claim": "The official Create Block Theme plugin (WordPress/create-block-theme on GitHub) is maintained by the WordPress Core Team, currently in the 2.x series, and serves as the primary tool for exporting Site Editor changes into physical theme files. It can export active themes as .zip, create child themes, clone themes, and save style variations.",
+      "source_url": "https://github.com/WordPress/create-block-theme",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress 6.6 introduced theme.json schema version 3 with breaking changes to preset handling: themes must now use explicit defaultFontSizes, defaultSpacingSizes, and defaultAspectRatios boolean properties to hide core presets, and Section Styles (Block Style Variations) were added with blockTypes and slug properties.",
+      "source_url": "https://make.wordpress.org/core/2024/06/19/theme-json-version-3/",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress 6.7 added the 'ref' property to theme.json allowing style values to reference other settings (e.g., a button background pointing to a global color), expanded shadow support to Group blocks, and extended border support to Paragraph, Heading, Quote, and Verse blocks.",
+      "source_url": "https://make.wordpress.org/core/2024/10/22/whats-new-in-wordpress-6-7/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The Ollie block theme by Mike McAllister includes 50+ professionally designed block patterns, uses Mona Sans variable font, ships with multiple Global Style Variations (Agency, Creator, Startup, Studio), achieves 100% Core Web Vitals scores, and requires no build step. Repository at OllieWP/ollie on GitHub.",
+      "source_url": "https://github.com/OllieWP/ollie",
+      "confidence": "high"
+    },
+    {
+      "claim": "theme.json currently cannot control: CSS transitions/animations, complex grid-template-areas, flex-grow/flex-shrink, container queries, clip-paths/masks, multiple background images, background-blend-mode, or media queries. Developers must use supplemental CSS files for these properties.",
+      "source_url": "https://github.com/WordPress/gutenberg",
+      "confidence": "high"
+    },
+    {
+      "claim": "Yetty AI (yetty.ai) is a specialized AI theme generator that creates native WordPress block themes from natural language descriptions, offering a free tier with 5 daily credits, and exports clean block-compatible code as installable themes.",
+      "source_url": "https://yetty.ai",
+      "confidence": "medium"
+    },
+    {
+      "claim": "WPTurbo (wpturbo.dev) offers an AI-powered Block Theme Generator that scaffolds complete starter themes in both 'No Code' (Site Editor compatible) and 'Advanced' (with build tools) variants, plus 40+ AI generators for specific WordPress components.",
+      "source_url": "https://wpturbo.dev",
+      "confidence": "medium"
+    },
+    {
+      "claim": "The official WordPress CLI scaffolding command for block themes is 'npx @wordpress/create-block@latest --variant theme [theme-slug]', part of the Gutenberg monorepo, generating theme.json, block templates, and a build process based on @wordpress/scripts.",
+      "source_url": "https://github.com/WordPress/gutenberg/tree/trunk/packages/create-block",
+      "confidence": "high"
+    },
+    {
+      "claim": "WP-CLI includes a native block theme scaffolding command: 'wp scaffold block-theme [slug]' which creates a minimal block theme structure without heavy build tools (Webpack/Babel).",
+      "source_url": "https://github.com/wp-cli/scaffold-command",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress Playground runs a full WordPress instance in the browser via WebAssembly, supports the Site Editor and theme.json v3, can be embedded in external apps via the @wp-playground/client SDK with file operations (writeFile) for real-time theme updates, and uses JSON Blueprints for environment configuration.",
+      "source_url": "https://playground.wordpress.net",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress Playground limitations include: ~15-30MB initial WASM binary load, CORS restrictions on external assets, VFS memory limits causing crashes with large media, ephemeral state by default (lost on refresh unless using IndexedDB), and SQLite compatibility gaps with complex MySQL queries.",
+      "source_url": "https://playground.wordpress.net",
+      "confidence": "high"
+    },
+    {
+      "claim": "ItalyStrap/theme-json-generator is an OOP PHP/Composer library for building theme.json programmatically, providing a structured API for defining settings (typography, colors, spacing) with logic, reusable variables, and validation.",
+      "source_url": "https://github.com/ItalyStrap/theme-json-generator",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Carolina Nymark's block-theme-generator (carolinan/block-theme-generator on GitHub) is an open-source web-based tool offering multiple scaffolding complexity levels (No-code, Basic, Advanced, WooCommerce) that generates theme.json, template files, and parts as a downloadable package.",
+      "source_url": "https://github.com/carolinan/block-theme-generator",
+      "confidence": "medium"
+    },
+    {
+      "claim": "PressMeGPT (pressmegpt.com) generates native WordPress themes without subscriptions and can convert designs from other AI builders (Wix, Lovable, Claude) into optimized WordPress theme files, supporting Bento Grid layouts and exporting standard ZIP files.",
+      "source_url": "https://pressmegpt.com",
+      "confidence": "medium"
+    },
+    {
+      "claim": "The Create Block Theme plugin has known limitations: pattern syncing between database and /patterns folder can be inconsistent with complex nested blocks, media path localization can fail with absolute paths or restrictive permissions, and it cannot export functionality from third-party plugins.",
+      "source_url": "https://github.com/WordPress/create-block-theme",
+      "confidence": "high"
+    },
+    {
+      "claim": "Responsive design in block themes relies on fluid typography/spacing (clamp() functions in theme.json), intrinsic sizing principles, and supplemental CSS files for media queries, since theme.json does not support media queries within its standard properties.",
+      "source_url": "https://developer.wordpress.org/themes/global-settings-and-styles/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Similar pattern-heavy block themes to Ollie include: Frost and Powder (by Brian Gardner/WP Engine), Bjork and Poe (by Anders Noren), Raft (by ThemeIsle, 12+ style variations), Bricksy (by Anariel Design), and Spectra One (by Brainstorm Force).",
+      "source_url": "https://wordpress.org/themes/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The Gutenberg Hub theme.json generator (gutenberghub.com) provides a visual interface to toggle settings for colors, spacing, and typography that exports a valid theme.json file, but has not been updated frequently enough to support the latest WordPress properties.",
+      "source_url": "https://gutenberghub.com",
+      "confidence": "medium"
+    },
+    {
+      "claim": "ZipWP (zipwp.com) added an 'AI Site Planner' in early 2025 that generates and refines sitemaps and wireframes before provisioning a WordPress installation, using Astra theme and Spectra blocks as its block-based architecture foundation.",
+      "source_url": "https://zipwp.com",
+      "confidence": "medium"
+    },
+    {
+      "claim": "The official WordPress theme.json JSON Schema is hosted at schemas.wp.org/trunk/theme.json and can be used in VS Code for autocomplete; when combined with GitHub Copilot, it functions as a lightweight AI generator for theme.json properties.",
+      "source_url": "https://schemas.wp.org/trunk/theme.json",
+      "confidence": "high"
+    }
+  ],
+  "key_insights": [
+    "No existing tool combines browser-based live preview with AI-driven block theme generation and direct CSS export -- most are either AI site builders (ZipWP, InstaWP) that generate entire sites, or scaffolding tools (wp-cli, create-block) that output boilerplate. A web app that generates production-ready block themes with real-time visual feedback occupies an underserved niche.",
+    "theme.json v3 cannot express responsive breakpoints, CSS transitions, complex grid layouts, or interactive states -- any serious block theme generator must produce a supplemental CSS layer alongside theme.json to achieve professional SaaS-quality layouts, which is exactly the challenge our project faces with inline CSS portability.",
+    "The pattern-first architecture (exemplified by Ollie's 50+ patterns and style variations) has become the standard for high-quality block themes. Theme generators that only output global styles and empty templates are insufficient -- the competitive bar requires generating a rich library of composable block patterns."
+  ],
+  "gaps": [
+    "Could not find reliable benchmarks comparing AI-generated block theme quality (code cleanliness, performance scores, accessibility) across different generators",
+    "No data found on how many developers actually use programmatic theme.json generation libraries like ItalyStrap vs. hand-writing JSON",
+    "Limited information on the exact revenue/pricing models of AI theme generators like Yetty AI and WPTurbo -- hard to assess commercial viability of the space",
+    "No academic papers or rigorous technical analyses of CSS layout limitations in block themes -- most sources are blog posts and GitHub issues",
+    "Could not verify current maintenance status or GitHub star counts for several community tools (SparkPress, CloudCatch create-block-theme, Component2Block)"
+  ]
+}

@@ -1,52 +1,46 @@
 {
-  "slug": "jsx-wp-transpiler-skeleton-blueprint",
+  "slug": "unify-saas-template-single-source",
   "scope": {
-    "files": 10,
-    "stories": 6,
+    "files": 8,
+    "stories": 5,
     "complexity": "large"
   },
   "route_hint": "standard",
   "prev": null,
   "skill": "plan-stories",
   "data": {
-    "epic_id": "epic-201",
-    "dev_branch": "dev/jsx-to-wordpress-block-transpiler-functional-skeleton-blueprint",
+    "epic_id": "epic-206",
+    "dev_branch": "dev/unify-saas-template-into-single-source-of-truth",
     "stories": [
       {
-        "id": "story-903",
-        "title": "Build JSX→WP block transpiler core",
+        "id": "story-930",
+        "title": "Build JSX string renderer with WP-to-app var mapping bridge",
         "agent": "architect",
-        "detail_file": "/tmp/gemini/story-903.md"
+        "detail_file": "/tmp/gemini/story-930.md"
       },
       {
-        "id": "story-904",
-        "title": "Define WP-specific JSX components",
-        "agent": "architect",
-        "detail_file": "/tmp/gemini/story-904.md"
-      },
-      {
-        "id": "story-905",
-        "title": "Build archetype-aware skeleton page generator",
-        "agent": "architect",
-        "detail_file": "/tmp/gemini/story-905.md"
-      },
-      {
-        "id": "story-906",
-        "title": "Build Blueprint enhancement",
-        "agent": "architect",
-        "detail_file": "/tmp/gemini/story-906.md"
-      },
-      {
-        "id": "story-907",
-        "title": "Wire transpiler into generation pipeline",
-        "agent": "architect",
-        "detail_file": "/tmp/gemini/story-907.md"
-      },
-      {
-        "id": "story-908",
-        "title": "Update Gemini system prompt for JSX generation",
+        "id": "story-934",
+        "title": "Consolidate SVG icon representations into single canonical source",
         "agent": "quick-fixer",
-        "detail_file": "/tmp/gemini/story-908.md"
+        "detail_file": "/tmp/gemini/story-934.md"
+      },
+      {
+        "id": "story-933",
+        "title": "Consolidate feature card rendering into single data source and builder",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/story-933.md"
+      },
+      {
+        "id": "story-932",
+        "title": "Unify header/footer rendering from JSX source strings via renderer",
+        "agent": "quick-fixer",
+        "detail_file": "/tmp/gemini/story-932.md"
+      },
+      {
+        "id": "story-931",
+        "title": "Replace SaaSPage native React component with JSX string renderer",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/story-931.md"
       }
     ]
   }

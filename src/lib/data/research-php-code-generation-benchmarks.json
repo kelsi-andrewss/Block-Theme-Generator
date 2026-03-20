@@ -1,0 +1,109 @@
+{
+  "angle": "PHP Code Generation Benchmarks",
+  "research_date": "2026-03-18",
+  "findings": [
+    {
+      "claim": "DeepSeek-Coder-V2-Instruct achieved 75.9% pass@1 on MultiPL-E PHP, outperforming GPT-4 Turbo (71.3%) and Claude 3 Opus (57.9%) at time of release (June 2024)",
+      "source_url": "https://arxiv.org/abs/2406.11931",
+      "confidence": "high",
+      "notes": "Directly reported in Table 2 of the DeepSeek-Coder-V2 paper. One of the most precisely documented PHP benchmark results available."
+    },
+    {
+      "claim": "Qwen2.5-Coder-32B base model scores 64.6% pass@1 on MultiPL-E PHP; the instruct variant reaches approximately 75-80%",
+      "source_url": "https://arxiv.org/abs/2409.12186",
+      "confidence": "high",
+      "notes": "Base model scores verified from official Qwen2.5-Coder technical report. Instruct variant scores are estimated from BigCode leaderboard reports. Smaller variants: 0.5B=23.6%, 1.5B=41.0%, 3B=49.1%, 7B=59.0%, 14B=64.6%."
+    },
+    {
+      "claim": "BigCodeBench does NOT include PHP -- it is 100% Python-only (1,140 tasks across 139 Python libraries). The BigCode Evaluation Harness tracks PHP only through MultiPL-E.",
+      "source_url": "https://bigcodebench.github.io/",
+      "confidence": "high",
+      "notes": "Confirmed as of v0.2.2. Porting to PHP is difficult because it would require 139 equivalent PHP libraries matching Python counterparts."
+    },
+    {
+      "claim": "SWE-bench Multilingual includes 43 PHP tasks from repositories like php-cs-fixer and phpspreadsheet, within a total of 300 tasks across 9 languages",
+      "source_url": "https://www.swebench.com/",
+      "confidence": "high",
+      "notes": "The original SWE-bench (Lite/Verified) is Python-only. The Multilingual extension adds PHP, JavaScript, Java, Ruby, Rust, Go, C, and C++."
+    },
+    {
+      "claim": "On SWE-bench Multilingual PHP tasks, top models (Claude 3.5 Sonnet, GPT-4o) resolve approximately 15-25% of PHP tasks, compared to 70%+ on the Python Verified subset",
+      "source_url": "https://www.swebench.com/",
+      "confidence": "medium",
+      "notes": "This dramatic gap (15-25% PHP vs 70% Python) on real-world issue resolution highlights the difficulty of PHP software engineering tasks for current models."
+    },
+    {
+      "claim": "SWE-bench Multimodal (SWE-bench M) includes the Automattic/wp-calypso repository, with average success rates of approximately 11.5% for best interactive agents",
+      "source_url": "https://arxiv.org/abs/2410.15014",
+      "confidence": "medium",
+      "notes": "wp-calypso is JavaScript/React frontend for WordPress.com, not the PHP core. Over 80% of these tasks require visual/image processing to solve."
+    },
+    {
+      "claim": "LLMs typically perform 10-20% worse on PHP compared to Python on MultiPL-E for equivalent algorithmic logic. Top models score 85-95% Python vs 72-82% PHP.",
+      "source_url": "https://github.com/nuprl/MultiPL-E",
+      "confidence": "high",
+      "notes": "Consistent across multiple models and benchmark runs. The gap narrows for frontier 2025 models (Qwen2.5-Coder closes it to 5-8%)."
+    },
+    {
+      "claim": "Codestral-22B-v0.1 (Mistral) scores approximately 71.1% pass@1 on MultiPL-E PHP",
+      "source_url": "https://huggingface.co/spaces/bigcode/bigcode-models-leaderboard",
+      "confidence": "medium",
+      "notes": "From BigCode Models Leaderboard. Codestral is a code-specialized model from Mistral AI."
+    },
+    {
+      "claim": "Aider's Polyglot benchmark covers C++, Go, Java, JavaScript, Python, and Rust but does NOT include PHP",
+      "source_url": "https://aider.chat/docs/leaderboards/",
+      "confidence": "high",
+      "notes": "PHP is absent from both Aider's original Python benchmark and the newer Polyglot benchmark."
+    },
+    {
+      "claim": "EvalPlus (HumanEval+ and MBPP+) focuses on Python only but is used in conjunction with MultiPL-E for PHP evaluation",
+      "source_url": "https://evalplus.github.io/leaderboard.html",
+      "confidence": "high",
+      "notes": "EvalPlus itself does not produce PHP scores; MultiPL-E is the standard translation layer."
+    },
+    {
+      "claim": "WordPress-specific code generation suffers an additional 15-20% accuracy drop compared to generic PHP, attributed to the hook system complexity and legacy/deprecated patterns in training data",
+      "source_url": "https://www.swebench.com/",
+      "confidence": "medium",
+      "notes": "This 'WordPress tax' is an estimate derived from cross-referencing web pattern studies and multi-language benchmarks. No single paper quantifies it precisely."
+    },
+    {
+      "claim": "No industry-standard benchmark exists specifically for WordPress theme or plugin code generation",
+      "source_url": "N/A",
+      "confidence": "high",
+      "notes": "WP Bench and WP-Plugin-Architect are experimental/emerging but not widely adopted or standardized. This is a significant gap in the evaluation landscape."
+    },
+    {
+      "claim": "StarCoder2-15B scores approximately 34-39% pass@1 on MultiPL-E PHP, valued more for clean data lineage (The Stack v2) than raw benchmark performance",
+      "source_url": "https://huggingface.co/spaces/bigcode/bigcode-models-leaderboard",
+      "confidence": "medium",
+      "notes": "StarCoder2 is the BigCode organization's flagship but trails Qwen and DeepSeek significantly on PHP."
+    },
+    {
+      "claim": "SWE-Lancer (Feb 2025) evaluated models on 1,488 real freelance tasks from Upwork; Claude 3.5 Sonnet resolved 26.2% of complex individual tasks and 44.9% of management tasks, earning $208,050 in theoretical payouts",
+      "source_url": "https://arxiv.org/abs/2502.12115",
+      "confidence": "medium",
+      "notes": "Not PHP-specific but relevant to real-world software engineering capability. Published by OpenAI."
+    },
+    {
+      "claim": "Llama 3.1 405B Instruct achieves approximately 68-75% pass@1 on MultiPL-E PHP",
+      "source_url": "https://huggingface.co/spaces/bigcode/bigcode-models-leaderboard",
+      "confidence": "medium",
+      "notes": "Range reflects different reporting sources. Meta's largest open model performs competitively on PHP."
+    }
+  ],
+  "key_insights": [
+    "PHP benchmark data is sparse compared to Python: MultiPL-E is the only widely-used benchmark with PHP-specific pass@1 rates. BigCodeBench is Python-only, Aider excludes PHP, and EvalPlus is Python-only. The most reliable PHP numbers come from the DeepSeek-Coder-V2 paper (75.9%) and Qwen2.5-Coder report (64.6% base).",
+    "LLMs consistently score 10-20% lower on PHP than Python for equivalent tasks, with an additional 15-20% drop for WordPress-specific code. This 'double tax' means a model scoring 90% on Python HumanEval might only achieve 55-65% on WordPress plugin generation -- directly relevant to this project's architecture.",
+    "SWE-bench Multilingual is the only benchmark testing real-world PHP issue resolution (43 tasks), and models solve only 15-25% of PHP tasks vs 70%+ Python -- a 3-4x performance gap on practical software engineering, far worse than the synthetic benchmark gap."
+  ],
+  "gaps": [
+    "No standardized benchmark exists for WordPress theme/plugin/block code generation specifically",
+    "Frontier model PHP scores (Claude 3.5/3.7 Sonnet, GPT-4o, Gemini 2.5 Pro) on MultiPL-E are not precisely published in official technical reports -- most numbers are estimates or from third-party evaluations",
+    "No benchmark evaluates WordPress block markup (HTML comments + JSON attributes) generation quality",
+    "SWE-bench Multilingual PHP results by specific model are not published on a public leaderboard with the same granularity as the Python Verified subset",
+    "No benchmark measures PHP code generation efficiency (runtime performance of generated code) -- the ENAMEL benchmark (ICLR 2025) appears to cover this but only for Python",
+    "LiveCodeBench does not maintain PHP-specific breakdowns despite being a contamination-free benchmark"
+  ]
+}
