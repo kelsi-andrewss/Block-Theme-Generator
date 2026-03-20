@@ -142,7 +142,6 @@ export default function Home() {
           body: JSON.stringify({
             instruction: message,
             selectedElement: { html: block.html, content: block.content },
-            palette,
           }),
         });
 
