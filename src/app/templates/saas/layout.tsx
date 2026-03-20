@@ -24,7 +24,7 @@ export default function SaaSLayout({
         <JsxStringRenderer jsxString={SAAS_HEADER_JSX_SOURCE} />
 
         {/* Main Content */}
-        <main style={{ paddingTop: '5rem' }}>
+        <main>
           {children}
         </main>
 
