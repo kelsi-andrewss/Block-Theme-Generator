@@ -138,6 +138,58 @@ export function buildContentPHP(
   `;
 }
 
+export function buildPreviewBlueprint(
+  themeSlug: string,
+  fileMap: Record<string, string>
+): Blueprint {
+  const basePath = `/wordpress/wp-content/themes/${themeSlug}`;
+
+  const dirs = new Set<string>();
+  for (const filePath of Object.keys(fileMap)) {
+    const parts = filePath.split("/");
+    for (let i = 1; i < parts.length; i++) {
+      dirs.add(parts.slice(0, i).join("/"));
+    }
+  }
+
+  const mkdirSteps: BlueprintStep[] = [
+    { step: "mkdir", path: basePath },
+    ...[...dirs].map((dir) => ({
+      step: "mkdir" as const,
+      path: `${basePath}/${dir}`,
+    })),
+  ];
+
+  const writeFileSteps: BlueprintStep[] = Object.entries(fileMap).map(
+    ([filePath, content]) => ({
+      step: "writeFile" as const,
+      path: `${basePath}/${filePath}`,
+      data: content,
+    })
+  );
+
+  const activationStep: BlueprintStep = {
+    step: "runPHP",
+    code: `<?php
+require '/wordpress/wp-load.php';
+switch_theme('${themeSlug}');
+$home = wp_insert_post(array('post_title'=>'Home','post_status'=>'publish','post_type'=>'page'));
+if ($home && !is_wp_error($home)) {
+  update_option('show_on_front', 'page');
+  update_option('page_on_front', $home);
+}
+echo 'OK';
+?>`,
+  };
+
+  return {
+    $schema: "https://playground.wordpress.net/blueprint-schema.json",
+    landingPage: "/",
+    preferredVersions: { php: "8.2", wp: "latest" },
+    steps: [...mkdirSteps, ...writeFileSteps, activationStep],
+  };
+}
+
 export function buildEnhancedBlueprint(
   themeSlug: string,
   archetypeId: string,

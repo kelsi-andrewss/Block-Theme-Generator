@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { buildThemeFileMap, type ThemeFilesData, type ThemeMetaInput } from "@/lib/packer/constants";
+import { buildPreviewBlueprint } from "@/lib/playground/blueprint-builder";
 import { get } from "idb-keyval";
 
 export default function PlaygroundPreview() {
@@ -22,7 +23,6 @@ export default function PlaygroundPreview() {
       }
 
       const slug = data.meta.themeName;
-      const basePath = `/wordpress/wp-content/themes/${slug}`;
       const fileMap = buildThemeFileMap(data, data.meta);
       try {
         setStatus("Loading WordPress Playground...");
@@ -35,45 +35,18 @@ export default function PlaygroundPreview() {
 
         setStatus("Installing theme files...");
 
+        const blueprint = buildPreviewBlueprint(slug, fileMap);
         const enc = new TextEncoder();
-        const write = (path: string, content: string) =>
-          client.writeFile(path, enc.encode(content));
-
-        // Collect all unique directories from the file map
-        const dirs = new Set<string>();
-        for (const path of Object.keys(fileMap)) {
-          const parts = path.split("/");
-          for (let i = 1; i < parts.length; i++) {
-            dirs.add(parts.slice(0, i).join("/"));
+        for (const step of blueprint.steps) {
+          if (step.step === "mkdir") {
+            await client.run({ code: `<?php @mkdir('${step.path}', 0777, true); echo 'OK'; ?>` });
+          } else if (step.step === "writeFile") {
+            await client.writeFile(step.path as string, enc.encode(step.data as string));
+          } else if (step.step === "runPHP") {
+            setStatus("Activating theme...");
+            await client.run({ code: step.code as string });
           }
         }
-
-        const mkdir = (path: string) =>
-          client.run({ code: `<?php @mkdir('${path}', 0777, true); echo 'OK'; ?>` });
-        await mkdir(basePath);
-        for (const dir of dirs) {
-          await mkdir(`${basePath}/${dir}`);
-        }
-
-        // Write all theme files
-        for (const [path, content] of Object.entries(fileMap)) {
-          await write(`${basePath}/${path}`, content);
-        }
-
-        setStatus("Activating theme...");
-
-        await client.run({
-          code: `<?php
-require '/wordpress/wp-load.php';
-switch_theme('${slug}');
-$home = wp_insert_post(array('post_title'=>'Home','post_status'=>'publish','post_type'=>'page'));
-if ($home && !is_wp_error($home)) {
-  update_option('show_on_front', 'page');
-  update_option('page_on_front', $home);
-}
-echo 'OK';
-?>`,
-        });
 
         setStatus("Navigating...");
         await client.goTo("/");
