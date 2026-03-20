@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { buildThemeFileMap, type ThemeFilesData, type ThemeMetaInput } from "@/lib/packer/constants";
+import { get } from "idb-keyval";
 
 export default function PlaygroundPreview() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -13,21 +14,16 @@ export default function PlaygroundPreview() {
     if (bootedRef.current || !iframeRef.current) return;
     bootedRef.current = true;
 
-    const raw = sessionStorage.getItem("playground-theme");
-    if (!raw) {
-      setError("No theme data found. Go back and click 'Preview in WordPress' again.");
-      return;
-    }
-
-    const data = JSON.parse(raw) as ThemeFilesData & {
-      meta: ThemeMetaInput;
-    };
-
-    const slug = data.meta.themeName;
-    const basePath = `/wordpress/wp-content/themes/${slug}`;
-    const fileMap = buildThemeFileMap(data, data.meta);
-
     async function boot() {
+      const data = await get<ThemeFilesData & { meta: ThemeMetaInput }>("playground-theme");
+      if (!data) {
+        setError("No theme data found. Go back and click 'Preview in WordPress' again.");
+        return;
+      }
+
+      const slug = data.meta.themeName;
+      const basePath = `/wordpress/wp-content/themes/${slug}`;
+      const fileMap = buildThemeFileMap(data, data.meta);
       try {
         setStatus("Loading WordPress Playground...");
         const { startPlaygroundWeb } = await import("@wp-playground/client");
