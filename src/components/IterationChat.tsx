@@ -12,6 +12,7 @@ interface IterationChatProps {
   onRegenerateLayout: () => void;
   onUndo?: () => void;
   canUndo?: boolean;
+  onImageUpload?: (file: File) => void;
   isProcessing?: boolean;
   selectedBlock?: SelectedBlockEvent | null;
   onClearSelection: () => void;
@@ -30,10 +31,12 @@ export default function IterationChat({
   onRegenerateLayout,
   onUndo,
   canUndo = false,
+  onImageUpload,
   isProcessing = false,
   selectedBlock,
   onClearSelection,
 }: IterationChatProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "initial",
@@ -170,15 +173,41 @@ export default function IterationChat({
               </svg>
               <span className="font-semibold">{formatBlockName(selectedBlock.blockName)}</span> selected
             </div>
-            <button 
-              onClick={onClearSelection}
-              className="text-blue-400 hover:text-blue-600 p-1 rounded-md hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors"
-              title="Clear selection"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-1">
+              {onImageUpload && (
+                <>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) onImageUpload(file);
+                      e.target.value = "";
+                    }}
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-blue-400 hover:text-blue-600 p-1 rounded-md hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors"
+                    title="Replace with image"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                </>
+              )}
+              <button
+                onClick={onClearSelection}
+                className="text-blue-400 hover:text-blue-600 p-1 rounded-md hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors"
+                title="Clear selection"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
         )}
 

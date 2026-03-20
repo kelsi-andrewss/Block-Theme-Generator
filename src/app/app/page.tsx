@@ -65,11 +65,20 @@ export default function Home() {
   const [selectedBlock, setSelectedBlock] = useState<SelectedBlockEvent | null>(null);
   const [iframeState, setIframeState] = useState<{ isDarkMode: boolean; activeThemeId: string; activeFontId: string; colors: any } | null>(null);
 
-  // Undo stack: stores snapshots to revert the last iteration
-  const [undoStack, setUndoStack] = useState<Array<
+  // Undo stack: ref for data (no stale closures), counter for reactivity
+  type UndoEntry =
     | { type: "element"; html: string; newHtml: string }
-    | { type: "css"; overrides: Record<string, string> }
-  >>([]);
+    | { type: "css"; overrides: Record<string, string> };
+  const MAX_UNDO = 20;
+  const undoRef = useRef<UndoEntry[]>([]);
+  const [undoCount, setUndoCount] = useState(0);
+
+  function pushUndo(entry: UndoEntry) {
+    const stack = undoRef.current;
+    stack.push(entry);
+    if (stack.length > MAX_UNDO) stack.shift();
+    setUndoCount(stack.length);
+  }
 
 
   useEffect(() => {
@@ -140,8 +149,7 @@ export default function Home() {
 
         const data: { html: string; explanation: string } = await res.json();
 
-        // Snapshot original + new HTML for undo
-        setUndoStack(prev => [...prev, { type: "element", html: block.html, newHtml: data.html }]);
+        pushUndo({ type: "element", html: block.html, newHtml: data.html });
 
         // Inject modified HTML directly into the iframe DOM
         document.querySelectorAll('iframe').forEach(f => {
@@ -174,7 +182,7 @@ export default function Home() {
             cssSnapshot[prop] = computed.getPropertyValue(prop).trim();
           }
         }
-        setUndoStack(prev => [...prev, { type: "css", overrides: cssSnapshot }]);
+        pushUndo({ type: "css", overrides: cssSnapshot });
 
         // Apply CSS variable overrides directly to iframe's documentElement
         if (iframe?.contentDocument) {
@@ -193,13 +201,28 @@ export default function Home() {
     }
   }, [result]);
 
+  const handleImageUpload = useCallback((file: File) => {
+    if (!selectedBlock) return;
+    const blobUrl = URL.createObjectURL(file);
+    const imgHtml = `<img src="${blobUrl}" alt="${file.name}" style="max-width:100%;height:auto;display:block" />`;
+
+    // Snapshot for undo
+    pushUndo({ type: "element", html: selectedBlock.html, newHtml: imgHtml });
+
+    // Replace selected element with the image
+    document.querySelectorAll('iframe').forEach(f => {
+      f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: imgHtml }, '*');
+    });
+    setSelectedBlock(null);
+  }, [selectedBlock]);
+
   const handleUndo = useCallback(() => {
-    if (undoStack.length === 0) return;
-    const last = undoStack[undoStack.length - 1];
-    setUndoStack(prev => prev.slice(0, -1));
+    const stack = undoRef.current;
+    if (stack.length === 0) return;
+    const last = stack.pop()!;
+    setUndoCount(stack.length);
 
     if (last.type === "element") {
-      // Find the patched element by its newHtml and replace with original
       document.querySelectorAll('iframe').forEach(f => {
         f.contentWindow?.postMessage({
           type: 'UNDO_ELEMENT',
@@ -215,7 +238,7 @@ export default function Home() {
         }
       }
     }
-  }, [undoStack]);
+  }, []);
 
   const updateStep = useCallback((key: string, status: StepState["status"], detail?: string) => {
     setPipelineSteps(prev =>
@@ -546,7 +569,8 @@ export default function Home() {
                         onSendMessage={handleSendMessage}
                         onRegenerateLayout={() => {}}
                         onUndo={handleUndo}
-                        canUndo={undoStack.length > 0}
+                        canUndo={undoCount > 0}
+                        onImageUpload={selectedBlock ? handleImageUpload : undefined}
                         isProcessing={isIterating}
                         selectedBlock={selectedBlock}
                         onClearSelection={() => {
