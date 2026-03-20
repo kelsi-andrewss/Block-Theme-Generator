@@ -89,7 +89,7 @@ function extractPropsFromAST(
 }
 
 function isHtmlString(s: string): boolean {
-  return /^\s*</.test(s);
+  return /<[a-zA-Z][\s\S]*?>/.test(s);
 }
 
 function unescapeQuotes(s: string): string {
