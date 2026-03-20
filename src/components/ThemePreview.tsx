@@ -90,9 +90,22 @@ const SELECTION_BRIDGE_SCRIPT = `
       var keys = Object.keys(styles);
       for (var k = 0; k < keys.length; k++) {
         var prop = keys[k];
+        var val = styles[prop];
+        var hasBgClip = sel.style.getPropertyValue('-webkit-background-clip') === 'text'
+          || sel.style.getPropertyValue('background-clip') === 'text';
+        if (prop === 'background' && hasBgClip) { prop = 'background-image'; }
         oldProps[prop] = sel.style.getPropertyValue(prop);
-        if (styles[prop] === '') { sel.style.removeProperty(prop); }
-        else { sel.style.setProperty(prop, styles[prop]); }
+        if (val === '') { sel.style.removeProperty(prop); }
+        else { sel.style.setProperty(prop, val); }
+      }
+      var hasBgClipFinal = sel.style.getPropertyValue('-webkit-background-clip') === 'text'
+        || sel.style.getPropertyValue('background-clip') === 'text'
+        || (oldProps['-webkit-background-clip'] === 'text');
+      if (hasBgClipFinal || styles['background']) {
+        if (sel.style.getPropertyValue('-webkit-text-fill-color') === 'transparent') {
+          sel.style.setProperty('-webkit-background-clip', 'text');
+          sel.style.setProperty('background-clip', 'text');
+        }
       }
       sel.style.outline = ''; sel.style.outlineOffset = ''; sel.style.backgroundColor = '';
       window.parent.postMessage({ type: 'STYLE_SNAPSHOT', iterateId: iterateId, oldProps: oldProps }, '*');

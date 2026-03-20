@@ -35,13 +35,24 @@ export default function NativeIframeController() {
         const { iterateId, styles } = event.data as { iterateId: string; styles: Record<string, string> };
         selectedEl.setAttribute('data-iterate-id', iterateId);
         const oldProps: Record<string, string> = {};
-        for (const [prop, value] of Object.entries(styles)) {
+        const hasBackgroundClipText = selectedEl.style.getPropertyValue('-webkit-background-clip') === 'text'
+          || selectedEl.style.getPropertyValue('background-clip') === 'text';
+        for (let [prop, value] of Object.entries(styles)) {
+          // background shorthand resets background-clip — use background-image instead
+          if (prop === 'background' && hasBackgroundClipText) {
+            prop = 'background-image';
+          }
           oldProps[prop] = selectedEl.style.getPropertyValue(prop);
           if (value === '') {
             selectedEl.style.removeProperty(prop);
           } else {
             selectedEl.style.setProperty(prop, value);
           }
+        }
+        // Re-assert background-clip in case it was reset
+        if (hasBackgroundClipText) {
+          selectedEl.style.setProperty('-webkit-background-clip', 'text');
+          selectedEl.style.setProperty('background-clip', 'text');
         }
         selectedEl.style.outline = '';
         selectedEl.style.outlineOffset = '';
