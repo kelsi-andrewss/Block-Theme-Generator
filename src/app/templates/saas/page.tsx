@@ -22,7 +22,7 @@ function esc(s: string): string {
 function buildFeatureCardsJsx(): string {
   return SAAS_FEATURES.map((feature) => {
     const colors = COLOR_MAP[feature.colorType] || COLOR_MAP.primary;
-    const escapedSvg = esc(feature.wpIconSvg);
+    const escapedSvg = esc(feature.icon);
     return `<div style={{padding:"2rem",borderRadius:"1rem",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 3%, transparent)",boxShadow:"0 1px 2px rgba(0,0,0,0.05)"}}>
   <div style={{width:"48px",height:"48px",borderRadius:"12px",backgroundColor:"${colors.iconBg}",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:"1.5rem",color:"${colors.iconColor}"}}>{"<svg style=\\"width:24px;height:24px\\" fill=\\"none\\" viewBox=\\"0 0 24 24\\" stroke=\\"currentColor\\">${escapedSvg}</svg>"}</div>
   <h3 style={{fontSize:"1.25rem",fontWeight:"700",marginBottom:"0.75rem"}}>${feature.title}</h3>
@@ -407,7 +407,7 @@ export default function SaaSPage() {
               return (
                 <div key={feature.title} style={{ borderRadius: '1rem', padding: '2rem', border: '1px solid var(--color-border)', backgroundColor: 'color-mix(in srgb, var(--color-bg-secondary) 50%, transparent)', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
                   <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: colors.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', color: colors.iconColor }}>
-                    <svg style={{ width: '24px', height: '24px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" dangerouslySetInnerHTML={{ __html: feature.iconSvg }} />
+                    <svg style={{ width: '24px', height: '24px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" dangerouslySetInnerHTML={{ __html: feature.icon }} />
                   </div>
                   <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: '0.75rem' }}>{feature.title}</h3>
                   <p style={{ color: 'var(--color-text-muted)', lineHeight: 1.625, fontSize: '0.875rem' }}>{feature.description}</p>
