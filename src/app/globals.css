@@ -26,6 +26,28 @@ body {
 }
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* --- NEUTRAL PALETTE (light/dark) --- */
+:root {
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f4f4f5;
+  --color-bg-tertiary: #e4e4e7;
+  --color-text: #18181b;
+  --color-text-muted: #71717a;
+  --color-text-secondary: #52525b;
+  --color-border: #e4e4e7;
+  --color-border-subtle: #f4f4f5;
+}
+.dark {
+  --color-bg: #09090b;
+  --color-bg-secondary: #18181b;
+  --color-bg-tertiary: #27272a;
+  --color-text: #fafafa;
+  --color-text-muted: #a1a1aa;
+  --color-text-secondary: #d4d4d8;
+  --color-border: rgba(255,255,255,0.05);
+  --color-border-subtle: rgba(255,255,255,0.02);
+}
+
 /* --- DYNAMIC TEMPLATE THEMES --- */
 [data-theme="default"] {
   --color-primary-400: #9333ea;
