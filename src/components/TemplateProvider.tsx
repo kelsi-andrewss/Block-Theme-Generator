@@ -2,57 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-
-const THEMES = [
-  { 
-    id: "default", 
-    name: "Nebula", 
-    colors: { 
-      primary: { 400: "#c084fc", 500: "#a855f7", 700: "#7e22ce", 900: "#581c87" }, 
-      secondary: { 400: "#60a5fa", 500: "#3b82f6", 700: "#1d4ed8", 900: "#1e3a8a" } 
-    } 
-  },
-  { 
-    id: "sunset", 
-    name: "Sunset", 
-    colors: { 
-      primary: { 400: "#fb923c", 500: "#f97316", 700: "#c2410c", 900: "#7c2d12" }, 
-      secondary: { 400: "#fb7185", 500: "#f43f5e", 700: "#be123c", 900: "#881337" } 
-    } 
-  },
-  { 
-    id: "forest", 
-    name: "Forest", 
-    colors: { 
-      primary: { 400: "#34d399", 500: "#10b981", 700: "#047857", 900: "#064e3b" }, 
-      secondary: { 400: "#2dd4bf", 500: "#14b8a6", 700: "#0f766e", 900: "#134e4a" } 
-    } 
-  },
-  { 
-    id: "ocean", 
-    name: "Ocean", 
-    colors: { 
-      primary: { 400: "#22d3ee", 500: "#06b6d4", 700: "#0e7490", 900: "#164e63" }, 
-      secondary: { 400: "#60a5fa", 500: "#3b82f6", 700: "#1d4ed8", 900: "#1e3a8a" } 
-    } 
-  },
-  { 
-    id: "cherry", 
-    name: "Cherry", 
-    colors: { 
-      primary: { 400: "#f472b6", 500: "#ec4899", 700: "#be185d", 900: "#831843" }, 
-      secondary: { 400: "#f87171", 500: "#ef4444", 700: "#b91c1c", 900: "#7f1d1d" } 
-    } 
-  },
-  { 
-    id: "midnight", 
-    name: "Midnight", 
-    colors: { 
-      primary: { 400: "#818cf8", 500: "#6366f1", 700: "#4338ca", 900: "#312e81" }, 
-      secondary: { 400: "#94a3b8", 500: "#64748b", 700: "#334155", 900: "#0f172a" } 
-    } 
-  },
-];
+import { THEME_COLORS, type ThemeColor } from "@/lib/theme-colors";
 
 const FONTS = [
   { id: "sans", name: "Sans" },
@@ -60,9 +10,22 @@ const FONTS = [
   { id: "mono", name: "Mono" },
 ];
 
+function applyCssVars(theme: ThemeColor, isDark: boolean) {
+  const colors = isDark ? theme.darkColors : theme.lightColors;
+  const style = document.documentElement.style;
+  style.setProperty("--color-primary-400", colors.primary[400]);
+  style.setProperty("--color-primary-500", colors.primary[500]);
+  style.setProperty("--color-primary-700", colors.primary[700]);
+  style.setProperty("--color-primary-900", colors.primary[900]);
+  style.setProperty("--color-secondary-400", colors.secondary[400]);
+  style.setProperty("--color-secondary-500", colors.secondary[500]);
+  style.setProperty("--color-secondary-700", colors.secondary[700]);
+  style.setProperty("--color-secondary-900", colors.secondary[900]);
+}
+
 export default function TemplateProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTheme, setActiveTheme] = useState(THEMES[0]);
+  const [activeTheme, setActiveTheme] = useState(THEME_COLORS[0]);
   const [activeFont, setActiveFont] = useState(FONTS[0]);
   const [isDarkMode, setIsDarkMode] = useState(true);
 
@@ -75,10 +38,11 @@ export default function TemplateProvider({ children }: { children: React.ReactNo
     }
   }, [isDarkMode]);
 
-  // Apply active theme via data attribute for pure CSS swapping
+  // Apply active theme via data attribute and CSS custom properties
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', activeTheme.id);
-  }, [activeTheme]);
+    applyCssVars(activeTheme, isDarkMode);
+  }, [activeTheme, isDarkMode]);
 
   // Font family class logic
   const fontClass = activeFont.id === 'sans' ? 'font-sans' : activeFont.id === 'serif' ? 'font-serif' : 'font-mono';
@@ -86,13 +50,14 @@ export default function TemplateProvider({ children }: { children: React.ReactNo
   // Sync state upward to parent (used for WordPress blueprint generation)
   useEffect(() => {
     if (typeof window !== "undefined" && window.parent !== window) {
+      const colors = isDarkMode ? activeTheme.darkColors : activeTheme.lightColors;
       window.parent.postMessage({
         type: 'TEMPLATE_STATE_CHANGE',
         payload: {
           isDarkMode,
           activeThemeId: activeTheme.id,
           activeFontId: activeFont.id,
-          colors: activeTheme.colors
+          colors
         }
       }, '*');
     }
@@ -101,23 +66,23 @@ export default function TemplateProvider({ children }: { children: React.ReactNo
   return (
     <div className={fontClass}>
       {children}
-      
+
       {/* Floating Controls */}
       <div data-no-select="true" className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3 font-sans">
-        
+
         {isOpen && (
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 shadow-2xl w-64 animate-in slide-in-from-bottom-5 fade-in duration-200">
             <div className="mb-4">
               <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-3">Theme</h3>
               <div className="grid grid-cols-3 gap-3">
-                {THEMES.map(theme => (
+                {THEME_COLORS.map(theme => (
                   <button
                     key={theme.id}
                     onClick={() => setActiveTheme(theme)}
                     title={theme.name}
                     className={`w-10 h-10 rounded-full border-2 transition-all mx-auto ${activeTheme.id === theme.id ? 'border-white scale-110' : 'border-transparent hover:scale-105'}`}
                     style={{
-                      background: `linear-gradient(135deg, ${theme.colors.primary[500]} 0%, ${theme.colors.secondary[500]} 100%)`
+                      background: `linear-gradient(135deg, ${theme.darkColors.primary[500]} 0%, ${theme.darkColors.secondary[500]} 100%)`
                     }}
                   />
                 ))}
@@ -143,7 +108,7 @@ export default function TemplateProvider({ children }: { children: React.ReactNo
 
         <div className="flex gap-2">
           {/* Main Toggle Controls */}
-          <button 
+          <button
             onClick={() => setIsDarkMode(!isDarkMode)}
             className="flex items-center justify-center w-12 h-12 bg-zinc-100 border border-zinc-200 text-black dark:bg-zinc-900 dark:border-zinc-800 dark:text-white rounded-full shadow-lg hover:scale-105 transition-transform"
             title="Toggle Light/Dark Mode"
@@ -158,8 +123,8 @@ export default function TemplateProvider({ children }: { children: React.ReactNo
                </svg>
             )}
           </button>
-          
-          <button 
+
+          <button
             onClick={() => setIsOpen(!isOpen)}
             className="flex items-center justify-center w-12 h-12 bg-zinc-100 border border-zinc-200 text-black dark:bg-zinc-900 dark:border-zinc-800 dark:text-white rounded-full shadow-lg hover:scale-105 transition-transform"
             title="Customize Template"

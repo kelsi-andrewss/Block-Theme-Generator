@@ -1,4 +1,5 @@
 import { ARCHETYPES, type ThemeArchetype } from "./prompts/archetypes";
+import { THEME_COLORS } from "./theme-colors";
 import type { ThemeJson, DarkModeStyles } from "./schemas/theme-json";
 
 export interface PremadeTheme {
@@ -9,15 +10,11 @@ export interface PremadeTheme {
   image?: string; // Path to thumbnail
 }
 
+const DEFAULT_THEME = THEME_COLORS[0];
+
 function generateBaseThemeJson(arch: ThemeArchetype): ThemeJson {
-  const paletteIndex = arch.id === "saas" ? 1 : 0;
-  const palette = arch.colorSuggestions[paletteIndex] || {
-    primary: "#3b82f6",
-    secondary: "#eff6ff",
-    accent: "#f59e0b",
-    background: "#ffffff",
-    text: "#1e293b",
-  };
+  const theme = DEFAULT_THEME;
+  const wp = theme.wpLight;
 
   const fonts = arch.typographySuggestions[0] || {
     heading: "Inter",
@@ -31,11 +28,11 @@ function generateBaseThemeJson(arch: ThemeArchetype): ThemeJson {
       appearanceTools: true,
       color: {
         palette: [
-          { name: "Primary", slug: "primary", color: palette.primary },
-          { name: "Secondary", slug: "secondary", color: palette.secondary },
-          { name: "Accent", slug: "accent", color: palette.accent },
-          { name: "Base", slug: "base", color: palette.background },
-          { name: "Contrast", slug: "contrast", color: palette.text },
+          { name: "Primary", slug: "primary", color: wp.primary },
+          { name: "Secondary", slug: "secondary", color: wp.secondary },
+          { name: "Accent", slug: "accent", color: wp.accent },
+          { name: "Base", slug: "base", color: wp.background },
+          { name: "Contrast", slug: "contrast", color: wp.text },
         ],
       },
       typography: {
@@ -146,15 +143,10 @@ function generateBaseThemeJson(arch: ThemeArchetype): ThemeJson {
   };
 }
 
-function generateDarkModeStyles(arch: ThemeArchetype): DarkModeStyles {
-  const paletteIndex = arch.id === "saas" ? 1 : 0;
-  const palette = arch.colorSuggestions[paletteIndex] || {
-    primary: "#3b82f6",
-    secondary: "#eff6ff",
-    accent: "#f59e0b",
-    background: "#ffffff",
-    text: "#1e293b",
-  };
+function generateDarkModeStyles(): DarkModeStyles {
+  const theme = DEFAULT_THEME;
+  const wp = theme.wpLight;
+  const wpDark = theme.wpDark;
 
   return {
     version: 3,
@@ -162,11 +154,11 @@ function generateDarkModeStyles(arch: ThemeArchetype): DarkModeStyles {
     settings: {
       color: {
         palette: [
-          { name: "Primary", slug: "primary", color: palette.primary },
-          { name: "Secondary", slug: "secondary", color: palette.text }, // Darker secondary
-          { name: "Accent", slug: "accent", color: palette.accent },
-          { name: "Base", slug: "base", color: "#09090b" }, // Match React bg-zinc-950 exactly
-          { name: "Contrast", slug: "contrast", color: "#fafafa" }, // Match React text-zinc-50 exactly
+          { name: "Primary", slug: "primary", color: wp.primary },
+          { name: "Secondary", slug: "secondary", color: wp.text },
+          { name: "Accent", slug: "accent", color: wp.accent },
+          { name: "Base", slug: "base", color: wpDark.base },
+          { name: "Contrast", slug: "contrast", color: wpDark.contrast },
         ],
       },
     },
@@ -183,7 +175,6 @@ export const PREMADE_THEMES: PremadeTheme[] = ARCHETYPES.map((arch) => ({
   id: arch.id,
   archetype: arch,
   themeJson: generateBaseThemeJson(arch),
-  darkMode: generateDarkModeStyles(arch),
-  // Default to a placeholder if no screenshot exists yet
-  image: `/thumbnails/${arch.id}.png`, 
+  darkMode: generateDarkModeStyles(),
+  image: `/thumbnails/${arch.id}.png`,
 }));
