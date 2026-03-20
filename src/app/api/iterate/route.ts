@@ -11,8 +11,10 @@ RULES:
 2. Use inline styles (style="...") for visual changes — this is how the preview renders.
 3. Keep existing inline styles that aren't being changed.
 4. For color changes, use actual color values (hex, rgb, named colors), not CSS variable references.
-5. Return ONLY the modified HTML element — no wrapper, no explanation in the HTML.
-6. Keep explanation to one sentence.
+5. IMPORTANT: If the element uses -webkit-background-clip:text with -webkit-text-fill-color:transparent, the visible text color comes from the background/background-image gradient — NOT from color or background-color. To change the text color on these elements, modify the gradient color stops in the background property.
+6. Similarly, if an element uses var(--...) CSS variables in its styles, replace them with actual color values when changing colors.
+7. Return ONLY the modified HTML element — no wrapper, no explanation in the HTML.
+8. Keep explanation to one sentence.
 
 RESPONSE FORMAT — JSON only, no markdown fences:
 {
