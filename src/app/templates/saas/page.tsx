@@ -38,6 +38,71 @@ const QUOTE_SVG = esc('<svg style="position:absolute;top:-1.5rem;left:-2rem;widt
 
 const featuresJsx = buildFeatureCardsJsx();
 
+const TWITTER_SVG = esc('<svg style="width:1.25rem;height:1.25rem" fill="currentColor" viewBox="0 0 24 24"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"/></svg>');
+const GITHUB_SVG = esc('<svg style="width:1.25rem;height:1.25rem" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/></svg>');
+
+export const SAAS_HEADER_JSX_SOURCE = `<header style={{borderBottom:"1px solid rgba(255,255,255,0.05)",paddingTop:"0",paddingRight:"0",paddingBottom:"0",paddingLeft:"0",width:"100%",backgroundColor:"rgba(9,9,11,0.7)",backdropFilter:"blur(24px)",zIndex:"50"}}>
+  <div style={{paddingRight:"1.5rem",paddingLeft:"1.5rem",maxWidth:"80rem",margin:"0 auto"}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:"5rem"}}>
+      <div style={{display:"flex"}}>
+        <p><a href="/" style={{display:"flex",alignItems:"center",gap:"0.5rem",textDecoration:"none"}}><span style={{width:"2rem",height:"2rem",borderRadius:"0.5rem",backgroundColor:"var(--wp--preset--color--primary)",display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:"700",boxShadow:"0 10px 15px -3px rgba(59, 130, 246, 0.2)"}}>S</span><span style={{fontSize:"1.25rem",fontWeight:"700",color:"#fff",letterSpacing:"-0.025em",fontFamily:"sans-serif"}}>SaaS<span style={{color:"var(--wp--preset--color--primary)"}}>Flow</span></span></a></p>
+      </div>
+      <div style={{display:"flex",alignItems:"center",gap:"2rem"}}>
+        <p><a href="#features" style={{fontSize:"0.875rem",fontWeight:"500",color:"#a1a1aa",textDecoration:"none",fontFamily:"sans-serif"}}>Features</a></p>
+        <p><a href="#testimonials" style={{fontSize:"0.875rem",fontWeight:"500",color:"#a1a1aa",textDecoration:"none",fontFamily:"sans-serif"}}>Customers</a></p>
+        <p><a href="#pricing" style={{fontSize:"0.875rem",fontWeight:"500",color:"#a1a1aa",textDecoration:"none",fontFamily:"sans-serif"}}>Pricing</a></p>
+      </div>
+      <div style={{display:"flex",alignItems:"center",gap:"1.5rem"}}>
+        <p><a href="#login" style={{fontSize:"0.875rem",fontWeight:"500",color:"#a1a1aa",textDecoration:"none",fontFamily:"sans-serif"}}>Log in</a></p>
+        <a role="button" href="#signup" style={{fontSize:"0.875rem",fontWeight:"500",backgroundColor:"#fff",color:"#18181b",padding:"0.625rem 1.25rem",borderRadius:"9999px",textDecoration:"none",fontFamily:"sans-serif",boxShadow:"0 4px 6px -1px rgba(0, 0, 0, 0.1)"}}>Get Started</a>
+      </div>
+    </div>
+  </div>
+</header>`;
+
+export const SAAS_FOOTER_JSX_SOURCE = `<footer style={{borderTop:"1px solid rgba(255,255,255,0.05)",backgroundColor:"#09090b",paddingTop:"4rem",paddingBottom:"2rem",paddingRight:"0",paddingLeft:"0",fontFamily:"sans-serif"}}>
+  <div style={{paddingRight:"1.5rem",paddingLeft:"1.5rem",maxWidth:"80rem",margin:"0 auto"}}>
+    <div style={{display:"flex",flexWrap:"wrap",gap:"3rem",marginBottom:"3rem"}}>
+      <div style={{flex:"2",minWidth:"250px"}}>
+        <p><a href="#" style={{display:"flex",alignItems:"center",gap:"0.5rem",marginBottom:"1rem",textDecoration:"none"}}><span style={{width:"1.5rem",height:"1.5rem",borderRadius:"0.375rem",backgroundColor:"var(--wp--preset--color--primary)",display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:"0.75rem",fontWeight:"700"}}>S</span><span style={{fontSize:"1.125rem",fontWeight:"700",color:"#fff",letterSpacing:"-0.025em"}}>SaaSFlow</span></a></p>
+        <p style={{fontSize:"0.875rem",color:"#a1a1aa",maxWidth:"20rem",lineHeight:"1.6",margin:"0"}}>Building the next generation of powerful, scalable SaaS tools for modern teams.</p>
+      </div>
+      <div style={{flex:"1",minWidth:"120px"}}>
+        <h3 style={{fontWeight:"600",color:"#fff",marginBottom:"1.5rem",fontSize:"0.875rem",lineHeight:"1.2",marginTop:"0"}}>Product</h3>
+        <div style={{display:"flex",flexDirection:"column",gap:"0.75rem"}}>
+          <p><a href="#" style={{fontSize:"0.875rem",color:"#a1a1aa",textDecoration:"none"}}>Features</a></p>
+          <p><a href="#" style={{fontSize:"0.875rem",color:"#a1a1aa",textDecoration:"none"}}>Integrations</a></p>
+          <p><a href="#" style={{fontSize:"0.875rem",color:"#a1a1aa",textDecoration:"none"}}>Pricing</a></p>
+          <p><a href="#" style={{fontSize:"0.875rem",color:"#a1a1aa",textDecoration:"none"}}>Changelog</a></p>
+        </div>
+      </div>
+      <div style={{flex:"1",minWidth:"120px"}}>
+        <h3 style={{fontWeight:"600",color:"#fff",marginBottom:"1.5rem",fontSize:"0.875rem",lineHeight:"1.2",marginTop:"0"}}>Company</h3>
+        <div style={{display:"flex",flexDirection:"column",gap:"0.75rem"}}>
+          <p><a href="#" style={{fontSize:"0.875rem",color:"#a1a1aa",textDecoration:"none"}}>About Us</a></p>
+          <p><a href="#" style={{fontSize:"0.875rem",color:"#a1a1aa",textDecoration:"none"}}>Careers</a></p>
+          <p><a href="#" style={{fontSize:"0.875rem",color:"#a1a1aa",textDecoration:"none"}}>Blog</a></p>
+          <p><a href="#" style={{fontSize:"0.875rem",color:"#a1a1aa",textDecoration:"none"}}>Contact</a></p>
+        </div>
+      </div>
+      <div style={{flex:"1",minWidth:"120px"}}>
+        <h3 style={{fontWeight:"600",color:"#fff",marginBottom:"1.5rem",fontSize:"0.875rem",lineHeight:"1.2",marginTop:"0"}}>Legal</h3>
+        <div style={{display:"flex",flexDirection:"column",gap:"0.75rem"}}>
+          <p><a href="#" style={{fontSize:"0.875rem",color:"#a1a1aa",textDecoration:"none"}}>Privacy Policy</a></p>
+          <p><a href="#" style={{fontSize:"0.875rem",color:"#a1a1aa",textDecoration:"none"}}>Terms of Service</a></p>
+        </div>
+      </div>
+    </div>
+    <div style={{borderTop:"1px solid rgba(255,255,255,0.05)",paddingTop:"2rem",display:"flex",flexWrap:"wrap",justifyContent:"space-between",alignItems:"center",gap:"1rem"}}>
+      <p style={{fontSize:"0.875rem",color:"#a1a1aa",margin:"0"}}>\u00a9 2026 SaaSFlow Inc. All rights reserved.</p>
+      <div style={{display:"flex",gap:"1rem"}}>
+        <p><a href="#" style={{color:"#a1a1aa"}}>{"${TWITTER_SVG}"}</a></p>
+        <p><a href="#" style={{color:"#a1a1aa"}}>{"${GITHUB_SVG}"}</a></p>
+      </div>
+    </div>
+  </div>
+</footer>`;
+
 export const SAAS_JSX_SOURCE = `<main>
 
 <div style={{paddingTop:"8rem",paddingBottom:"5rem",position:"relative",overflow:"hidden"}}>
