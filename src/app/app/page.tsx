@@ -15,17 +15,9 @@ import type { PremadeTheme } from "@/lib/premade-themes";
 import { SAAS_FRONT_PAGE_HTML, SAAS_HEADER_HTML, SAAS_FOOTER_HTML } from "@/lib/generators/saas-template";
 import { generateSaasCustomCss } from "@/lib/generators/custom-css";
 import type { AuditResult } from "@/lib/validation/design-audit";
+import { applyThemeOverrides, buildThemeFileMap, type ThemeFilesData, type IframeState } from "@/lib/packer/constants";
 
 type AppStep = "input" | "generating" | "results";
-
-interface ThemeFilesData {
-  themeJson: string;
-  darkMode: string;
-  templates: Record<string, string>;
-  parts: Record<string, string>;
-  patterns: Record<string, string>;
-  customCss?: string;
-}
 
 interface GenerationResult {
   themeFiles: ThemeFilesData;
@@ -192,17 +184,21 @@ export default function Home() {
     if (!result) return;
     setIsPackaging(true);
     try {
+      const overridden = applyThemeOverrides(result.themeFiles, iframeState as IframeState | null);
+      const fileMap = buildThemeFileMap(overridden, result.meta);
+      const slug = result.meta.themeName;
+
       const res = await fetch("/api/package", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ themeFiles: result.themeFiles, meta: result.meta }),
+        body: JSON.stringify({ fileMap, slug }),
       });
       if (!res.ok) throw new Error("Packaging failed");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${result.meta.themeName}.zip`;
+      a.download = `${slug}.zip`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -216,73 +212,12 @@ export default function Home() {
   async function handlePreview() {
     if (!result) return;
     setIsPreviewing(true);
-    
+
     try {
-      // 0. Sync WP Blueprint settings with the active layout toggles in the React Iframe (Dark Mode & Colors)
-      let activeThemeJsonStr = result.themeFiles.themeJson;
-      let activeDarkModeStr = result.themeFiles.darkMode;
-      
-      try {
-        const parsedJson = JSON.parse(activeThemeJsonStr);
-        
-        // If dark mode is active, cleanly merge dark colors into the root theme.json so we don't lose typography/layout!
-        if (iframeState?.isDarkMode && result.themeFiles.darkMode) {
-          const parsedDark = JSON.parse(result.themeFiles.darkMode);
-          if (parsedDark.settings?.color?.palette) {
-            parsedJson.settings.color.palette = parsedDark.settings.color.palette;
-          }
-          if (parsedDark.styles?.color) {
-            parsedJson.styles = parsedJson.styles || {};
-            parsedJson.styles.color = parsedDark.styles.color;
-          }
-        }
-        
-        // Inject live color palette overrides
-        if (iframeState?.colors) {
-          const palette = parsedJson.settings?.color?.palette;
-          if (Array.isArray(palette)) {
-            const primary = palette.find((p: any) => p.slug === 'primary');
-            if (primary && iframeState.colors.primary) primary.color = iframeState.colors.primary[500];
-            
-            const secondary = palette.find((p: any) => p.slug === 'secondary');
-            if (secondary && iframeState.colors.secondary) secondary.color = iframeState.colors.secondary[500];
-          }
-        }
+      const overridden = applyThemeOverrides(result.themeFiles, iframeState as IframeState | null);
 
-        // Inject live font overrides
-        if (iframeState?.activeFontId) {
-          const fontFamilies = parsedJson.settings?.typography?.fontFamilies;
-          if (Array.isArray(fontFamilies)) {
-            const fontMap: Record<string, string> = {
-              'sans': 'Inter, ui-sans-serif, system-ui, sans-serif',
-              'serif': 'ui-serif, Georgia, Cambria, "Times New Roman", Times, serif',
-              'mono': 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace'
-            };
-            const activeFontFamily = fontMap[iframeState.activeFontId] || fontMap['sans'];
-            
-            const headingFont = fontFamilies.find((f: any) => f.slug === 'heading');
-            if (headingFont) headingFont.fontFamily = activeFontFamily;
-            
-            const bodyFont = fontFamilies.find((f: any) => f.slug === 'body');
-            if (bodyFont) bodyFont.fontFamily = activeFontFamily;
-          }
-        }
-
-        activeThemeJsonStr = JSON.stringify(parsedJson, null, 2);
-      } catch (e) {
-        console.error("Failed to inject CSS palette variables into theme.json", e);
-      }
-      
-      const exportedThemeFiles = {
-        ...result.themeFiles,
-        themeJson: activeThemeJsonStr,
-        darkMode: activeDarkModeStr
-      };
-
-      // Store theme data in sessionStorage and open local preview page
-      // This avoids the slow data URI + blueprint bundle approach
       sessionStorage.setItem("playground-theme", JSON.stringify({
-        ...exportedThemeFiles,
+        ...overridden,
         meta: result.meta,
       }));
       window.open("/playground-preview", "_blank");
@@ -306,7 +241,8 @@ export default function Home() {
 
   function handleSelectGalleryTheme(theme: PremadeTheme) {
     // Construct the static files
-    const templates = {
+    const templates: Record<string, string> = {
+      ...(theme.id === "saas" ? { "front-page.html": SAAS_FRONT_PAGE_HTML } : {}),
       "index.html": theme.id === "saas" ? SAAS_FRONT_PAGE_HTML : `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->\n<div class="wp-block-group">\n<!-- wp:heading {"level":1} -->\n<h1 class="wp-block-heading">Latest Posts</h1>\n<!-- /wp:heading -->\n</div>\n<!-- /wp:group -->\n<!-- wp:spacer {"height":"2rem"} -->\n<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>\n<!-- /wp:spacer -->\n<!-- wp:query {"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true}} -->\n<div class="wp-block-query">\n<!-- wp:post-template -->\n<!-- wp:group {"style":{"spacing":{"padding":{"top":"1.5rem","right":"1.5rem","bottom":"1.5rem","left":"1.5rem"}}},"layout":{"type":"flex","orientation":"vertical"}} -->\n<div class="wp-block-group" style="padding-top:1.5rem;padding-right:1.5rem;padding-bottom:1.5rem;padding-left:1.5rem">\n<!-- wp:post-title {"isLink":true} /-->\n<!-- wp:post-date /-->\n<!-- wp:post-excerpt /-->\n</div>\n<!-- /wp:group -->\n<!-- /wp:post-template -->\n<!-- wp:query-pagination -->\n<!-- wp:query-pagination-previous /-->\n<!-- wp:query-pagination-numbers /-->\n<!-- wp:query-pagination-next /-->\n<!-- /wp:query-pagination -->\n<!-- wp:query-no-results -->\n<!-- wp:paragraph -->\n<p>No posts found.</p>\n<!-- /wp:paragraph -->\n<!-- /wp:query-no-results -->\n</div>\n<!-- /wp:query -->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
       "single.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:post-featured-image {"isLink":false,"align":"wide"} /-->\n<!-- wp:spacer {"height":"2rem"} -->\n<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>\n<!-- /wp:spacer -->\n<!-- wp:post-title {"level":1} /-->\n<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->\n<div class="wp-block-group">\n<!-- wp:post-date /-->\n<!-- wp:post-author {"showAvatar":false,"showBio":false} /-->\n</div>\n<!-- /wp:group -->\n<!-- wp:spacer {"height":"2rem"} -->\n<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>\n<!-- /wp:spacer -->\n<!-- wp:post-content /-->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
       "page.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:post-title {"level":1} /-->\n<!-- wp:spacer {"height":"2rem"} -->\n<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>\n<!-- /wp:spacer -->\n<!-- wp:post-content /-->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,

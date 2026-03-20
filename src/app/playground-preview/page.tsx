@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { generateStyleCss, generateFunctionsPHP } from "@/lib/packer/constants";
+import { buildThemeFileMap, type ThemeFilesData, type ThemeMetaInput } from "@/lib/packer/constants";
 
 export default function PlaygroundPreview() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -19,18 +19,13 @@ export default function PlaygroundPreview() {
       return;
     }
 
-    const data = JSON.parse(raw) as {
-      themeJson: string;
-      darkMode: string;
-      templates: Record<string, string>;
-      parts: Record<string, string>;
-      patterns: Record<string, string>;
-      customCss?: string;
-      meta: { themeName: string; displayName: string; description: string };
+    const data = JSON.parse(raw) as ThemeFilesData & {
+      meta: ThemeMetaInput;
     };
 
     const slug = data.meta.themeName;
     const basePath = `/wordpress/wp-content/themes/${slug}`;
+    const fileMap = buildThemeFileMap(data, data.meta);
 
     async function boot() {
       try {
@@ -48,84 +43,38 @@ export default function PlaygroundPreview() {
         const write = (path: string, content: string) =>
           client.writeFile(path, enc.encode(content));
 
-        // Create theme directory structure first
+        // Collect all unique directories from the file map
+        const dirs = new Set<string>();
+        for (const path of Object.keys(fileMap)) {
+          const parts = path.split("/");
+          for (let i = 1; i < parts.length; i++) {
+            dirs.add(parts.slice(0, i).join("/"));
+          }
+        }
+
         const mkdir = (path: string) =>
           client.run({ code: `<?php @mkdir('${path}', 0777, true); echo 'OK'; ?>` });
         await mkdir(basePath);
-        await mkdir(`${basePath}/templates`);
-        await mkdir(`${basePath}/parts`);
-        await mkdir(`${basePath}/patterns`);
-        await mkdir(`${basePath}/styles`);
-        await mkdir(`${basePath}/assets/css`);
-
-        // Write style.css
-        await write(
-          `${basePath}/style.css`,
-          generateStyleCss({
-            name: data.meta.displayName,
-            slug,
-            description: data.meta.description,
-            version: "1.0.0",
-          })
-        );
-
-        // Write theme.json
-        await write(`${basePath}/theme.json`, data.themeJson);
-
-        // Write functions.php
-        const fontFamilies: string[] = [];
-        try {
-          const tj = JSON.parse(data.themeJson);
-          const families = tj?.settings?.typography?.fontFamilies;
-          if (Array.isArray(families)) {
-            for (const f of families) {
-              if (f.name) fontFamilies.push(f.name);
-            }
-          }
-        } catch {}
-
-        await write(
-          `${basePath}/functions.php`,
-          generateFunctionsPHP({
-            name: data.meta.displayName,
-            slug,
-            description: data.meta.description,
-            version: "1.0.0",
-            fontFamilies,
-            hasCustomCss: !!data.customCss,
-          })
-        );
-
-        // Write templates
-        for (const [name, content] of Object.entries(data.templates)) {
-          await write(`${basePath}/templates/${name}`, content);
+        for (const dir of dirs) {
+          await mkdir(`${basePath}/${dir}`);
         }
 
-        // Write parts
-        for (const [name, content] of Object.entries(data.parts)) {
-          await write(`${basePath}/parts/${name}`, content);
-        }
-
-        // Write patterns
-        for (const [name, content] of Object.entries(data.patterns)) {
-          await write(`${basePath}/patterns/${name}`, content);
-        }
-
-        // Write dark mode
-        await write(`${basePath}/styles/dark.json`, data.darkMode);
-
-        // Write custom CSS if present
-        if (data.customCss) {
-          await write(`${basePath}/assets/css/saas-sections.css`, data.customCss);
+        // Write all theme files
+        for (const [path, content] of Object.entries(fileMap)) {
+          await write(`${basePath}/${path}`, content);
         }
 
         setStatus("Activating theme...");
 
-        // Activate theme
         await client.run({
           code: `<?php
 require '/wordpress/wp-load.php';
 switch_theme('${slug}');
+$home = wp_insert_post(array('post_title'=>'Home','post_status'=>'publish','post_type'=>'page'));
+if ($home && !is_wp_error($home)) {
+  update_option('show_on_front', 'page');
+  update_option('page_on_front', $home);
+}
 echo 'OK';
 ?>`,
         });
