@@ -40,6 +40,17 @@ export default function NativeIframeController() {
         selectedEl = null;
       }
 
+      if (event.data.type === 'UNDO_ELEMENT' && event.data.findHtml && event.data.restoreHtml) {
+        // Walk all elements to find the one matching the patched HTML
+        const all = document.body.querySelectorAll('*');
+        for (const el of all) {
+          if (el.outerHTML === event.data.findHtml) {
+            el.outerHTML = event.data.restoreHtml;
+            break;
+          }
+        }
+      }
+
       if (event.data.type === 'PATCH_CONTENT' && event.data.html) {
         document.body.innerHTML = event.data.html;
         highlightedEl = null;

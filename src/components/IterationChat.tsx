@@ -10,6 +10,8 @@ export interface SelectedBlockEvent {
 interface IterationChatProps {
   onSendMessage: (message: string, selectedBlock?: SelectedBlockEvent) => Promise<string>;
   onRegenerateLayout: () => void;
+  onUndo?: () => void;
+  canUndo?: boolean;
   isProcessing?: boolean;
   selectedBlock?: SelectedBlockEvent | null;
   onClearSelection: () => void;
@@ -26,6 +28,8 @@ interface ChatMessage {
 export default function IterationChat({
   onSendMessage,
   onRegenerateLayout,
+  onUndo,
+  canUndo = false,
   isProcessing = false,
   selectedBlock,
   onClearSelection,
@@ -98,12 +102,23 @@ export default function IterationChat({
           Iterate Design
         </h3>
         
-        <button
-          onClick={onRegenerateLayout}
-          className="text-xs font-medium px-3 py-1.5 rounded-md bg-zinc-200/50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors border border-transparent hover:border-zinc-300 dark:hover:border-zinc-600 focus:ring-2 focus:ring-zinc-400 focus:outline-none"
-        >
-          Regenerate Layout
-        </button>
+        <div className="flex items-center gap-2">
+          {canUndo && (
+            <button
+              onClick={onUndo}
+              disabled={isProcessing}
+              className="text-xs font-medium px-3 py-1.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors border border-transparent hover:border-amber-300 dark:hover:border-amber-700 focus:ring-2 focus:ring-amber-400 focus:outline-none disabled:opacity-50"
+            >
+              Undo
+            </button>
+          )}
+          <button
+            onClick={onRegenerateLayout}
+            className="text-xs font-medium px-3 py-1.5 rounded-md bg-zinc-200/50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors border border-transparent hover:border-zinc-300 dark:hover:border-zinc-600 focus:ring-2 focus:ring-zinc-400 focus:outline-none"
+          >
+            Regenerate Layout
+          </button>
+        </div>
       </div>
 
       {/* Chat History */}

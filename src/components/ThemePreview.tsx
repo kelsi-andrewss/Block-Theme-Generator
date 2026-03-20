@@ -88,6 +88,15 @@ const SELECTION_BRIDGE_SCRIPT = `
       }
       hl = null; sel = null;
     }
+    if (e.data.type === 'UNDO_ELEMENT' && e.data.findHtml && e.data.restoreHtml) {
+      var allEls = document.body.querySelectorAll('*');
+      for (var j = 0; j < allEls.length; j++) {
+        if (allEls[j].outerHTML === e.data.findHtml) {
+          allEls[j].outerHTML = e.data.restoreHtml;
+          break;
+        }
+      }
+    }
     if (e.data.type === 'PATCH_CONTENT' && e.data.html) {
       // Global fallback: swap entire body
       document.body.innerHTML = e.data.html;

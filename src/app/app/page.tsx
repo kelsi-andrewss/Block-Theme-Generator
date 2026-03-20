@@ -65,6 +65,12 @@ export default function Home() {
   const [selectedBlock, setSelectedBlock] = useState<SelectedBlockEvent | null>(null);
   const [iframeState, setIframeState] = useState<{ isDarkMode: boolean; activeThemeId: string; activeFontId: string; colors: any } | null>(null);
 
+  // Undo stack: stores snapshots to revert the last iteration
+  const [undoStack, setUndoStack] = useState<Array<
+    | { type: "element"; html: string; newHtml: string }
+    | { type: "css"; overrides: Record<string, string> }
+  >>([]);
+
 
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
@@ -134,6 +140,9 @@ export default function Home() {
 
         const data: { html: string; explanation: string } = await res.json();
 
+        // Snapshot original + new HTML for undo
+        setUndoStack(prev => [...prev, { type: "element", html: block.html, newHtml: data.html }]);
+
         // Inject modified HTML directly into the iframe DOM
         document.querySelectorAll('iframe').forEach(f => {
           f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: data.html }, '*');
@@ -156,8 +165,18 @@ export default function Home() {
 
         const data: { cssOverrides: Record<string, string>; explanation: string } = await res.json();
 
-        // Apply CSS variable overrides directly to iframe's documentElement
+        // Snapshot current CSS values for undo
         const iframe = document.querySelector('iframe');
+        const cssSnapshot: Record<string, string> = {};
+        if (iframe?.contentDocument) {
+          const computed = iframe.contentWindow!.getComputedStyle(iframe.contentDocument.documentElement);
+          for (const prop of Object.keys(data.cssOverrides)) {
+            cssSnapshot[prop] = computed.getPropertyValue(prop).trim();
+          }
+        }
+        setUndoStack(prev => [...prev, { type: "css", overrides: cssSnapshot }]);
+
+        // Apply CSS variable overrides directly to iframe's documentElement
         if (iframe?.contentDocument) {
           for (const [prop, value] of Object.entries(data.cssOverrides)) {
             iframe.contentDocument.documentElement.style.setProperty(prop, value);
@@ -173,6 +192,30 @@ export default function Home() {
       setIsIterating(false);
     }
   }, [result]);
+
+  const handleUndo = useCallback(() => {
+    if (undoStack.length === 0) return;
+    const last = undoStack[undoStack.length - 1];
+    setUndoStack(prev => prev.slice(0, -1));
+
+    if (last.type === "element") {
+      // Find the patched element by its newHtml and replace with original
+      document.querySelectorAll('iframe').forEach(f => {
+        f.contentWindow?.postMessage({
+          type: 'UNDO_ELEMENT',
+          findHtml: last.newHtml,
+          restoreHtml: last.html,
+        }, '*');
+      });
+    } else if (last.type === "css") {
+      const iframe = document.querySelector('iframe');
+      if (iframe?.contentDocument) {
+        for (const [prop, value] of Object.entries(last.overrides)) {
+          iframe.contentDocument.documentElement.style.setProperty(prop, value);
+        }
+      }
+    }
+  }, [undoStack]);
 
   const updateStep = useCallback((key: string, status: StepState["status"], detail?: string) => {
     setPipelineSteps(prev =>
@@ -502,6 +545,8 @@ export default function Home() {
                       <IterationChat
                         onSendMessage={handleSendMessage}
                         onRegenerateLayout={() => {}}
+                        onUndo={handleUndo}
+                        canUndo={undoStack.length > 0}
                         isProcessing={isIterating}
                         selectedBlock={selectedBlock}
                         onClearSelection={() => {
