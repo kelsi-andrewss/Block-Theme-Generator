@@ -62,6 +62,7 @@ const SELECTION_BRIDGE_SCRIPT = `
     e.preventDefault();
     e.stopPropagation();
     if (sel) { sel.style.outline = ''; sel.style.outlineOffset = ''; sel.style.backgroundColor = ''; }
+    var cleanHtml = t.outerHTML;
     sel = t;
     sel.style.outline = '2px solid #f97316';
     sel.style.outlineOffset = '4px';
@@ -71,7 +72,7 @@ const SELECTION_BRIDGE_SCRIPT = `
     var c = r.slice(0, 50) + (r.length > 50 ? '...' : '');
     window.parent.postMessage({
       type: 'BLOCK_SELECTED',
-      payload: { blockId: bid(t), blockName: 'Native <' + n + '>', content: c, html: t.outerHTML }
+      payload: { blockId: bid(t), blockName: 'Native <' + n + '>', content: c, html: cleanHtml }
     }, '*');
   }, { capture: true });
 

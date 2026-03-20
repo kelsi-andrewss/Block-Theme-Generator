@@ -124,13 +124,15 @@ export default function NativeIframeController() {
         selectedEl.style.backgroundColor = '';
       }
 
+      // Capture clean outerHTML BEFORE adding selection highlight styles
+      const cleanHtml = target.outerHTML;
+
       selectedEl = target;
       selectedEl.style.outline = '2px solid #f97316'; // Orange-500 for selection
       selectedEl.style.outlineOffset = '4px';
       selectedEl.style.backgroundColor = 'rgba(249, 115, 22, 0.1)';
 
       const blockName = target.tagName.toLowerCase();
-      // Only send the first 50 chars of text content safely, falling back to textContent or empty string
       const rawText = target.innerText || target.textContent || '';
       const content = rawText.slice(0, 50) + (rawText.length > 50 ? '...' : '');
 
@@ -140,7 +142,7 @@ export default function NativeIframeController() {
           blockId: getBlockId(target),
           blockName: `Native <${blockName}>`,
           content: content,
-          html: target.outerHTML
+          html: cleanHtml
         }
       }, '*');
     }
