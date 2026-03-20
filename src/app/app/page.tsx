@@ -578,30 +578,53 @@ export default function Home() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-zinc-900 dark:text-white">Theme downloaded!</h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">Install it in WordPress in 4 steps</p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">Two ways to use your theme</p>
               </div>
             </div>
-            <ol className="space-y-4 text-sm text-zinc-600 dark:text-zinc-300">
-              <li className="flex gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-500 dark:text-zinc-400">1</span>
-                <span>Go to <span className="font-semibold text-zinc-900 dark:text-white">Appearance &rarr; Themes</span> in your WordPress admin</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-500 dark:text-zinc-400">2</span>
-                <span>Click <span className="font-semibold text-zinc-900 dark:text-white">Add New Theme</span>, then <span className="font-semibold text-zinc-900 dark:text-white">Upload Theme</span></span>
-              </li>
-              <li className="flex gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-500 dark:text-zinc-400">3</span>
-                <span>Choose the <span className="font-semibold text-zinc-900 dark:text-white">{result?.meta.themeName}.zip</span> file you just downloaded</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-500 dark:text-zinc-400">4</span>
-                <span>Click <span className="font-semibold text-zinc-900 dark:text-white">Install Now</span>, then <span className="font-semibold text-zinc-900 dark:text-white">Activate</span></span>
-              </li>
-            </ol>
+
+            <div className="mb-5">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-3">Option A: WordPress Playground (free, instant)</h4>
+              <ol className="space-y-3 text-sm text-zinc-600 dark:text-zinc-300">
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center text-xs font-bold text-blue-600 dark:text-blue-400">1</span>
+                  <span>Go to <a href="https://playground.wordpress.net" target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-600 dark:text-blue-400 underline">playground.wordpress.net</a></span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center text-xs font-bold text-blue-600 dark:text-blue-400">2</span>
+                  <span>Go to <span className="font-semibold text-zinc-900 dark:text-white">Appearance &rarr; Themes &rarr; Add New &rarr; Upload Theme</span></span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center text-xs font-bold text-blue-600 dark:text-blue-400">3</span>
+                  <span>Upload <span className="font-semibold text-zinc-900 dark:text-white">{result?.meta.themeName}.zip</span>, install, and activate</span>
+                </li>
+              </ol>
+            </div>
+
+            <div className="pt-5 border-t border-zinc-200 dark:border-zinc-800">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-3">Option B: Your WordPress site</h4>
+              <ol className="space-y-3 text-sm text-zinc-600 dark:text-zinc-300">
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-500 dark:text-zinc-400">1</span>
+                  <span>Go to <span className="font-semibold text-zinc-900 dark:text-white">Appearance &rarr; Themes</span> in your WordPress admin</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-500 dark:text-zinc-400">2</span>
+                  <span>Click <span className="font-semibold text-zinc-900 dark:text-white">Add New Theme &rarr; Upload Theme</span></span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-500 dark:text-zinc-400">3</span>
+                  <span>Choose <span className="font-semibold text-zinc-900 dark:text-white">{result?.meta.themeName}.zip</span>, click <span className="font-semibold text-zinc-900 dark:text-white">Install Now</span>, then <span className="font-semibold text-zinc-900 dark:text-white">Activate</span></span>
+                </li>
+              </ol>
+            </div>
+
+            <p className="mt-5 text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed">
+              <span className="font-semibold text-zinc-500 dark:text-zinc-400">Note:</span> The WordPress admin editor may look different from the preview. Activate the theme and visit your live site URL to see the final result.
+            </p>
+
             <button
               onClick={() => setShowInstallInstructions(false)}
-              className="mt-6 w-full py-2.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold hover:opacity-90 transition-all"
+              className="mt-4 w-full py-2.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold hover:opacity-90 transition-all"
             >
               Got it
             </button>
