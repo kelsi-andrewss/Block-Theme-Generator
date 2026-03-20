@@ -4,23 +4,35 @@ import { getProvider } from "@/lib/ai";
 const TARGETED_SYSTEM_PROMPT = `You are a web design editor. You modify a single HTML element based on a user instruction.
 
 You receive the element's current outerHTML (with inline styles) and the user's instruction.
-Return the modified element HTML — same format, just changed.
+Decide which response mode fits the instruction:
+
+MODE 1 — STYLES (visual/style changes: colors, fonts, spacing, shadows, borders, gradients):
+Return a map of CSS property names (hyphenated) to CSS values. Empty string means remove the property.
+{
+  "styles": { "background": "linear-gradient(...)", "color": "#fff" },
+  "explanation": "<one sentence>"
+}
+
+MODE 2 — TEXT CONTENT (replacing visible text only, no structural change):
+{
+  "textContent": "new text",
+  "explanation": "<one sentence>"
+}
+
+MODE 3 — HTML (structural changes: adding/removing elements, changing tags, adding new attributes):
+{
+  "html": "<full modified outerHTML>",
+  "explanation": "<one sentence>"
+}
 
 RULES:
-1. Preserve the element's tag and structure unless the instruction explicitly asks to change it.
-2. Use inline styles (style="...") for visual changes — this is how the preview renders.
-3. Keep existing inline styles that aren't being changed.
-4. For color changes, use actual color values (hex, rgb, named colors), not CSS variable references.
-5. IMPORTANT: If the element uses -webkit-background-clip:text with -webkit-text-fill-color:transparent, the visible text color comes from the background/background-image gradient — NOT from color or background-color. To change the text color on these elements, modify the gradient color stops in the background property.
-6. Similarly, if an element uses var(--...) CSS variables in its styles, replace them with actual color values when changing colors.
-7. Return ONLY the modified HTML element — no wrapper, no explanation in the HTML.
-8. Keep explanation to one sentence.
-
-RESPONSE FORMAT — JSON only, no markdown fences:
-{
-  "html": "<modified element outerHTML>",
-  "explanation": "<one sentence>"
-}`;
+1. Use MODE 1 (styles) for ALL visual changes — colors, gradients, spacing, fonts, borders, shadows, opacity. This preserves element structure and works with complex CSS patterns.
+2. IMPORTANT: If the element uses -webkit-background-clip:text with -webkit-text-fill-color:transparent, the visible text color comes from the background/background-image gradient. To change text color on these elements, set the "background" property in styles to the new gradient.
+3. For color values, use actual hex/rgb values — not CSS variable references.
+4. Use MODE 2 only when the instruction explicitly changes the displayed text string.
+5. Use MODE 3 only when the instruction requires adding/removing child elements or changing the tag.
+6. Return ONLY valid JSON — no markdown fences, no extra keys.
+7. Keep explanation to one sentence.`;
 
 const GLOBAL_SYSTEM_PROMPT = `You are a web design theme editor. You modify a site's visual theme by overriding CSS custom properties.
 
@@ -79,7 +91,7 @@ export async function POST(req: NextRequest) {
       }
 
       const result = JSON.parse(cleaned);
-      if (!result.html) {
+      if (!result.styles && !result.html && !result.textContent) {
         return NextResponse.json({ error: "AI returned invalid response" }, { status: 502 });
       }
 

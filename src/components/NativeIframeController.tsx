@@ -31,6 +31,41 @@ export default function NativeIframeController() {
         selectedEl = null;
       }
 
+      if (event.data.type === 'PATCH_STYLES' && event.data.styles && selectedEl) {
+        const { iterateId, styles } = event.data as { iterateId: string; styles: Record<string, string> };
+        selectedEl.setAttribute('data-iterate-id', iterateId);
+        const oldProps: Record<string, string> = {};
+        for (const [prop, value] of Object.entries(styles)) {
+          oldProps[prop] = selectedEl.style.getPropertyValue(prop);
+          if (value === '') {
+            selectedEl.style.removeProperty(prop);
+          } else {
+            selectedEl.style.setProperty(prop, value);
+          }
+        }
+        selectedEl.style.outline = '';
+        selectedEl.style.outlineOffset = '';
+        selectedEl.style.backgroundColor = '';
+        window.parent.postMessage({ type: 'STYLE_SNAPSHOT', iterateId, oldProps }, '*');
+        highlightedEl = null;
+        selectedEl = null;
+      }
+
+      if (event.data.type === 'UNDO_STYLES' && event.data.iterateId) {
+        const { iterateId, oldProps } = event.data as { iterateId: string; oldProps: Record<string, string> };
+        const el = document.querySelector<HTMLElement>(`[data-iterate-id="${iterateId}"]`);
+        if (el) {
+          for (const [prop, value] of Object.entries(oldProps)) {
+            if (value === '') {
+              el.style.removeProperty(prop);
+            } else {
+              el.style.setProperty(prop, value);
+            }
+          }
+          el.removeAttribute('data-iterate-id');
+        }
+      }
+
       if (event.data.type === 'PATCH_ELEMENT' && event.data.html) {
         // selectedEl still holds the live DOM reference — swap it directly
         if (selectedEl) {

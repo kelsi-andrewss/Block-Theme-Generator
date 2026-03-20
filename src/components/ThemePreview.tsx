@@ -82,6 +82,36 @@ const SELECTION_BRIDGE_SCRIPT = `
       sel.style.outline = ''; sel.style.outlineOffset = ''; sel.style.backgroundColor = '';
       sel = null;
     }
+    if (e.data.type === 'PATCH_STYLES' && e.data.styles && sel) {
+      var iterateId = e.data.iterateId;
+      var styles = e.data.styles;
+      sel.setAttribute('data-iterate-id', iterateId);
+      var oldProps = {};
+      var keys = Object.keys(styles);
+      for (var k = 0; k < keys.length; k++) {
+        var prop = keys[k];
+        oldProps[prop] = sel.style.getPropertyValue(prop);
+        if (styles[prop] === '') { sel.style.removeProperty(prop); }
+        else { sel.style.setProperty(prop, styles[prop]); }
+      }
+      sel.style.outline = ''; sel.style.outlineOffset = ''; sel.style.backgroundColor = '';
+      window.parent.postMessage({ type: 'STYLE_SNAPSHOT', iterateId: iterateId, oldProps: oldProps }, '*');
+      hl = null; sel = null;
+    }
+    if (e.data.type === 'UNDO_STYLES' && e.data.iterateId) {
+      var undoId = e.data.iterateId;
+      var undoProps = e.data.oldProps;
+      var undoEl = document.querySelector('[data-iterate-id="' + undoId + '"]');
+      if (undoEl) {
+        var undoKeys = Object.keys(undoProps);
+        for (var u = 0; u < undoKeys.length; u++) {
+          var up = undoKeys[u];
+          if (undoProps[up] === '') { undoEl.style.removeProperty(up); }
+          else { undoEl.style.setProperty(up, undoProps[up]); }
+        }
+        undoEl.removeAttribute('data-iterate-id');
+      }
+    }
     if (e.data.type === 'PATCH_ELEMENT' && e.data.html) {
       // sel holds the live DOM reference — swap it directly
       if (sel) {

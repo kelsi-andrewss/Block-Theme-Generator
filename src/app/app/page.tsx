@@ -68,7 +68,8 @@ export default function Home() {
   // Undo stack: ref for data (no stale closures), counter for reactivity
   type UndoEntry =
     | { type: "element"; html: string; newHtml: string }
-    | { type: "css"; overrides: Record<string, string> };
+    | { type: "css"; overrides: Record<string, string> }
+    | { type: "style-props"; iterateId: string; oldProps: Record<string, string> };
   const MAX_UNDO = 20;
   const undoRef = useRef<UndoEntry[]>([]);
   const [undoCount, setUndoCount] = useState(0);
@@ -87,6 +88,9 @@ export default function Home() {
         setSelectedBlock(event.data.payload);
       } else if (event.data?.type === 'TEMPLATE_STATE_CHANGE') {
         setIframeState(event.data.payload);
+      } else if (event.data?.type === 'STYLE_SNAPSHOT') {
+        const { iterateId, oldProps } = event.data as { iterateId: string; oldProps: Record<string, string> };
+        pushUndo({ type: "style-props", iterateId, oldProps });
       }
     }
     window.addEventListener('message', handleMessage);
@@ -147,14 +151,25 @@ export default function Home() {
           throw new Error(body.error ?? `Iteration failed (${res.status})`);
         }
 
-        const data: { html: string; explanation: string } = await res.json();
+        const data: { styles?: Record<string, string>; html?: string; textContent?: string; explanation: string } = await res.json();
 
-        pushUndo({ type: "element", html: block.html, newHtml: data.html });
-
-        // Inject modified HTML directly into the iframe DOM
-        document.querySelectorAll('iframe').forEach(f => {
-          f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: data.html }, '*');
-        });
+        if (data.styles) {
+          const iterateId = `iter-${Date.now()}`;
+          document.querySelectorAll('iframe').forEach(f => {
+            f.contentWindow?.postMessage({ type: 'PATCH_STYLES', iterateId, styles: data.styles }, '*');
+          });
+        } else if (data.textContent !== undefined) {
+          const newHtml = block.html.replace(/>([^<]*)</, `>${data.textContent}<`);
+          pushUndo({ type: "element", html: block.html, newHtml });
+          document.querySelectorAll('iframe').forEach(f => {
+            f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: newHtml }, '*');
+          });
+        } else if (data.html) {
+          pushUndo({ type: "element", html: block.html, newHtml: data.html });
+          document.querySelectorAll('iframe').forEach(f => {
+            f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: data.html }, '*');
+          });
+        }
 
         setSelectedBlock(null);
         return data.explanation;
@@ -237,6 +252,14 @@ export default function Home() {
           iframe.contentDocument.documentElement.style.setProperty(prop, value);
         }
       }
+    } else if (last.type === "style-props") {
+      document.querySelectorAll('iframe').forEach(f => {
+        f.contentWindow?.postMessage({
+          type: 'UNDO_STYLES',
+          iterateId: last.iterateId,
+          oldProps: last.oldProps,
+        }, '*');
+      });
     }
   }, []);
 
