@@ -103,7 +103,7 @@ export default function TemplateProvider({ children }: { children: React.ReactNo
       {children}
       
       {/* Floating Controls */}
-      <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3 font-sans">
+      <div data-no-select="true" className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3 font-sans">
         
         {isOpen && (
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 shadow-2xl w-64 animate-in slide-in-from-bottom-5 fade-in duration-200">

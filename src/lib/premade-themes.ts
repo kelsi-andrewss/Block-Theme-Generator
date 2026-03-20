@@ -10,7 +10,8 @@ export interface PremadeTheme {
 }
 
 function generateBaseThemeJson(arch: ThemeArchetype): ThemeJson {
-  const palette = arch.colorSuggestions[0] || {
+  const paletteIndex = arch.id === "saas" ? 1 : 0;
+  const palette = arch.colorSuggestions[paletteIndex] || {
     primary: "#3b82f6",
     secondary: "#eff6ff",
     accent: "#f59e0b",
@@ -146,7 +147,8 @@ function generateBaseThemeJson(arch: ThemeArchetype): ThemeJson {
 }
 
 function generateDarkModeStyles(arch: ThemeArchetype): DarkModeStyles {
-  const palette = arch.colorSuggestions[0] || {
+  const paletteIndex = arch.id === "saas" ? 1 : 0;
+  const palette = arch.colorSuggestions[paletteIndex] || {
     primary: "#3b82f6",
     secondary: "#eff6ff",
     accent: "#f59e0b",

@@ -34,6 +34,7 @@ export default function NativeIframeController() {
     function isSelectable(target: HTMLElement) {
       const tagName = target.tagName.toLowerCase();
       if (tagName === 'html' || tagName === 'body') return false;
+      if (target.closest('[data-no-select]')) return false;
       return true;
     }
 
