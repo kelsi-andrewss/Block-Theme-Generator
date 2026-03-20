@@ -26,9 +26,9 @@ MODE 3 — HTML (structural changes: adding/removing elements, changing tags, ad
 }
 
 RULES:
-1. Use MODE 1 (styles) for ALL visual changes — colors, gradients, spacing, fonts, borders, shadows, opacity. This preserves element structure and works with complex CSS patterns.
-2. IMPORTANT: If the element uses -webkit-background-clip:text with -webkit-text-fill-color:transparent, the visible text color comes from the background/background-image gradient. To change text color on these elements, set the "background" property in styles to the new gradient.
-3. For color values, use actual hex/rgb values — not CSS variable references.
+1. Use MODE 1 (styles) for ALL visual changes — colors, gradients, spacing, fonts, borders, shadows, opacity.
+2. For text color changes, always use the "color" property. Do NOT set "background" for color changes — the handler takes care of gradient-text elements automatically.
+3. For color values, use actual hex/rgb values — not CSS variable references like var(--...).
 4. Use MODE 2 only when the instruction explicitly changes the displayed text string.
 5. Use MODE 3 only when the instruction requires adding/removing child elements or changing the tag.
 6. Return ONLY valid JSON — no markdown fences, no extra keys.

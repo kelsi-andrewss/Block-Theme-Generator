@@ -35,24 +35,32 @@ export default function NativeIframeController() {
         const { iterateId, styles } = event.data as { iterateId: string; styles: Record<string, string> };
         selectedEl.setAttribute('data-iterate-id', iterateId);
         const oldProps: Record<string, string> = {};
-        const hasBackgroundClipText = selectedEl.style.getPropertyValue('-webkit-background-clip') === 'text'
-          || selectedEl.style.getPropertyValue('background-clip') === 'text';
-        for (let [prop, value] of Object.entries(styles)) {
-          // background shorthand resets background-clip — use background-image instead
-          if (prop === 'background' && hasBackgroundClipText) {
-            prop = 'background-image';
+        const isGradientText = (selectedEl.style.getPropertyValue('-webkit-background-clip') === 'text'
+          || selectedEl.style.getPropertyValue('background-clip') === 'text')
+          && selectedEl.style.getPropertyValue('-webkit-text-fill-color') === 'transparent';
+
+        // If setting "color" on a gradient-text element, clear the gradient so color is visible
+        if (isGradientText && styles['color']) {
+          const colorVal = styles['color'];
+          // Snapshot gradient-related props for undo
+          for (const gp of ['background', 'background-image', '-webkit-background-clip', 'background-clip', '-webkit-text-fill-color']) {
+            oldProps[gp] = selectedEl.style.getPropertyValue(gp);
           }
-          oldProps[prop] = selectedEl.style.getPropertyValue(prop);
+          selectedEl.style.setProperty('background', 'none');
+          selectedEl.style.removeProperty('-webkit-background-clip');
+          selectedEl.style.removeProperty('background-clip');
+          selectedEl.style.setProperty('-webkit-text-fill-color', colorVal);
+        }
+
+        for (const [prop, value] of Object.entries(styles)) {
+          if (!(prop in oldProps)) {
+            oldProps[prop] = selectedEl.style.getPropertyValue(prop);
+          }
           if (value === '') {
             selectedEl.style.removeProperty(prop);
           } else {
             selectedEl.style.setProperty(prop, value);
           }
-        }
-        // Re-assert background-clip in case it was reset
-        if (hasBackgroundClipText) {
-          selectedEl.style.setProperty('-webkit-background-clip', 'text');
-          selectedEl.style.setProperty('background-clip', 'text');
         }
         selectedEl.style.outline = '';
         selectedEl.style.outlineOffset = '';
