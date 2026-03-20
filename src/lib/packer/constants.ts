@@ -1,3 +1,5 @@
+import { getThemeById, getWpPalette } from "../theme-colors";
+
 export interface ThemeMeta {
   name: string;
   slug: string;
@@ -127,25 +129,18 @@ export function applyThemeOverrides(
   try {
     const parsed = JSON.parse(themeJsonStr);
 
+    const theme = getThemeById(state.activeThemeId);
+    if (theme) {
+      parsed.settings = parsed.settings || {};
+      parsed.settings.color = parsed.settings.color || {};
+      parsed.settings.color.palette = getWpPalette(theme, state.isDarkMode);
+    }
+
     if (state.isDarkMode && themeFiles.darkMode) {
       const dark = JSON.parse(themeFiles.darkMode);
-      if (dark.settings?.color?.palette) {
-        parsed.settings.color.palette = dark.settings.color.palette;
-      }
       if (dark.styles?.color) {
         parsed.styles = parsed.styles || {};
         parsed.styles.color = dark.styles.color;
-      }
-    }
-
-    if (state.colors) {
-      const palette = parsed.settings?.color?.palette;
-      if (Array.isArray(palette)) {
-        const primary = palette.find((p: any) => p.slug === "primary");
-        if (primary && state.colors.primary) primary.color = state.colors.primary[500];
-
-        const secondary = palette.find((p: any) => p.slug === "secondary");
-        if (secondary && state.colors.secondary) secondary.color = state.colors.secondary[500];
       }
     }
 

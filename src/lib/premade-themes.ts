@@ -1,5 +1,5 @@
 import { ARCHETYPES, type ThemeArchetype } from "./prompts/archetypes";
-import { THEME_COLORS } from "./theme-colors";
+import { THEME_COLORS, getWpPalette } from "./theme-colors";
 import type { ThemeJson, DarkModeStyles } from "./schemas/theme-json";
 
 export interface PremadeTheme {
@@ -10,11 +10,8 @@ export interface PremadeTheme {
   image?: string; // Path to thumbnail
 }
 
-const DEFAULT_THEME = THEME_COLORS[0];
-
 function generateBaseThemeJson(arch: ThemeArchetype): ThemeJson {
-  const theme = DEFAULT_THEME;
-  const wp = theme.wpLight;
+  const palette = getWpPalette(THEME_COLORS[0], false);
 
   const fonts = arch.typographySuggestions[0] || {
     heading: "Inter",
@@ -27,13 +24,7 @@ function generateBaseThemeJson(arch: ThemeArchetype): ThemeJson {
     settings: {
       appearanceTools: true,
       color: {
-        palette: [
-          { name: "Primary", slug: "primary", color: wp.primary },
-          { name: "Secondary", slug: "secondary", color: wp.secondary },
-          { name: "Accent", slug: "accent", color: wp.accent },
-          { name: "Base", slug: "base", color: wp.background },
-          { name: "Contrast", slug: "contrast", color: wp.text },
-        ],
+        palette,
       },
       typography: {
         defaultFontSizes: false,
@@ -144,22 +135,14 @@ function generateBaseThemeJson(arch: ThemeArchetype): ThemeJson {
 }
 
 function generateDarkModeStyles(): DarkModeStyles {
-  const theme = DEFAULT_THEME;
-  const wp = theme.wpLight;
-  const wpDark = theme.wpDark;
+  const palette = getWpPalette(THEME_COLORS[0], true);
 
   return {
     version: 3,
     title: "Dark",
     settings: {
       color: {
-        palette: [
-          { name: "Primary", slug: "primary", color: wp.primary },
-          { name: "Secondary", slug: "secondary", color: wp.text },
-          { name: "Accent", slug: "accent", color: wp.accent },
-          { name: "Base", slug: "base", color: wpDark.base },
-          { name: "Contrast", slug: "contrast", color: wpDark.contrast },
-        ],
+        palette,
       },
     },
     styles: {
