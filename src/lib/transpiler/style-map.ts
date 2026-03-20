@@ -129,6 +129,10 @@ export function convertStylesToBlockAttrs(styles: Record<string, string>, skipLa
   const entries = Object.entries(styles);
 
   for (const [prop, value] of entries) {
+    // Every style goes to residualStyles for guaranteed inline rendering.
+    // Some also go to blockAttrs for editor compatibility.
+    residualStyles[prop] = value;
+
     if ((SPACING_SHORTHAND as readonly string[]).includes(prop)) {
       const expanded = parseShorthandSpacing(value);
       deepSet(blockAttrs, ['style', 'spacing', prop], expanded);
@@ -175,8 +179,6 @@ export function convertStylesToBlockAttrs(styles: Record<string, string>, skipLa
       deepSet(blockAttrs, ['style', 'border', BORDER_PROPS[prop]], value);
       continue;
     }
-
-    residualStyles[prop] = value;
   }
 
   const layoutAttrs = skipLayout ? {} : extractLayoutAttrs(styles, residualStyles, blockAttrs);

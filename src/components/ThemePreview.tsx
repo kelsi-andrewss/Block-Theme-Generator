@@ -195,8 +195,8 @@ export default function ThemePreview({ themeJson, templates, parts, customCss }:
       `;
 
       // 2. Build HTML from blocks
-      // We start by looking for index.html or front-page.html
-      const templateHTML = templates["front-page.html"] || templates["index.html"] || "";
+      // Use index.html as the main template
+      const templateHTML = templates["index.html"] || "";
       
       // Stupid simple parser to just strip block comments and resolve template parts
       let rawHtml = templateHTML;
