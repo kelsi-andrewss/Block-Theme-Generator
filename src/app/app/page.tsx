@@ -16,6 +16,7 @@ import { SAAS_FRONT_PAGE_HTML, SAAS_HEADER_HTML, SAAS_FOOTER_HTML } from "@/lib/
 import { generateSaasCustomCss } from "@/lib/generators/custom-css";
 import type { AuditResult } from "@/lib/validation/design-audit";
 import { applyThemeOverrides, buildThemeFileMap, type ThemeFilesData, type IframeState } from "@/lib/packer/constants";
+import { set } from "idb-keyval";
 
 type AppStep = "input" | "generating" | "results";
 
@@ -216,10 +217,10 @@ export default function Home() {
     try {
       const overridden = applyThemeOverrides(result.themeFiles, iframeState as IframeState | null);
 
-      sessionStorage.setItem("playground-theme", JSON.stringify({
+      await set("playground-theme", {
         ...overridden,
         meta: result.meta,
-      }));
+      });
       window.open("/playground-preview", "_blank");
       setIsPreviewing(false);
     } catch (err) {
