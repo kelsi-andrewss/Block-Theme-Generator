@@ -15,7 +15,7 @@ function buildSvgDataUri(pathMarkup: string): string {
 
 export function generateSaasCustomCss(): string {
   const featureIconRules = SAAS_FEATURES.map((feature, i) => {
-    const dataUri = buildSvgDataUri(feature.wpIconSvg);
+    const dataUri = buildSvgDataUri(feature.icon);
     return `:root :where(.saas-feature-icon--${i})::after {
   -webkit-mask-image: ${dataUri};
   mask-image: ${dataUri};
