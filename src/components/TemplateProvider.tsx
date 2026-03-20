@@ -21,6 +21,16 @@ function applyCssVars(theme: ThemeColor, isDark: boolean) {
   style.setProperty("--color-secondary-500", colors.secondary[500]);
   style.setProperty("--color-secondary-700", colors.secondary[700]);
   style.setProperty("--color-secondary-900", colors.secondary[900]);
+  style.setProperty("--color-bg", colors.base);
+  style.setProperty("--color-text", colors.contrast);
+  style.setProperty("--color-bg-secondary", colors.bgSecondary);
+  style.setProperty("--color-bg-tertiary", colors.bgTertiary);
+  style.setProperty("--color-text-muted", colors.textMuted);
+  style.setProperty("--color-text-secondary", colors.textSecondary);
+  style.setProperty("--color-border", colors.border);
+  style.setProperty("--color-border-subtle", colors.borderSubtle);
+  style.setProperty("--color-bg-card", colors.bgCard);
+  style.setProperty("--color-border-card", colors.borderCard);
 }
 
 export default function TemplateProvider({ children }: { children: React.ReactNode }) {

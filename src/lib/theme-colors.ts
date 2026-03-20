@@ -11,6 +11,14 @@ export interface ThemeColorSet {
   base: string;
   contrast: string;
   accent: string;
+  bgSecondary: string;
+  bgTertiary: string;
+  textMuted: string;
+  textSecondary: string;
+  border: string;
+  borderSubtle: string;
+  bgCard: string;
+  borderCard: string;
 }
 
 export interface ThemeColor {
@@ -30,6 +38,14 @@ export const THEME_COLORS: ThemeColor[] = [
       base: "#ffffff",
       contrast: "#1e1b4b",
       accent: "#10b981",
+      bgSecondary: "#f4f4f5",
+      bgTertiary: "#e4e4e7",
+      textMuted: "#71717a",
+      textSecondary: "#52525b",
+      border: "#e4e4e7",
+      borderSubtle: "#f4f4f5",
+      bgCard: "rgba(255,255,255,0.8)",
+      borderCard: "rgba(0,0,0,0.1)",
     },
     darkColors: {
       primary: { 400: "#c084fc", 500: "#a855f7", 700: "#7e22ce", 900: "#581c87" },
@@ -37,6 +53,14 @@ export const THEME_COLORS: ThemeColor[] = [
       base: "#09090b",
       contrast: "#fafafa",
       accent: "#10b981",
+      bgSecondary: "#18181b",
+      bgTertiary: "#27272a",
+      textMuted: "#a1a1aa",
+      textSecondary: "#d4d4d8",
+      border: "rgba(255,255,255,0.05)",
+      borderSubtle: "rgba(255,255,255,0.02)",
+      bgCard: "rgba(39,39,42,0.5)",
+      borderCard: "rgba(63,63,70,0.5)",
     },
   },
   {
@@ -48,6 +72,14 @@ export const THEME_COLORS: ThemeColor[] = [
       base: "#ffffff",
       contrast: "#1c1917",
       accent: "#f59e0b",
+      bgSecondary: "#f4f4f5",
+      bgTertiary: "#e4e4e7",
+      textMuted: "#71717a",
+      textSecondary: "#52525b",
+      border: "#e4e4e7",
+      borderSubtle: "#f4f4f5",
+      bgCard: "rgba(255,255,255,0.8)",
+      borderCard: "rgba(0,0,0,0.1)",
     },
     darkColors: {
       primary: { 400: "#fb923c", 500: "#f97316", 700: "#c2410c", 900: "#7c2d12" },
@@ -55,6 +87,14 @@ export const THEME_COLORS: ThemeColor[] = [
       base: "#09090b",
       contrast: "#fafafa",
       accent: "#f59e0b",
+      bgSecondary: "#18181b",
+      bgTertiary: "#27272a",
+      textMuted: "#a1a1aa",
+      textSecondary: "#d4d4d8",
+      border: "rgba(255,255,255,0.05)",
+      borderSubtle: "rgba(255,255,255,0.02)",
+      bgCard: "rgba(39,39,42,0.5)",
+      borderCard: "rgba(63,63,70,0.5)",
     },
   },
   {
@@ -66,6 +106,14 @@ export const THEME_COLORS: ThemeColor[] = [
       base: "#ffffff",
       contrast: "#1e293b",
       accent: "#f59e0b",
+      bgSecondary: "#f4f4f5",
+      bgTertiary: "#e4e4e7",
+      textMuted: "#71717a",
+      textSecondary: "#52525b",
+      border: "#e4e4e7",
+      borderSubtle: "#f4f4f5",
+      bgCard: "rgba(255,255,255,0.8)",
+      borderCard: "rgba(0,0,0,0.1)",
     },
     darkColors: {
       primary: { 400: "#34d399", 500: "#10b981", 700: "#047857", 900: "#064e3b" },
@@ -73,6 +121,14 @@ export const THEME_COLORS: ThemeColor[] = [
       base: "#09090b",
       contrast: "#fafafa",
       accent: "#f59e0b",
+      bgSecondary: "#18181b",
+      bgTertiary: "#27272a",
+      textMuted: "#a1a1aa",
+      textSecondary: "#d4d4d8",
+      border: "rgba(255,255,255,0.05)",
+      borderSubtle: "rgba(255,255,255,0.02)",
+      bgCard: "rgba(39,39,42,0.5)",
+      borderCard: "rgba(63,63,70,0.5)",
     },
   },
   {
@@ -84,6 +140,14 @@ export const THEME_COLORS: ThemeColor[] = [
       base: "#ffffff",
       contrast: "#1e293b",
       accent: "#f59e0b",
+      bgSecondary: "#f4f4f5",
+      bgTertiary: "#e4e4e7",
+      textMuted: "#71717a",
+      textSecondary: "#52525b",
+      border: "#e4e4e7",
+      borderSubtle: "#f4f4f5",
+      bgCard: "rgba(255,255,255,0.8)",
+      borderCard: "rgba(0,0,0,0.1)",
     },
     darkColors: {
       primary: { 400: "#22d3ee", 500: "#06b6d4", 700: "#0e7490", 900: "#164e63" },
@@ -91,6 +155,14 @@ export const THEME_COLORS: ThemeColor[] = [
       base: "#09090b",
       contrast: "#fafafa",
       accent: "#f59e0b",
+      bgSecondary: "#18181b",
+      bgTertiary: "#27272a",
+      textMuted: "#a1a1aa",
+      textSecondary: "#d4d4d8",
+      border: "rgba(255,255,255,0.05)",
+      borderSubtle: "rgba(255,255,255,0.02)",
+      bgCard: "rgba(39,39,42,0.5)",
+      borderCard: "rgba(63,63,70,0.5)",
     },
   },
   {
@@ -102,6 +174,14 @@ export const THEME_COLORS: ThemeColor[] = [
       base: "#ffffff",
       contrast: "#1e293b",
       accent: "#f59e0b",
+      bgSecondary: "#f4f4f5",
+      bgTertiary: "#e4e4e7",
+      textMuted: "#71717a",
+      textSecondary: "#52525b",
+      border: "#e4e4e7",
+      borderSubtle: "#f4f4f5",
+      bgCard: "rgba(255,255,255,0.8)",
+      borderCard: "rgba(0,0,0,0.1)",
     },
     darkColors: {
       primary: { 400: "#f472b6", 500: "#ec4899", 700: "#be185d", 900: "#831843" },
@@ -109,6 +189,14 @@ export const THEME_COLORS: ThemeColor[] = [
       base: "#09090b",
       contrast: "#fafafa",
       accent: "#f59e0b",
+      bgSecondary: "#18181b",
+      bgTertiary: "#27272a",
+      textMuted: "#a1a1aa",
+      textSecondary: "#d4d4d8",
+      border: "rgba(255,255,255,0.05)",
+      borderSubtle: "rgba(255,255,255,0.02)",
+      bgCard: "rgba(39,39,42,0.5)",
+      borderCard: "rgba(63,63,70,0.5)",
     },
   },
   {
@@ -120,6 +208,14 @@ export const THEME_COLORS: ThemeColor[] = [
       base: "#ffffff",
       contrast: "#1e293b",
       accent: "#f59e0b",
+      bgSecondary: "#f4f4f5",
+      bgTertiary: "#e4e4e7",
+      textMuted: "#71717a",
+      textSecondary: "#52525b",
+      border: "#e4e4e7",
+      borderSubtle: "#f4f4f5",
+      bgCard: "rgba(255,255,255,0.8)",
+      borderCard: "rgba(0,0,0,0.1)",
     },
     darkColors: {
       primary: { 400: "#818cf8", 500: "#6366f1", 700: "#4338ca", 900: "#312e81" },
@@ -127,6 +223,14 @@ export const THEME_COLORS: ThemeColor[] = [
       base: "#09090b",
       contrast: "#fafafa",
       accent: "#f59e0b",
+      bgSecondary: "#18181b",
+      bgTertiary: "#27272a",
+      textMuted: "#a1a1aa",
+      textSecondary: "#d4d4d8",
+      border: "rgba(255,255,255,0.05)",
+      borderSubtle: "rgba(255,255,255,0.02)",
+      bgCard: "rgba(39,39,42,0.5)",
+      borderCard: "rgba(63,63,70,0.5)",
     },
   },
 ];
