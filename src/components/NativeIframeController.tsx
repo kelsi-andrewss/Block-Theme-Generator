@@ -6,23 +6,44 @@ export default function NativeIframeController() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // 1. Listen for theme updates from parent IDE
+    // 1. Listen for messages from parent IDE
     function handleMessage(event: MessageEvent) {
-      if (event.data?.type === 'UPDATE_THEME' && event.data?.payload) {
+      if (!event.data?.type) return;
+
+      if (event.data.type === 'UPDATE_THEME' && event.data.payload) {
         try {
-          // payload is the themeJson object or stringified JSON
           const themeJson = typeof event.data.payload === 'string' ? JSON.parse(event.data.payload) : event.data.payload;
           const palette = themeJson.settings?.color?.palette || [];
-          
           palette.forEach((colorObj: { slug: string; color: string }) => {
             if (colorObj.slug && colorObj.color) {
-              // The IDE generates slugs like 'primary-500', Native React uses '--color-primary-500'
               document.documentElement.style.setProperty(`--color-${colorObj.slug}`, colorObj.color);
             }
           });
         } catch (e) {
           console.error("Error parsing theme update", e);
         }
+      }
+
+      if (event.data.type === 'CLEAR_SELECTION' && selectedEl) {
+        selectedEl.style.outline = '';
+        selectedEl.style.outlineOffset = '';
+        selectedEl.style.backgroundColor = '';
+        selectedEl = null;
+      }
+
+      if (event.data.type === 'PATCH_ELEMENT' && event.data.html) {
+        // selectedEl still holds the live DOM reference — swap it directly
+        if (selectedEl) {
+          selectedEl.outerHTML = event.data.html;
+        }
+        highlightedEl = null;
+        selectedEl = null;
+      }
+
+      if (event.data.type === 'PATCH_CONTENT' && event.data.html) {
+        document.body.innerHTML = event.data.html;
+        highlightedEl = null;
+        selectedEl = null;
       }
     }
     window.addEventListener('message', handleMessage);

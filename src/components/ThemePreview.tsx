@@ -18,6 +18,85 @@ export interface ThemePreviewProps {
   customCss?: string;
 }
 
+// Vanilla JS selection bridge — injected into the blob iframe to enable click-to-select
+const SELECTION_BRIDGE_SCRIPT = `
+<script>
+(function() {
+  var hl = null, sel = null;
+
+  function bid(el) {
+    var p = [], c = el;
+    for (var i = 0; i < 4 && c && c !== document.documentElement; i++) {
+      var par = c.parentElement;
+      var idx = par ? Array.prototype.indexOf.call(par.children, c) : 0;
+      p.unshift(c.tagName.toLowerCase() + idx);
+      c = par;
+    }
+    return p.join('-');
+  }
+
+  function ok(t) {
+    var n = t.tagName.toLowerCase();
+    return n !== 'html' && n !== 'body' && !t.closest('[data-no-select]');
+  }
+
+  document.addEventListener('mouseover', function(e) {
+    var t = e.target;
+    if (!ok(t) || t === sel) return;
+    e.stopPropagation();
+    if (hl && hl !== sel) { hl.style.outline = ''; hl.style.outlineOffset = ''; hl.style.cursor = ''; }
+    hl = t;
+    t.style.outline = '2px dashed #fb923c';
+    t.style.outlineOffset = '4px';
+    t.style.cursor = 'pointer';
+  });
+
+  document.addEventListener('mouseout', function() {
+    if (hl && hl !== sel) { hl.style.outline = ''; hl.style.outlineOffset = ''; hl.style.cursor = ''; }
+    hl = null;
+  });
+
+  document.addEventListener('click', function(e) {
+    var t = e.target;
+    if (!ok(t)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (sel) { sel.style.outline = ''; sel.style.outlineOffset = ''; sel.style.backgroundColor = ''; }
+    sel = t;
+    sel.style.outline = '2px solid #f97316';
+    sel.style.outlineOffset = '4px';
+    sel.style.backgroundColor = 'rgba(249, 115, 22, 0.1)';
+    var n = t.tagName.toLowerCase();
+    var r = t.innerText || t.textContent || '';
+    var c = r.slice(0, 50) + (r.length > 50 ? '...' : '');
+    window.parent.postMessage({
+      type: 'BLOCK_SELECTED',
+      payload: { blockId: bid(t), blockName: 'Native <' + n + '>', content: c, html: t.outerHTML }
+    }, '*');
+  }, { capture: true });
+
+  window.addEventListener('message', function(e) {
+    if (!e.data) return;
+    if (e.data.type === 'CLEAR_SELECTION' && sel) {
+      sel.style.outline = ''; sel.style.outlineOffset = ''; sel.style.backgroundColor = '';
+      sel = null;
+    }
+    if (e.data.type === 'PATCH_ELEMENT' && e.data.html) {
+      // sel holds the live DOM reference — swap it directly
+      if (sel) {
+        sel.outerHTML = e.data.html;
+      }
+      hl = null; sel = null;
+    }
+    if (e.data.type === 'PATCH_CONTENT' && e.data.html) {
+      // Global fallback: swap entire body
+      document.body.innerHTML = e.data.html;
+      hl = null; sel = null;
+    }
+  });
+})();
+</script>`;
+
 export default function ThemePreview({ themeJson, templates, parts, customCss }: ThemePreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [viewport, setViewport] = useState<ViewportSize>("desktop");
@@ -228,6 +307,7 @@ export default function ThemePreview({ themeJson, templates, parts, customCss }:
         </head>
         <body>
           ${rawHtml}
+          ${SELECTION_BRIDGE_SCRIPT}
         </body>
       </html>
       `;

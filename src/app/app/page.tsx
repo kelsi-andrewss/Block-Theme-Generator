@@ -65,6 +65,7 @@ export default function Home() {
   const [selectedBlock, setSelectedBlock] = useState<SelectedBlockEvent | null>(null);
   const [iframeState, setIframeState] = useState<{ isDarkMode: boolean; activeThemeId: string; activeFontId: string; colors: any } | null>(null);
 
+
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
       if (event.data?.type === 'BLOCK_SELECTED') {
@@ -77,12 +78,85 @@ export default function Home() {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  const handleSendMessage = useCallback(async (message: string) => {
+  // Build a compact palette string from theme.json for color context
+  function getPaletteContext(): string {
+    if (!result) return "";
+    try {
+      const parsed = JSON.parse(result.themeFiles.themeJson);
+      const palette = parsed?.settings?.color?.palette?.map((c: { slug: string; color: string }) =>
+        `${c.slug}: ${c.color}`
+      ) || [];
+      return palette.join(", ");
+    } catch {
+      return "";
+    }
+  }
+
+  const handleSendMessage = useCallback(async (message: string, block?: SelectedBlockEvent): Promise<string> => {
+    if (!result) return "No theme loaded.";
+
     setIsIterating(true);
-    // Simulate iterative generation
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsIterating(false);
-  }, []);
+    try {
+      const palette = getPaletteContext();
+
+      if (block) {
+        // Targeted edit: send element HTML, get modified HTML back
+        const res = await fetch("/api/iterate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            instruction: message,
+            selectedElement: { html: block.html, content: block.content },
+            palette,
+          }),
+        });
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error ?? `Iteration failed (${res.status})`);
+        }
+
+        const data: { html: string; explanation: string } = await res.json();
+
+        // Inject modified HTML directly into the iframe DOM
+        document.querySelectorAll('iframe').forEach(f => {
+          f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: data.html }, '*');
+        });
+
+        setSelectedBlock(null);
+        return data.explanation;
+      } else {
+        // Global edit: CSS variable overrides
+        const res = await fetch("/api/iterate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ instruction: message, palette }),
+        });
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error ?? `Iteration failed (${res.status})`);
+        }
+
+        const data: { cssOverrides: Record<string, string>; explanation: string } = await res.json();
+
+        // Apply CSS variable overrides directly to iframe's documentElement
+        const iframe = document.querySelector('iframe');
+        if (iframe?.contentDocument) {
+          for (const [prop, value] of Object.entries(data.cssOverrides)) {
+            iframe.contentDocument.documentElement.style.setProperty(prop, value);
+          }
+        }
+
+        return data.explanation;
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Iteration failed";
+      return `Error: ${msg}`;
+    } finally {
+      setIsIterating(false);
+    }
+  }, [result]);
 
   const updateStep = useCallback((key: string, status: StepState["status"], detail?: string) => {
     setPipelineSteps(prev =>
@@ -414,7 +488,12 @@ export default function Home() {
                         onRegenerateLayout={() => {}}
                         isProcessing={isIterating}
                         selectedBlock={selectedBlock}
-                        onClearSelection={() => setSelectedBlock(null)}
+                        onClearSelection={() => {
+                          setSelectedBlock(null);
+                          document.querySelectorAll('iframe').forEach(f => {
+                            f.contentWindow?.postMessage({ type: 'CLEAR_SELECTION' }, '*');
+                          });
+                        }}
                       />
                     )}
                   </div>

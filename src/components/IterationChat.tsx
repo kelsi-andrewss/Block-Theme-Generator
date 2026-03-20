@@ -8,7 +8,7 @@ export interface SelectedBlockEvent {
 }
 
 interface IterationChatProps {
-  onSendMessage: (message: string, selectedBlock?: SelectedBlockEvent) => void;
+  onSendMessage: (message: string, selectedBlock?: SelectedBlockEvent) => Promise<string>;
   onRegenerateLayout: () => void;
   isProcessing?: boolean;
   selectedBlock?: SelectedBlockEvent | null;
@@ -46,24 +46,34 @@ export default function IterationChat({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isProcessing]);
 
-  function handleSend(e: React.FormEvent) {
+  async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     if (!input.trim() || isProcessing) return;
+
+    const messageText = input.trim();
+    const currentBlock = selectedBlock ?? undefined;
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       role: "user",
-      content: input.trim(),
+      content: messageText,
       timestamp: new Date(),
-      targetBlock: selectedBlock?.blockName || undefined,
+      targetBlock: currentBlock?.blockName || undefined,
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    
-    // Call parent handler (which will talk to the API)
-    onSendMessage(input.trim(), selectedBlock ?? undefined);
-    
     setInput("");
+
+    // Call parent handler and wait for AI response
+    const response = await onSendMessage(messageText, currentBlock);
+
+    // Add AI response to chat
+    setMessages((prev) => [...prev, {
+      id: (Date.now() + 1).toString(),
+      role: "ai" as const,
+      content: response,
+      timestamp: new Date(),
+    }]);
   }
 
   // Helper to format block names cleanly (e.g. "core/heading" -> "Heading Block")
