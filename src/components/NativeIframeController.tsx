@@ -27,6 +27,21 @@ export default function NativeIframeController() {
     }
     window.addEventListener('message', handleMessage);
 
+    // Deterministic block ID from element tag + DOM position (3 ancestor levels)
+    function getBlockId(el: HTMLElement): string {
+      const parts: string[] = [];
+      let current: HTMLElement | null = el;
+      for (let i = 0; i < 4 && current && current !== document.documentElement; i++) {
+        const parent = current.parentElement;
+        const index = parent
+          ? Array.prototype.indexOf.call(parent.children, current)
+          : 0;
+        parts.unshift(current.tagName.toLowerCase() + index);
+        current = parent;
+      }
+      return parts.join('-');
+    }
+
     // 2. Click-to-edit semantic bridge
     let highlightedEl: HTMLElement | null = null;
     let selectedEl: HTMLElement | null = null;
@@ -90,7 +105,7 @@ export default function NativeIframeController() {
       window.parent.postMessage({
         type: 'BLOCK_SELECTED',
         payload: {
-          blockId: blockName + '-' + Math.random().toString(36).substr(2, 9),
+          blockId: getBlockId(target),
           blockName: `Native <${blockName}>`,
           content: content,
           html: target.outerHTML
