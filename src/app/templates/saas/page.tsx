@@ -252,9 +252,9 @@ export const SAAS_JSX_SOURCE = `<main>
         <a role="button" style={{display:"block",width:"100%",padding:"0.75rem",borderRadius:"0.5rem",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 20%, transparent)",backgroundColor:"var(--wp--preset--color--base)",color:"var(--wp--preset--color--contrast)",fontWeight:"500",textAlign:"center",textDecoration:"none",marginBottom:"2rem"}}>Start Free Trial</a>
         <div style={{flex:"1"}}>
           <ul style={{listStyle:"none",padding:"0",margin:"0",display:"flex",flexDirection:"column",gap:"1rem",fontSize:"0.875rem",color:"color-mix(in srgb, var(--wp--preset--color--contrast) 70%, transparent)"}}>
-            <li>{"${CHECK_SVG_GREEN} Up to 5 users"}</li>
-            <li>{"${CHECK_SVG_GREEN} Basic analytics"}</li>
-            <li>{"${CHECK_SVG_GREEN} Community support"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_GREEN} Up to 5 users"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_GREEN} Basic analytics"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_GREEN} Community support"}</li>
           </ul>
         </div>
       </div>
@@ -269,10 +269,10 @@ export const SAAS_JSX_SOURCE = `<main>
         <a role="button" style={{display:"block",width:"100%",padding:"0.75rem",borderRadius:"0.5rem",backgroundColor:"var(--wp--preset--color--primary)",color:"var(--wp--preset--color--base)",fontWeight:"700",textAlign:"center",textDecoration:"none",marginBottom:"2rem"}}>Get Started</a>
         <div style={{flex:"1"}}>
           <ul style={{listStyle:"none",padding:"0",margin:"0",display:"flex",flexDirection:"column",gap:"1rem",fontSize:"0.875rem",color:"color-mix(in srgb, var(--wp--preset--color--contrast) 70%, transparent)"}}>
-            <li>{"${CHECK_SVG_PRIMARY} Unlimited users"}</li>
-            <li>{"${CHECK_SVG_PRIMARY} Advanced analytics"}</li>
-            <li>{"${CHECK_SVG_PRIMARY} Priority email support"}</li>
-            <li>{"${CHECK_SVG_PRIMARY} Custom integrations"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_PRIMARY} Unlimited users"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_PRIMARY} Advanced analytics"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_PRIMARY} Priority email support"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_PRIMARY} Custom integrations"}</li>
           </ul>
         </div>
       </div>
@@ -286,10 +286,10 @@ export const SAAS_JSX_SOURCE = `<main>
         <a role="button" style={{display:"block",width:"100%",padding:"0.75rem",borderRadius:"0.5rem",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 20%, transparent)",backgroundColor:"var(--wp--preset--color--base)",color:"var(--wp--preset--color--contrast)",fontWeight:"500",textAlign:"center",textDecoration:"none",marginBottom:"2rem"}}>Contact Sales</a>
         <div style={{flex:"1"}}>
           <ul style={{listStyle:"none",padding:"0",margin:"0",display:"flex",flexDirection:"column",gap:"1rem",fontSize:"0.875rem",color:"color-mix(in srgb, var(--wp--preset--color--contrast) 70%, transparent)"}}>
-            <li>{"${CHECK_SVG_CONTRAST} Everything in Pro"}</li>
-            <li>{"${CHECK_SVG_CONTRAST} Dedicated account manager"}</li>
-            <li>{"${CHECK_SVG_CONTRAST} SLA guarantees"}</li>
-            <li>{"${CHECK_SVG_CONTRAST} SSO &amp; Advanced Security"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_CONTRAST} Everything in Pro"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_CONTRAST} Dedicated account manager"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_CONTRAST} SLA guarantees"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_CONTRAST} SSO &amp; Advanced Security"}</li>
           </ul>
         </div>
       </div>
