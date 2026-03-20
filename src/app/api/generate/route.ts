@@ -1,4 +1,4 @@
-import { enrichPrompt } from "@/lib/prompts/enrichment";
+import { enrichPrompt, type EnrichedPrompt } from "@/lib/prompts/enrichment";
 import { getProvider } from "@/lib/ai";
 import { generateLightThemeJson, generateDarkMode } from "@/lib/generators/theme-json";
 import { generateTemplates } from "@/lib/generators/templates";
@@ -23,6 +23,68 @@ function mapToObject(map: Map<string, string>): Record<string, string> {
     obj[key] = value;
   }
   return obj;
+}
+
+async function retryWithConstraints<T>(
+  fn: (negativeConstraints?: string[]) => Promise<T>,
+  validate: (result: T) => string[],
+  maxRetries: number = 2
+): Promise<{ result: T; errors: string[] }> {
+  let lastResult = await fn();
+  let errors = validate(lastResult);
+
+  let attempt = 0;
+  while (errors.length > 0 && attempt < maxRetries) {
+    attempt++;
+    lastResult = await fn(errors);
+    errors = validate(lastResult);
+  }
+
+  return { result: lastResult, errors };
+}
+
+function validateMarkupMap(files: Map<string, string>): string[] {
+  const errors: string[] = [];
+  for (const [filename, content] of files) {
+    const result = validateBlockMarkup(content);
+    if (!result.valid) {
+      errors.push(`${filename}: ${result.errors.map(e => e.message).join(", ")}`);
+    }
+  }
+  return errors;
+}
+
+function validatePatternMap(files: Map<string, string>): string[] {
+  const errors: string[] = [];
+  for (const [filename, content] of files) {
+    const markupStart = content.indexOf("?>");
+    if (markupStart !== -1) {
+      const markup = content.slice(markupStart + 2).trim();
+      if (markup) {
+        const result = validateBlockMarkup(markup);
+        if (!result.valid) {
+          errors.push(`${filename}: ${result.errors.map(e => e.message).join(", ")}`);
+        }
+      }
+    }
+  }
+  return errors;
+}
+
+function withNegativeConstraints(
+  prompt: EnrichedPrompt,
+  constraints?: string[]
+): EnrichedPrompt {
+  if (!constraints || constraints.length === 0) return prompt;
+  const constraintBlock = [
+    "\n\n## IMPORTANT: Previous attempt had these validation errors. Do NOT repeat them:",
+    ...constraints.map(c => `- ${c}`),
+  ].join("\n");
+  return {
+    ...prompt,
+    enrichedDescription: prompt.enrichedDescription + constraintBlock,
+    negativeConstraints: [...prompt.negativeConstraints, ...constraints],
+  };
 }
 
 export async function POST(request: Request) {
@@ -88,28 +150,65 @@ export async function POST(request: Request) {
         send("step", { step: "parts", status: "active", detail: "Structuring responsive header/footer" });
         send("step", { step: "patterns", status: "active", detail: "Skipping pattern injection (handled by layout)" });
 
-        const [darkMode, templates, parts, patterns] = await Promise.all([
+        let templateRetries = 0;
+        let partRetries = 0;
+        let patternRetries = 0;
+
+        const [darkMode, templateResult, partResult, patternResult] = await Promise.all([
           generateDarkMode(themeJson, provider).then(r => {
             send("files", { type: "dark-mode", content: JSON.stringify(r, null, 2) });
             send("step", { step: "dark-mode", status: "done", detail: "Dark color variant ready" });
             return r;
           }),
-          generateTemplates(enriched, themeJson, provider).then(r => {
+          retryWithConstraints(
+            (constraints) => {
+              if (constraints) {
+                templateRetries++;
+                send("step", { step: "templates", status: "active", detail: `Generating templates (retry ${templateRetries}/2)...` });
+              }
+              return generateTemplates(withNegativeConstraints(enriched, constraints), themeJson, provider);
+            },
+            validateMarkupMap
+          ).then(({ result: r, errors }) => {
             send("files", { type: "templates", files: mapToObject(r) });
-            send("step", { step: "templates", status: "done", detail: `${r.size} templates built` });
-            return r;
+            const retryNote = templateRetries > 0 ? ` after ${templateRetries} ${templateRetries === 1 ? "retry" : "retries"}` : "";
+            send("step", { step: "templates", status: "done", detail: `${r.size} templates built${retryNote}` });
+            return { result: r, errors };
           }),
-          generateParts(enriched, themeJson, provider).then(r => {
+          retryWithConstraints(
+            (constraints) => {
+              if (constraints) {
+                partRetries++;
+                send("step", { step: "parts", status: "active", detail: `Generating parts (retry ${partRetries}/2)...` });
+              }
+              return generateParts(withNegativeConstraints(enriched, constraints), themeJson, provider);
+            },
+            validateMarkupMap
+          ).then(({ result: r, errors }) => {
             send("files", { type: "parts", files: mapToObject(r) });
-            send("step", { step: "parts", status: "done", detail: `${r.size} template parts built` });
-            return r;
+            const retryNote = partRetries > 0 ? ` after ${partRetries} ${partRetries === 1 ? "retry" : "retries"}` : "";
+            send("step", { step: "parts", status: "done", detail: `${r.size} template parts built${retryNote}` });
+            return { result: r, errors };
           }),
-          generatePatterns(enriched, themeJson, provider).then(r => {
+          retryWithConstraints(
+            (constraints) => {
+              if (constraints) {
+                patternRetries++;
+                send("step", { step: "patterns", status: "active", detail: `Generating patterns (retry ${patternRetries}/2)...` });
+              }
+              return generatePatterns(withNegativeConstraints(enriched, constraints), themeJson, provider);
+            },
+            validatePatternMap
+          ).then(({ result: r, errors }) => {
             send("files", { type: "patterns", files: mapToObject(r) });
             send("step", { step: "patterns", status: "done", detail: "Pattern generation bypassed." });
-            return r;
+            return { result: r, errors };
           }),
         ]);
+
+        const templates = templateResult.result;
+        const parts = partResult.result;
+        const patterns = patternResult.result;
 
         // Step 8: Skeleton pages
         send("step", { step: "skeleton-pages", status: "active", detail: "Generating content pages..." });
@@ -127,26 +226,17 @@ export async function POST(request: Request) {
           detail: `${skeletonPages.size} content pages generated`,
         });
 
-        // Step 9: Validate
+        // Step 9: Validate (re-validate all markup, including skeleton pages not covered by retry)
         send("step", { step: "validate", status: "active", detail: "Checking block markup, WCAG contrast, typography..." });
-        const validationErrors: string[] = [];
-        const allMarkup = new Map([...templates, ...parts, ...skeletonMarkup]);
-        for (const [filename, content] of allMarkup) {
+        const validationErrors: string[] = [
+          ...templateResult.errors,
+          ...partResult.errors,
+          ...patternResult.errors,
+        ];
+        for (const [filename, content] of skeletonMarkup) {
           const result = validateBlockMarkup(content);
           if (!result.valid) {
             validationErrors.push(`${filename}: ${result.errors.map(e => e.message).join(", ")}`);
-          }
-        }
-        for (const [filename, content] of patterns) {
-          const markupStart = content.indexOf("?>");
-          if (markupStart !== -1) {
-            const markup = content.slice(markupStart + 2).trim();
-            if (markup) {
-              const result = validateBlockMarkup(markup);
-              if (!result.valid) {
-                validationErrors.push(`${filename}: ${result.errors.map(e => e.message).join(", ")}`);
-              }
-            }
           }
         }
 
