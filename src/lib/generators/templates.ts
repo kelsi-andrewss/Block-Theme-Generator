@@ -405,6 +405,7 @@ export async function generateTemplates(
       : genericFrontPage;
   }
 
+  templates.set("front-page.html", frontPageHtml);
   templates.set("index.html", frontPageHtml);
 
   templates.set("404.html", `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
