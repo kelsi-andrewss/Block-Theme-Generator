@@ -32,7 +32,7 @@ export default function NativeIframeController() {
       const parts: string[] = [];
       let current: HTMLElement | null = el;
       for (let i = 0; i < 4 && current && current !== document.documentElement; i++) {
-        const parent = current.parentElement;
+        const parent: HTMLElement | null = current.parentElement;
         const index = parent
           ? Array.prototype.indexOf.call(parent.children, current)
           : 0;
