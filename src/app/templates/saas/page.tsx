@@ -180,7 +180,7 @@ export const SAAS_JSX_SOURCE = `<main>
   </div>
 </div>
 
-<div style={{paddingTop:"6rem",paddingBottom:"6rem",backgroundColor:"var(--wp--preset--color--contrast)",color:"var(--wp--preset--color--base)",position:"relative",overflow:"hidden"}}>
+<div style={{paddingTop:"6rem",paddingBottom:"6rem",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 5%, var(--wp--preset--color--base))",color:"var(--wp--preset--color--contrast)",position:"relative",overflow:"hidden"}}>
   <div style={{position:"absolute",right:"0",bottom:"0",width:"600px",height:"600px",backgroundColor:"var(--wp--preset--color--primary)",opacity:"0.2",filter:"blur(100px)",borderRadius:"50%",pointerEvents:"none"}}></div>
 
   <div style={{maxWidth:"1280px",margin:"0 auto",padding:"0 2rem",position:"relative",zIndex:"10"}}>
@@ -193,10 +193,10 @@ export const SAAS_JSX_SOURCE = `<main>
           <div>{"${QUOTE_SVG}"}</div>
           <p style={{fontSize:"1.25rem",fontWeight:"500",lineHeight:"1.6",marginBottom:"2rem",position:"relative",zIndex:"10"}}>{"\\u201cSwitching to SaaSFlow was the best decision we made this year. It allowed our team to ship features 40% faster and cut our infrastructure costs in half.\\u201d"}</p>
           <div style={{display:"flex",alignItems:"center",gap:"1rem"}}>
-            <div style={{width:"3.5rem",height:"3.5rem",borderRadius:"50%",backgroundImage:"url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop')",backgroundSize:"cover",border:"2px solid color-mix(in srgb, var(--wp--preset--color--base) 15%, transparent)"}}></div>
+            <div style={{width:"3.5rem",height:"3.5rem",borderRadius:"50%",backgroundImage:"url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop')",backgroundSize:"cover",border:"2px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)"}}></div>
             <div>
               <h4 style={{fontWeight:"700",marginTop:"0",marginBottom:"0"}}>Sarah Jenkins</h4>
-              <p style={{color:"color-mix(in srgb, var(--wp--preset--color--base) 60%, transparent)",fontSize:"0.875rem",marginTop:"0",marginBottom:"0"}}>CTO at TechNova</p>
+              <p style={{color:"color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)",fontSize:"0.875rem",marginTop:"0",marginBottom:"0"}}>CTO at TechNova</p>
             </div>
           </div>
         </div>
@@ -204,21 +204,21 @@ export const SAAS_JSX_SOURCE = `<main>
 
       <div style={{flex:"1"}}>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"1.5rem"}}>
-          <div style={{backgroundColor:"color-mix(in srgb, var(--wp--preset--color--base) 15%, transparent)",backdropFilter:"blur(4px)",padding:"2rem",borderRadius:"1rem",border:"1px solid color-mix(in srgb, var(--wp--preset--color--base) 25%, transparent)"}}>
+          <div style={{backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 5%, var(--wp--preset--color--base))",backdropFilter:"blur(4px)",padding:"2rem",borderRadius:"1rem",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)"}}>
             <p style={{fontSize:"2.5rem",fontWeight:"800",color:"var(--wp--preset--color--primary)",marginBottom:"0.5rem"}}>99.9%</p>
-            <p style={{color:"color-mix(in srgb, var(--wp--preset--color--base) 60%, transparent)",fontWeight:"500",marginTop:"0",marginBottom:"0",fontSize:"0.875rem"}}>Uptime Guarantee</p>
+            <p style={{color:"color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)",fontWeight:"500",marginTop:"0",marginBottom:"0",fontSize:"0.875rem"}}>Uptime Guarantee</p>
           </div>
-          <div style={{backgroundColor:"color-mix(in srgb, var(--wp--preset--color--base) 15%, transparent)",backdropFilter:"blur(4px)",padding:"2rem",borderRadius:"1rem",border:"1px solid color-mix(in srgb, var(--wp--preset--color--base) 25%, transparent)",transform:"translateY(1.5rem)"}}>
+          <div style={{backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 5%, var(--wp--preset--color--base))",backdropFilter:"blur(4px)",padding:"2rem",borderRadius:"1rem",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)",transform:"translateY(1.5rem)"}}>
             <p style={{fontSize:"2.5rem",fontWeight:"800",color:"var(--wp--preset--color--primary)",marginBottom:"0.5rem"}}>10M+</p>
-            <p style={{color:"color-mix(in srgb, var(--wp--preset--color--base) 60%, transparent)",fontWeight:"500",marginTop:"0",marginBottom:"0",fontSize:"0.875rem"}}>Requests per day</p>
+            <p style={{color:"color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)",fontWeight:"500",marginTop:"0",marginBottom:"0",fontSize:"0.875rem"}}>Requests per day</p>
           </div>
-          <div style={{backgroundColor:"color-mix(in srgb, var(--wp--preset--color--base) 15%, transparent)",backdropFilter:"blur(4px)",padding:"2rem",borderRadius:"1rem",border:"1px solid color-mix(in srgb, var(--wp--preset--color--base) 25%, transparent)"}}>
+          <div style={{backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 5%, var(--wp--preset--color--base))",backdropFilter:"blur(4px)",padding:"2rem",borderRadius:"1rem",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)"}}>
             <p style={{fontSize:"2.5rem",fontWeight:"800",color:"var(--wp--preset--color--secondary)",marginBottom:"0.5rem"}}>5,000+</p>
-            <p style={{color:"color-mix(in srgb, var(--wp--preset--color--base) 60%, transparent)",fontWeight:"500",marginTop:"0",marginBottom:"0",fontSize:"0.875rem"}}>Active Teams</p>
+            <p style={{color:"color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)",fontWeight:"500",marginTop:"0",marginBottom:"0",fontSize:"0.875rem"}}>Active Teams</p>
           </div>
-          <div style={{backgroundColor:"color-mix(in srgb, var(--wp--preset--color--base) 15%, transparent)",backdropFilter:"blur(4px)",padding:"2rem",borderRadius:"1rem",border:"1px solid color-mix(in srgb, var(--wp--preset--color--base) 25%, transparent)",transform:"translateY(1.5rem)"}}>
+          <div style={{backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 5%, var(--wp--preset--color--base))",backdropFilter:"blur(4px)",padding:"2rem",borderRadius:"1rem",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)",transform:"translateY(1.5rem)"}}>
             <p style={{fontSize:"2.5rem",fontWeight:"800",color:"var(--wp--preset--color--secondary)",marginBottom:"0.5rem"}}>24/7</p>
-            <p style={{color:"color-mix(in srgb, var(--wp--preset--color--base) 60%, transparent)",fontWeight:"500",marginTop:"0",marginBottom:"0",fontSize:"0.875rem"}}>Expert Support</p>
+            <p style={{color:"color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)",fontWeight:"500",marginTop:"0",marginBottom:"0",fontSize:"0.875rem"}}>Expert Support</p>
           </div>
         </div>
       </div>
@@ -419,7 +419,7 @@ export default function SaaSPage() {
       </section>
 
       {/* Stats/Testimonial Section */}
-      <section id="testimonials" style={{ paddingTop: '6rem', paddingBottom: '6rem', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', position: 'relative', overflow: 'hidden' }}>
+      <section id="testimonials" style={{ paddingTop: '6rem', paddingBottom: '6rem', backgroundColor: 'var(--color-bg-tertiary)', color: 'var(--color-text)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', right: 0, bottom: 0, width: '600px', height: '600px', backgroundColor: 'color-mix(in srgb, var(--color-primary-500) 20%, transparent)', filter: 'blur(100px)', borderRadius: '50%', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 2rem', position: 'relative', zIndex: 10 }}>
@@ -437,7 +437,7 @@ export default function SaaSPage() {
                   &ldquo;Switching to SaaSFlow was the best decision we made this year. It allowed our team to ship features 40% faster and cut our infrastructure costs in half.&rdquo;
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ width: '3.5rem', height: '3.5rem', borderRadius: '50%', backgroundImage: "url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop')", backgroundSize: 'cover', border: '2px solid color-mix(in srgb, var(--color-bg) 15%, transparent)' }} />
+                  <div style={{ width: '3.5rem', height: '3.5rem', borderRadius: '50%', backgroundImage: "url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop')", backgroundSize: 'cover', border: '2px solid var(--color-border-subtle)' }} />
                   <div>
                     <h4 style={{ fontWeight: 700, marginTop: 0, marginBottom: 0 }}>Sarah Jenkins</h4>
                     <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem', marginTop: 0, marginBottom: 0 }}>CTO at TechNova</p>
@@ -448,21 +448,21 @@ export default function SaaSPage() {
 
             <div style={{ flex: 1 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <div style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 15%, transparent)', backdropFilter: 'blur(4px)', padding: '2rem', borderRadius: '1rem', border: '1px solid color-mix(in srgb, var(--color-bg) 25%, transparent)' }}>
+                <div style={{ backgroundColor: 'var(--color-bg-card)', backdropFilter: 'blur(4px)', padding: '2rem', borderRadius: '1rem', border: '1px solid var(--color-border-card)' }}>
                   <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--color-primary-500)', marginBottom: '0.5rem' }}>99.9%</div>
-                  <p style={{ color: 'color-mix(in srgb, var(--color-bg) 60%, transparent)', fontWeight: 500 }}>Uptime Guarantee</p>
+                  <p style={{ color: 'var(--color-text-muted)', fontWeight: 500 }}>Uptime Guarantee</p>
                 </div>
-                <div style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 15%, transparent)', backdropFilter: 'blur(4px)', padding: '2rem', borderRadius: '1rem', border: '1px solid color-mix(in srgb, var(--color-bg) 25%, transparent)', transform: 'translateY(1.5rem)' }}>
+                <div style={{ backgroundColor: 'var(--color-bg-card)', backdropFilter: 'blur(4px)', padding: '2rem', borderRadius: '1rem', border: '1px solid var(--color-border-card)', transform: 'translateY(1.5rem)' }}>
                   <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--color-primary-500)', marginBottom: '0.5rem' }}>10M+</div>
-                  <p style={{ color: 'color-mix(in srgb, var(--color-bg) 60%, transparent)', fontWeight: 500 }}>Requests per day</p>
+                  <p style={{ color: 'var(--color-text-muted)', fontWeight: 500 }}>Requests per day</p>
                 </div>
-                <div style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 15%, transparent)', backdropFilter: 'blur(4px)', padding: '2rem', borderRadius: '1rem', border: '1px solid color-mix(in srgb, var(--color-bg) 25%, transparent)' }}>
+                <div style={{ backgroundColor: 'var(--color-bg-card)', backdropFilter: 'blur(4px)', padding: '2rem', borderRadius: '1rem', border: '1px solid var(--color-border-card)' }}>
                   <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--color-secondary-500)', marginBottom: '0.5rem' }}>5,000+</div>
-                  <p style={{ color: 'color-mix(in srgb, var(--color-bg) 60%, transparent)', fontWeight: 500 }}>Active Teams</p>
+                  <p style={{ color: 'var(--color-text-muted)', fontWeight: 500 }}>Active Teams</p>
                 </div>
-                <div style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 15%, transparent)', backdropFilter: 'blur(4px)', padding: '2rem', borderRadius: '1rem', border: '1px solid color-mix(in srgb, var(--color-bg) 25%, transparent)', transform: 'translateY(1.5rem)' }}>
+                <div style={{ backgroundColor: 'var(--color-bg-card)', backdropFilter: 'blur(4px)', padding: '2rem', borderRadius: '1rem', border: '1px solid var(--color-border-card)', transform: 'translateY(1.5rem)' }}>
                   <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--color-secondary-500)', marginBottom: '0.5rem' }}>24/7</div>
-                  <p style={{ color: 'color-mix(in srgb, var(--color-bg) 60%, transparent)', fontWeight: 500 }}>Expert Support</p>
+                  <p style={{ color: 'var(--color-text-muted)', fontWeight: 500 }}>Expert Support</p>
                 </div>
               </div>
             </div>
