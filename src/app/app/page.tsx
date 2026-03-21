@@ -431,11 +431,9 @@ export default function Home() {
           if (eventType === "step") {
             updateStep(parsed.step, parsed.status, parsed.detail);
 
-            // When enrich completes, configure the theme path
+            // When enrich completes, store the slug for packaging but keep ThemePreview as renderer
             if (parsed.step === "enrich" && parsed.status === "done" && parsed.meta?.themeSlug) {
-              const slug = parsed.meta.themeSlug;
-              setThemeSlug(slug);
-              themeSlugRef.current = slug;
+              themeSlugRef.current = parsed.meta.themeSlug;
               setArchetypeId(parsed.meta.archetypeId ?? "blog");
             }
           } else if (eventType === "files") {
