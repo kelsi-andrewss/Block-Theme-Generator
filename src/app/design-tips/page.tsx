@@ -145,6 +145,100 @@ export default function DesignTipsPage() {
                 <p className="text-sm text-zinc-500 mb-4">A window that floats over the rest of the site.</p>
                 <code className="text-xs bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-800/50 block font-mono">"Make this button open a modal window."</code>
               </div>
+
+              {/* Pricing */}
+              <div className="flex flex-col">
+                <div className="bg-zinc-100 dark:bg-zinc-800 rounded-3xl p-4 mb-4 h-48 flex gap-3 justify-center items-end border border-zinc-200 dark:border-zinc-700 overflow-hidden relative">
+                   <div className="w-24 h-32 bg-white dark:bg-zinc-900 rounded-xl shadow-md p-3 flex flex-col gap-2 border border-zinc-100 dark:border-zinc-800">
+                      <div className="w-full h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full"></div>
+                      <div className="w-1/2 h-4 bg-zinc-200 dark:bg-zinc-700 rounded-lg mx-auto"></div>
+                      <div className="flex-1"></div>
+                      <div className="w-full h-6 bg-zinc-100 dark:bg-zinc-800 rounded-lg"></div>
+                   </div>
+                   <div className="w-24 h-36 bg-white dark:bg-zinc-900 rounded-xl shadow-xl p-3 flex flex-col gap-2 border-2 border-blue-500 z-10 scale-110">
+                      <div className="w-full h-2 bg-blue-50 dark:bg-blue-900/30 rounded-full"></div>
+                      <div className="w-1/2 h-4 bg-blue-100 dark:bg-blue-800 rounded-lg mx-auto"></div>
+                      <div className="flex-1"></div>
+                      <div className="w-full h-6 bg-blue-600 rounded-lg"></div>
+                   </div>
+                   <div className="w-24 h-32 bg-white dark:bg-zinc-900 rounded-xl shadow-md p-3 flex flex-col gap-2 border border-zinc-100 dark:border-zinc-800">
+                      <div className="w-full h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full"></div>
+                      <div className="w-1/2 h-4 bg-zinc-200 dark:bg-zinc-700 rounded-lg mx-auto"></div>
+                      <div className="flex-1"></div>
+                      <div className="w-full h-6 bg-zinc-100 dark:bg-zinc-800 rounded-lg"></div>
+                   </div>
+                   <div className="absolute top-3 right-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Example: Pricing</div>
+                </div>
+                <h3 className="font-bold text-xl text-zinc-900 dark:text-white mb-1">Pricing Table</h3>
+                <p className="text-sm text-zinc-500 mb-4">Comparison boxes for different plans or tiers.</p>
+                <code className="text-xs bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-800/50 block font-mono">"Add a 3-column pricing table with a 'Most Popular' tag."</code>
+              </div>
+
+              {/* Accordion */}
+              <div className="flex flex-col">
+                <div className="bg-zinc-100 dark:bg-zinc-800 rounded-3xl p-4 mb-4 h-48 flex flex-col gap-2 justify-center items-center border border-zinc-200 dark:border-zinc-700 overflow-hidden relative">
+                   {[1, 2, 3].map(i => (
+                     <div key={i} className={`w-48 ${i === 2 ? 'h-16' : 'h-8'} bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-700 flex flex-col p-2 px-3 justify-center gap-1 shadow-sm`}>
+                        <div className="flex justify-between items-center">
+                           <div className="w-24 h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full"></div>
+                           <div className={`w-2 h-2 border-r-2 border-b-2 border-zinc-400 ${i === 2 ? 'rotate-[225deg] mt-1' : 'rotate-45 mb-1'} transition-transform`}></div>
+                        </div>
+                        {i === 2 && <div className="w-full h-1 bg-zinc-50 dark:bg-zinc-800/50 rounded-full mt-1"></div>}
+                        {i === 2 && <div className="w-2/3 h-1 bg-zinc-50 dark:bg-zinc-800/50 rounded-full"></div>}
+                     </div>
+                   ))}
+                   <div className="absolute top-3 right-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Example: Accordion</div>
+                </div>
+                <h3 className="font-bold text-xl text-zinc-900 dark:text-white mb-1">Accordion</h3>
+                <p className="text-sm text-zinc-500 mb-4">Expandable list items, perfect for FAQ sections.</p>
+                <code className="text-xs bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-800/50 block font-mono">"Make these FAQ questions into an accordion."</code>
+              </div>
+
+              {/* Form */}
+              <div className="flex flex-col">
+                <div className="bg-zinc-100 dark:bg-zinc-800 rounded-3xl p-4 mb-4 h-48 flex justify-center items-center border border-zinc-200 dark:border-zinc-700 overflow-hidden relative">
+                   <div className="w-48 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl p-4 flex flex-col gap-3 border border-zinc-100 dark:border-zinc-800">
+                      <div className="space-y-1">
+                         <div className="w-8 h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full"></div>
+                         <div className="w-full h-6 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-100 dark:border-zinc-700"></div>
+                      </div>
+                      <div className="space-y-1">
+                         <div className="w-12 h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full"></div>
+                         <div className="w-full h-12 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-100 dark:border-zinc-700"></div>
+                      </div>
+                      <div className="w-full h-8 bg-blue-600 rounded-xl"></div>
+                   </div>
+                   <div className="absolute top-3 right-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Example: Form</div>
+                </div>
+                <h3 className="font-bold text-xl text-zinc-900 dark:text-white mb-1">Contact Form</h3>
+                <p className="text-sm text-zinc-500 mb-4">Input fields for names, emails, and messages.</p>
+                <code className="text-xs bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-800/50 block font-mono">"Add a contact form with fields for Name and Message."</code>
+              </div>
+
+              {/* Testimonials */}
+              <div className="flex flex-col">
+                <div className="bg-zinc-100 dark:bg-zinc-800 rounded-3xl p-4 mb-4 h-48 flex justify-center items-center border border-zinc-200 dark:border-zinc-700 overflow-hidden relative">
+                   <div className="w-56 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl p-4 flex flex-col gap-3 border border-zinc-100 dark:border-zinc-800 relative">
+                      <div className="absolute -top-2 -left-2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xl font-serif">"</div>
+                      <div className="space-y-2 py-2">
+                         <div className="w-full h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full"></div>
+                         <div className="w-5/6 h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full"></div>
+                         <div className="w-4/6 h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full"></div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                         <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700"></div>
+                         <div className="space-y-1">
+                            <div className="w-16 h-1.5 bg-zinc-300 dark:bg-zinc-600 rounded-full"></div>
+                            <div className="w-12 h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full"></div>
+                         </div>
+                      </div>
+                   </div>
+                   <div className="absolute top-3 right-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Example: Testimonial</div>
+                </div>
+                <h3 className="font-bold text-xl text-zinc-900 dark:text-white mb-1">Testimonials</h3>
+                <p className="text-sm text-zinc-500 mb-4">Quotes from happy customers or users.</p>
+                <code className="text-xs bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-800/50 block font-mono">"Add a testimonial section with customer photos."</code>
+              </div>
             </div>
           </section>
 
