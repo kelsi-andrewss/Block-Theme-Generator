@@ -260,7 +260,7 @@ export async function POST(request: Request) {
             templates: mapToObject(templates),
             parts: mapToObject(parts),
             patterns: mapToObject(patterns),
-            pages: skeletonPayload,
+            skeletonPages: skeletonPayload,
             customCss,
           },
           audit,
