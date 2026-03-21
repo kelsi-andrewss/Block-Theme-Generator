@@ -17,7 +17,7 @@ import { SAAS_FRONT_PAGE_HTML, SAAS_HEADER_HTML, SAAS_FOOTER_HTML, SAAS_SIGNUP_H
 import { generateSaasCustomCss } from "@/lib/generators/custom-css";
 import type { AuditResult } from "@/lib/validation/design-audit";
 import { applyThemeOverrides, buildThemeFileMap, type ThemeFilesData, type IframeState } from "@/lib/packer/constants";
-import { set, get, del } from "idb-keyval";
+import { set } from "idb-keyval";
 import {
   SAAS_JSX_SOURCE, SAAS_HEADER_JSX_SOURCE, SAAS_FOOTER_JSX_SOURCE,
   SAAS_404_JSX_SOURCE, SAAS_SIGNUP_JSX_SOURCE, SAAS_PRICING_JSX_SOURCE,
@@ -76,6 +76,8 @@ export default function Home() {
   const [activeFile, setActiveFile] = useState<string>("index.html");
   const [openFiles, setOpenFiles] = useState<string[]>(["index.html"]);
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
+  const [jsxPages, setJsxPages] = useState<Record<string, string> | null>(null);
+
   const activeSlug = useMemo(() => {
     if (!activeFile || activeFile === 'index.html' || activeFile === 'front-page.html') return 'home';
     if (activeFile.startsWith('parts/')) return activeFile.replace('parts/', '').replace('.html', '');
@@ -163,8 +165,6 @@ export default function Home() {
     }
   }
 
-  const [iframeKey, setIframeKey] = useState(0);
-
   const handleSendMessage = useCallback(async (message: string, block?: SelectedBlockEvent): Promise<string> => {
     if (!result) return "No theme loaded.";
 
@@ -177,40 +177,7 @@ export default function Home() {
       const isHeaderFooter = block?.blockName.toLowerCase().includes('header') || block?.blockName.toLowerCase().includes('footer') || activeFile.includes('parts/');
 
       if (block) {
-        // JSX path: when IDB has jsx-pages, edit JSX source directly via API
-        const jsxPagesData = await get<Record<string, string>>("jsx-pages");
-        if (jsxPagesData) {
-          const editSlug = isHeaderFooter
-            ? (block.blockName.toLowerCase().includes('header') ? 'header' : 'footer')
-            : activeSlug;
-          const currentJsx = jsxPagesData[editSlug];
-          if (currentJsx) {
-            const res = await fetch("/api/iterate", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                instruction: message,
-                jsxSource: "jsx-mode",
-                selectedElement: { html: block.html, content: block.content },
-              }),
-            });
-            if (!res.ok) {
-              const body = await res.json().catch(() => ({}));
-              throw new Error(body.error ?? `Iteration failed (${res.status})`);
-            }
-            const data: { originalJsx: string; modifiedJsx: string; explanation: string } = await res.json();
-            const updatedJsx = currentJsx.replace(data.originalJsx, data.modifiedJsx);
-            if (updatedJsx === currentJsx) {
-              console.warn("JSX element replace did not match — change may not persist");
-            }
-            jsxPagesData[editSlug] = updatedJsx;
-            await set("jsx-pages", jsxPagesData);
-            setIframeKey(k => k + 1);
-            return data.explanation;
-          }
-        }
-
-        // DOM path: generated themes that use ThemePreview (no jsx-pages in IDB)
+        // Targeted edit: send element HTML, get modified HTML back
         const res = await fetch("/api/iterate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -542,8 +509,7 @@ export default function Home() {
     if (!result) return;
     setIsPackaging(true);
     try {
-      const jsxPagesData = await get<Record<string, string>>("jsx-pages");
-      const themeFiles = jsxPagesData ? transpileJsxPagesToThemeFiles(result.themeFiles, jsxPagesData) : result.themeFiles;
+      const themeFiles = jsxPages ? transpileJsxPagesToThemeFiles(result.themeFiles, jsxPages) : result.themeFiles;
       const overridden = applyThemeOverrides(themeFiles, iframeState as IframeState | null);
       const fileMap = buildThemeFileMap(overridden, result.meta);
       const slug = result.meta.themeName;
@@ -574,8 +540,7 @@ export default function Home() {
     setIsPreviewing(true);
 
     try {
-      const jsxPagesData = await get<Record<string, string>>("jsx-pages");
-      const themeFiles = jsxPagesData ? transpileJsxPagesToThemeFiles(result.themeFiles, jsxPagesData) : result.themeFiles;
+      const themeFiles = jsxPages ? transpileJsxPagesToThemeFiles(result.themeFiles, jsxPages) : result.themeFiles;
       const overridden = applyThemeOverrides(themeFiles, iframeState as IframeState | null);
 
       await set("playground-theme", {
@@ -599,7 +564,7 @@ export default function Home() {
     setInitialDesc("");
     setInitialArch(null);
     setFormKey(k => k + 1);
-    del("jsx-pages");
+    setJsxPages(null);
   }
 
   function handleSelectGalleryTheme(theme: PremadeTheme) {
@@ -624,7 +589,7 @@ export default function Home() {
     setArchetypeId(theme.id);
 
     if (theme.id === "saas") {
-      set("jsx-pages", {
+      setJsxPages({
         home: SAAS_JSX_SOURCE,
         header: SAAS_HEADER_JSX_SOURCE,
         footer: SAAS_FOOTER_JSX_SOURCE,
@@ -635,7 +600,7 @@ export default function Home() {
         contact: SAAS_CONTACT_JSX_SOURCE,
       });
     } else {
-      del("jsx-pages");
+      setJsxPages(null);
     }
 
     const customCss = theme.id === "saas" ? generateSaasCustomCss() : undefined;
@@ -962,7 +927,7 @@ export default function Home() {
                       const iframeSrc = `/templates/${themeSlug}${iframeSlug ? `/${iframeSlug}` : ''}${isPart ? '?isolate=true' : ''}`;
                       return (
                         <iframe
-                          key={`${activeFile}-${iframeKey}`}
+                          key={activeFile}
                           src={iframeSrc}
                           className="w-full h-full border-0"
                           title={`${themeSlug} Template Iteration Preview`}

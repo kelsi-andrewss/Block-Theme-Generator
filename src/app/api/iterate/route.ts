@@ -63,32 +63,6 @@ RESPONSE FORMAT — JSON only, no markdown fences:
   "explanation": "<one sentence>"
 }`;
 
-const JSX_ELEMENT_EDIT_PROMPT = `You are a JSX element editor for a SaaS website builder.
-
-You receive a single HTML element (as rendered in the browser DOM) and an edit instruction.
-
-Your job:
-1. Convert the DOM HTML element to its JSX equivalent (style attributes become style objects: style={{prop:"value"}}, class becomes className, etc.)
-2. Apply the user's edit instruction to produce the modified JSX element
-3. Return BOTH the original JSX and the modified JSX
-
-The JSX uses WordPress CSS custom properties: var(--wp--preset--color--primary), var(--wp--preset--color--contrast), etc.
-Style values use color-mix(): color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)
-
-RULES:
-1. The originalJsx must be the EXACT JSX representation of the input HTML — this will be used for string matching.
-2. The modifiedJsx must be the edited version with the instruction applied.
-3. Keep styles as JSX object syntax: style={{fontSize:"2rem"}} not style="font-size:2rem"
-4. Preserve WordPress CSS variable references.
-5. Return ONLY valid JSON — no markdown fences.
-
-RESPONSE FORMAT:
-{
-  "originalJsx": "<JSX version of the input element>",
-  "modifiedJsx": "<modified JSX element>",
-  "explanation": "<one sentence>"
-}`;
-
 const MULTI_FILE_SYSTEM_PROMPT = `You are a WordPress block theme editor. You modify multiple HTML template files based on a user instruction.
 
 You will receive:
@@ -116,14 +90,13 @@ RESPONSE FORMAT:
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { instruction, selectedElement, palette, isGlobal, themeFiles, activeFile, jsxSource } = body as {
+    const { instruction, selectedElement, palette, isGlobal, themeFiles, activeFile } = body as {
       instruction: string;
       selectedElement?: { html: string; content: string };
       palette?: string;
       isGlobal?: boolean;
       themeFiles?: any;
       activeFile?: string;
-      jsxSource?: string;
     };
 
     if (!instruction) {
@@ -142,21 +115,6 @@ export async function POST(req: NextRequest) {
         cleaned = cleaned.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
       }
       return NextResponse.json(JSON.parse(cleaned));
-    }
-
-    if (jsxSource && selectedElement) {
-      // Element-level JSX edit — send only the element, not the whole page
-      const prompt = `## Selected Element (browser DOM HTML)\n\`\`\`html\n${selectedElement.html}\n\`\`\`\n\nText content: "${selectedElement.content}"\n\n## Instruction\n${instruction}`;
-      const raw = await provider.generateText(prompt, JSX_ELEMENT_EDIT_PROMPT, { temperature: 0.3 });
-      let cleaned = raw.trim();
-      if (cleaned.startsWith("```")) {
-        cleaned = cleaned.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
-      }
-      const result = JSON.parse(cleaned);
-      if (!result.originalJsx || !result.modifiedJsx) {
-        return NextResponse.json({ error: "AI returned invalid JSX element response" }, { status: 502 });
-      }
-      return NextResponse.json(result);
     }
 
     if (selectedElement) {
