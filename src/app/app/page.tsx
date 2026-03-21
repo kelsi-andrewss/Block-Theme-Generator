@@ -374,7 +374,7 @@ export default function Home() {
     setStep("generating");
     setError(null);
     setResult({
-      themeFiles: { themeJson: "", darkMode: "", templates: {}, parts: {}, patterns: {}, pages: {}, customCss: "" },
+      themeFiles: { themeJson: "", darkMode: "", templates: {}, parts: {}, patterns: {}, customCss: "" },
       audit: { score: 0, grade: "F", checks: [] },
       meta: { themeName: "generating", displayName: "Generating...", description: data.description }
     });
@@ -549,7 +549,6 @@ export default function Home() {
         templates,
         parts,
         patterns: {},
-        pages: {},
         customCss,
       },
       audit: {
@@ -859,8 +858,7 @@ export default function Home() {
                           title={`${themeSlug} Template Iteration Preview`}
                         />
                       );
-                    })()
-                    ) : (
+                    })() : (
                       <ThemePreview
                         themeJson={result?.themeFiles.darkMode || result?.themeFiles.themeJson}
                         templates={result?.themeFiles.templates}
