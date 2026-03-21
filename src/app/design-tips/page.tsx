@@ -24,10 +24,10 @@ export default function DesignTipsPage() {
       <main className="max-w-4xl mx-auto px-6 py-16">
         <header className="mb-20 text-center">
           <h1 className="text-5xl font-extrabold text-zinc-900 dark:text-white mb-6 tracking-tight">
-            Design for Non-Designers
+            The Iteration Playbook
           </h1>
           <p className="text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-2xl mx-auto">
-            You don't need to be a pro. Use these "AI-Friendly" phrases to get the exact design you want.
+            Learn the "Pro Phrasing" that unlocks high-end layouts, precise control, and pixel-perfect iterations.
           </p>
         </header>
 
