@@ -17,7 +17,7 @@ import { SAAS_FRONT_PAGE_HTML, SAAS_HEADER_HTML, SAAS_FOOTER_HTML, SAAS_SIGNUP_H
 import { generateSaasCustomCss } from "@/lib/generators/custom-css";
 import type { AuditResult } from "@/lib/validation/design-audit";
 import { applyThemeOverrides, buildThemeFileMap, type ThemeFilesData, type IframeState } from "@/lib/packer/constants";
-import { set } from "idb-keyval";
+import { set, get, del } from "idb-keyval";
 import {
   SAAS_JSX_SOURCE, SAAS_HEADER_JSX_SOURCE, SAAS_FOOTER_JSX_SOURCE,
   SAAS_404_JSX_SOURCE, SAAS_SIGNUP_JSX_SOURCE, SAAS_PRICING_JSX_SOURCE,
@@ -76,8 +76,6 @@ export default function Home() {
   const [activeFile, setActiveFile] = useState<string>("index.html");
   const [openFiles, setOpenFiles] = useState<string[]>(["index.html"]);
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
-  const [jsxPages, setJsxPages] = useState<Record<string, string> | null>(null);
-
   const activeSlug = useMemo(() => {
     if (!activeFile || activeFile === 'index.html' || activeFile === 'front-page.html') return 'home';
     if (activeFile.startsWith('parts/')) return activeFile.replace('parts/', '').replace('.html', '');
@@ -509,7 +507,8 @@ export default function Home() {
     if (!result) return;
     setIsPackaging(true);
     try {
-      const themeFiles = jsxPages ? transpileJsxPagesToThemeFiles(result.themeFiles, jsxPages) : result.themeFiles;
+      const jsxPagesData = await get<Record<string, string>>("jsx-pages");
+      const themeFiles = jsxPagesData ? transpileJsxPagesToThemeFiles(result.themeFiles, jsxPagesData) : result.themeFiles;
       const overridden = applyThemeOverrides(themeFiles, iframeState as IframeState | null);
       const fileMap = buildThemeFileMap(overridden, result.meta);
       const slug = result.meta.themeName;
@@ -540,7 +539,8 @@ export default function Home() {
     setIsPreviewing(true);
 
     try {
-      const themeFiles = jsxPages ? transpileJsxPagesToThemeFiles(result.themeFiles, jsxPages) : result.themeFiles;
+      const jsxPagesData = await get<Record<string, string>>("jsx-pages");
+      const themeFiles = jsxPagesData ? transpileJsxPagesToThemeFiles(result.themeFiles, jsxPagesData) : result.themeFiles;
       const overridden = applyThemeOverrides(themeFiles, iframeState as IframeState | null);
 
       await set("playground-theme", {
@@ -564,7 +564,7 @@ export default function Home() {
     setInitialDesc("");
     setInitialArch(null);
     setFormKey(k => k + 1);
-    setJsxPages(null);
+    del("jsx-pages");
   }
 
   function handleSelectGalleryTheme(theme: PremadeTheme) {
@@ -589,7 +589,7 @@ export default function Home() {
     setArchetypeId(theme.id);
 
     if (theme.id === "saas") {
-      setJsxPages({
+      set("jsx-pages", {
         home: SAAS_JSX_SOURCE,
         header: SAAS_HEADER_JSX_SOURCE,
         footer: SAAS_FOOTER_JSX_SOURCE,
@@ -600,7 +600,7 @@ export default function Home() {
         contact: SAAS_CONTACT_JSX_SOURCE,
       });
     } else {
-      setJsxPages(null);
+      del("jsx-pages");
     }
 
     const customCss = theme.id === "saas" ? generateSaasCustomCss() : undefined;

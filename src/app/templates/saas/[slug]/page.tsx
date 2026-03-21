@@ -1,6 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { get } from 'idb-keyval';
 import JsxStringRenderer from '@/components/JsxStringRenderer';
 import {
   SAAS_404_JSX_SOURCE,
@@ -31,7 +33,14 @@ const WP_VAR_BRIDGE: Record<string, string> = {
 
 export default function SaaSSubPage() {
   const { slug } = useParams<{ slug: string }>();
-  const jsxSource = TEMPLATE_MAP[slug] ?? SAAS_404_JSX_SOURCE;
+  const fallback = TEMPLATE_MAP[slug] ?? SAAS_404_JSX_SOURCE;
+  const [jsxSource, setJsxSource] = useState(fallback);
+
+  useEffect(() => {
+    get<Record<string, string>>("jsx-pages").then(stored => {
+      if (stored?.[slug]) setJsxSource(stored[slug]);
+    });
+  }, [slug]);
 
   return (
     <div style={{

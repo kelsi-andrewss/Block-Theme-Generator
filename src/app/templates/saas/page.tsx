@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { get } from 'idb-keyval';
 import { SAAS_FEATURES } from '@/lib/data/saas-features';
 import JsxStringRenderer from '@/components/JsxStringRenderer';
 
@@ -319,6 +321,14 @@ const WP_VAR_BRIDGE: Record<string, string> = {
 };
 
 export default function SaaSPage() {
+  const [jsxSource, setJsxSource] = useState(SAAS_JSX_SOURCE);
+
+  useEffect(() => {
+    get<Record<string, string>>("jsx-pages").then(stored => {
+      if (stored?.home) setJsxSource(stored.home);
+    });
+  }, []);
+
   return (
     <div style={{
       display: 'flex',
@@ -328,7 +338,7 @@ export default function SaaSPage() {
       backgroundColor: 'var(--color-bg)',
       color: 'var(--color-text)',
     }}>
-      <JsxStringRenderer jsxString={SAAS_JSX_SOURCE} />
+      <JsxStringRenderer jsxString={jsxSource} />
     </div>
   );
 }
