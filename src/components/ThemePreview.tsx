@@ -357,7 +357,7 @@ export default function ThemePreview({
         const pageSlug = activeFile.replace('pages/', '');
         templateHTML = skeletonPages?.[pageSlug]?.content || "";
       } else {
-        templateHTML = templates?.[activeFile] || templates?.["index.html"] || templates?.["front-page.html"] || "";
+        templateHTML = templates?.[activeFile] ?? templates?.["index.html"] ?? templates?.["front-page.html"] ?? "";
       }
       
       // Stupid simple parser to just strip block comments and resolve template parts
