@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 type ViewportSize = "desktop" | "tablet" | "mobile";
+export type PreviewMode = "edit" | "preview";
 
 const VIEWPORT_WIDTHS: Record<ViewportSize, string> = {
   desktop: "100%",
@@ -15,14 +16,20 @@ export interface ThemePreviewProps {
   templates?: Record<string, string>;
   parts?: Record<string, string>;
   patterns?: Record<string, string>;
+  pages?: Record<string, { title: string; content: string }>;
+  activePage?: string; // slug or template name
   customCss?: string;
+  mode?: PreviewMode;
+  onNavigate?: (pageSlug: string) => void;
 }
 
 // Vanilla JS selection bridge — injected into the blob iframe to enable click-to-select
-const SELECTION_BRIDGE_SCRIPT = `
+// UPDATED: Now checks for 'edit' mode before allowing selection
+const SELECTION_BRIDGE_SCRIPT = (mode: PreviewMode) => `
 <script>
 (function() {
   var hl = null, sel = null;
+  var currentMode = '${mode}';
 
   function bid(el) {
     var p = [], c = el;
@@ -41,6 +48,7 @@ const SELECTION_BRIDGE_SCRIPT = `
   }
 
   document.addEventListener('mouseover', function(e) {
+    if (currentMode !== 'edit') return;
     var t = e.target;
     if (!ok(t) || t === sel) return;
     e.stopPropagation();
@@ -58,6 +66,23 @@ const SELECTION_BRIDGE_SCRIPT = `
 
   document.addEventListener('click', function(e) {
     var t = e.target;
+    
+    // NAVIGATION logic: If in preview mode and it's a link, notify parent
+    if (currentMode === 'preview') {
+      var link = t.closest('a');
+      if (link && link.getAttribute('href')) {
+        e.preventDefault();
+        e.stopPropagation();
+        var href = link.getAttribute('href');
+        // Handle local slugs /signup -> signup
+        var slug = href.replace(/^\\//, '');
+        window.parent.postMessage({ type: 'NAVIGATE', payload: slug || 'home' }, '*');
+        return;
+      }
+      return; // Fall through for normal clicks in preview
+    }
+
+    // SELECTION logic: If in edit mode
     if (!ok(t)) return;
     e.preventDefault();
     e.stopPropagation();
@@ -130,23 +155,10 @@ const SELECTION_BRIDGE_SCRIPT = `
       }
     }
     if (e.data.type === 'PATCH_ELEMENT' && e.data.html) {
-      // sel holds the live DOM reference — swap it directly
-      if (sel) {
-        sel.outerHTML = e.data.html;
-      }
+      if (sel) { sel.outerHTML = e.data.html; }
       hl = null; sel = null;
     }
-    if (e.data.type === 'UNDO_ELEMENT' && e.data.findHtml && e.data.restoreHtml) {
-      var allEls = document.body.querySelectorAll('*');
-      for (var j = 0; j < allEls.length; j++) {
-        if (allEls[j].outerHTML === e.data.findHtml) {
-          allEls[j].outerHTML = e.data.restoreHtml;
-          break;
-        }
-      }
-    }
     if (e.data.type === 'PATCH_CONTENT' && e.data.html) {
-      // Global fallback: swap entire body
       document.body.innerHTML = e.data.html;
       hl = null; sel = null;
     }
@@ -154,9 +166,28 @@ const SELECTION_BRIDGE_SCRIPT = `
 })();
 </script>`;
 
-export default function ThemePreview({ themeJson, templates, parts, customCss }: ThemePreviewProps) {
+export default function ThemePreview({ 
+  themeJson, 
+  templates, 
+  parts, 
+  pages, 
+  activePage = "home", 
+  customCss, 
+  mode = "edit",
+  onNavigate
+}: ThemePreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [viewport, setViewport] = useState<ViewportSize>("desktop");
+
+  useEffect(() => {
+    function handleNav(event: MessageEvent) {
+      if (event.data?.type === 'NAVIGATE' && onNavigate) {
+        onNavigate(event.data.payload);
+      }
+    }
+    window.addEventListener('message', handleNav);
+    return () => window.removeEventListener('message', handleNav);
+  }, [onNavigate]);
 
   useEffect(() => {
     if (!iframeRef.current || !themeJson || !templates) return;
@@ -166,189 +197,95 @@ export default function ThemePreview({ themeJson, templates, parts, customCss }:
       
       // 1. Build CSS from theme.json
       let cssVars = ":root {\n";
-      
-      // Colors
       const palette = parsedJson?.settings?.color?.palette || [];
-      palette.forEach((c: any) => {
-        cssVars += `  --wp--preset--color--${c.slug}: ${c.color};\n`;
-      });
-      
-      // Typo
+      palette.forEach((c: any) => { cssVars += `  --wp--preset--color--${c.slug}: ${c.color};\n`; });
       const fonts = parsedJson?.settings?.typography?.fontFamilies || [];
-      fonts.forEach((f: any) => {
-        cssVars += `  --wp--preset--font-family--${f.slug}: ${f.fontFamily};\n`;
-      });
-      
+      fonts.forEach((f: any) => { cssVars += `  --wp--preset--font-family--${f.slug}: ${f.fontFamily};\n`; });
       const sizes = parsedJson?.settings?.typography?.fontSizes || [];
-      sizes.forEach((s: any) => {
-        cssVars += `  --wp--preset--font-size--${s.slug}: ${s.size};\n`;
-      });
-
+      sizes.forEach((s: any) => { cssVars += `  --wp--preset--font-size--${s.slug}: ${s.size};\n`; });
       cssVars += "}\n";
 
-      // Base Styles
       const styles = parsedJson?.styles || {};
       const bgColor = styles?.color?.background || "#ffffff";
       const textColor = styles?.color?.text || "#000000";
       const fontFam = styles?.typography?.fontFamily || "sans-serif";
       
       let baseCss = `
-        /* WP Core Base */
-        html, body {
-          margin: 0;
-          padding: 0;
-          max-width: 100vw;
-          overflow-x: hidden;
-        }
-        *, *::before, *::after {
-          box-sizing: border-box;
-        }
+        html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
+        *, *::before, *::after { box-sizing: border-box; }
         body { 
-          background-color: ${bgColor}; 
-          color: ${textColor}; 
-          font-family: ${fontFam};
-          line-height: ${styles?.typography?.lineHeight || 1.6};
-          -webkit-font-smoothing: antialiased;
+          background-color: ${bgColor}; color: ${textColor}; font-family: ${fontFam};
+          line-height: ${styles?.typography?.lineHeight || 1.6}; -webkit-font-smoothing: antialiased;
         }
-
         a { color: inherit; text-decoration: underline; }
         a:hover { text-decoration: none; }
-        
-        /* Layouts & Containers */
         .wp-block-group { box-sizing: border-box; }
         .is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
-          max-width: 1200px;
-          margin-left: auto !important;
-          margin-right: auto !important;
+          max-width: 1200px; margin-left: auto !important; margin-right: auto !important;
         }
-        .is-layout-flex {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 1.25em;
-        }
+        .is-layout-flex { display: flex; flex-wrap: wrap; align-items: center; gap: 1.25em; }
         .is-vertical { flex-direction: column; align-items: flex-start; }
         .is-content-justification-center { justify-content: center; }
         .is-content-justification-space-between { justify-content: space-between; }
-
-        /* Columns */
-        .wp-block-columns {
-          display: flex;
-          margin-bottom: 1.75em;
-          box-sizing: border-box;
-          flex-wrap: wrap;
-        }
-        @media (min-width: 782px) {
-          .wp-block-columns { flex-wrap: nowrap; gap: 2em; }
-        }
-        
-        .wp-block-columns.is-not-stacked-on-mobile {
-          flex-wrap: nowrap;
-        }
-        
-        .wp-block-column { 
-          flex-grow: 1; 
-          min-width: 0; 
-          word-break: break-word; 
-          overflow-wrap: break-word; 
-          flex-basis: 100%; /* Default to stacking on mobile */
-        }
-        @media (min-width: 782px) {
-          .wp-block-column { flex-basis: 0; }
-        }
-
-        /* Cover Block */
+        .wp-block-columns { display: flex; margin-bottom: 1.75em; box-sizing: border-box; flex-wrap: wrap; }
+        @media (min-width: 782px) { .wp-block-columns { flex-wrap: nowrap; gap: 2em; } }
+        .wp-block-columns.is-not-stacked-on-mobile { flex-wrap: nowrap; }
+        .wp-block-column { flex-grow: 1; min-width: 0; word-break: break-word; overflow-wrap: break-word; flex-basis: 100%; }
+        @media (min-width: 782px) { .wp-block-column { flex-basis: 0; } }
         .wp-block-cover {
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: 400px;
-          background-size: cover;
-          background-position: center center;
-          overflow: hidden;
-          padding: 2em;
+          position: relative; display: flex; align-items: center; justify-content: center;
+          min-height: 400px; background-size: cover; background-position: center center; overflow: hidden; padding: 2em;
         }
         .wp-block-cover.has-background-dim::before {
-          content: "";
-          position: absolute;
-          top: 0; left: 0; bottom: 0; right: 0;
-          background-color: inherit;
-          opacity: 0.5;
-          z-index: 1;
+          content: ""; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+          background-color: inherit; opacity: 0.5; z-index: 1;
         }
         .wp-block-cover__inner-container { z-index: 2; position: relative; width: 100%; }
-        
-        /* Buttons */
         .wp-block-buttons { display: flex; flex-wrap: wrap; gap: 0.5em; }
         .wp-block-button__link {
-          box-sizing: border-box;
-          cursor: pointer;
-          display: inline-block;
-          text-align: center;
-          word-break: break-word;
-          color: var(--wp--preset--color--base, #ffffff);
-          background-color: var(--wp--preset--color--primary, #32373c);
-          border-radius: 9999px;
-          padding: calc(0.667em + 2px) calc(1.333em + 2px);
-          text-decoration: none;
-          font-weight: 500;
-          transition: opacity 0.2s ease;
+          box-sizing: border-box; cursor: pointer; display: inline-block; text-align: center;
+          word-break: break-word; color: var(--wp--preset--color--base, #ffffff);
+          background-color: var(--wp--preset--color--primary, #32373c); border-radius: 9999px;
+          padding: calc(0.667em + 2px) calc(1.333em + 2px); text-decoration: none; font-weight: 500;
         }
-        .wp-block-button__link:hover { opacity: 0.85; text-decoration: none; }
-        .has-background { background-color: var(--wp--preset--color--base, #32373c); }
-        .has-text-color { color: var(--wp--preset--color--contrast, #fff); }
-
-        /* Typography */
         h1, h2, h3, h4, h5, h6 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 700; line-height: 1.2; }
-        h1 { font-size: 3rem; }
-        h2 { font-size: 2.25rem; }
-        h3 { font-size: 1.75rem; }
+        h1 { font-size: 3rem; } h2 { font-size: 2.25rem; } h3 { font-size: 1.75rem; }
         p { margin-top: 0; margin-bottom: 1.5rem; }
-        .has-text-align-center { text-align: center; }
-        .has-text-align-right { text-align: right; }
-        
-        /* Utilities */
-        hr.wp-block-separator {
-          border: none;
-          border-bottom: 2px solid currentColor;
-          opacity: 0.1;
-          margin: 3em auto;
-          width: 100%;
-        }
+        .has-text-align-center { text-align: center; } .has-text-align-right { text-align: right; }
+        hr.wp-block-separator { border: none; border-bottom: 2px solid currentColor; opacity: 0.1; margin: 3em auto; width: 100%; }
         .wp-block-spacer { display: block; height: 3rem; }
         img { max-width: 100%; width: 100%; height: auto; object-fit: cover; }
-        
-        /* Theme JSON Variable Classes Mapping */
         ${palette.map((c: any) => `
           .has-${c.slug}-color { color: var(--wp--preset--color--${c.slug}) !important; }
           .has-${c.slug}-background-color { background-color: var(--wp--preset--color--${c.slug}) !important; }
         `).join('')}
-        
         ${sizes.map((s: any) => `
           .has-${s.slug}-font-size { font-size: var(--wp--preset--font-size--${s.slug}) !important; }
         `).join('')}
       `;
 
-      // 2. Build HTML from blocks
-      // Use front-page.html or index.html as the main template
-      const templateHTML = templates["front-page.html"] || templates["index.html"] || "";
+      // 2. Build HTML Content
+      let rawHtml = "";
+      if (activePage === "home") {
+        rawHtml = templates["front-page.html"] || templates["index.html"] || "";
+      } else if (pages && pages[activePage]) {
+        rawHtml = pages[activePage].content;
+      } else {
+        // Fallback to page.html template if specific content not found
+        rawHtml = templates["page.html"] || "";
+      }
       
-      // Stupid simple parser to just strip block comments and resolve template parts
-      let rawHtml = templateHTML;
-      
+      // Resolve Template Parts
       if (parts) {
-        // Resolve Header
         if (rawHtml.includes('{"slug":"header"')) {
           rawHtml = rawHtml.replace(/<!-- wp:template-part \{"slug":"header"[^>]*-->/g, parts["header.html"] || "");
         }
-        // Resolve Footer
         if (rawHtml.includes('{"slug":"footer"')) {
           rawHtml = rawHtml.replace(/<!-- wp:template-part \{"slug":"footer"[^>]*-->/g, parts["footer.html"] || "");
         }
       }
 
-      // Remove all remaining block comments
+      // Remove block comments
       rawHtml = rawHtml.replace(/<!-- wp:[^\-]*-->/g, "").replace(/<!-- \/wp:[^>]*-->/g, "");
 
       const doc = `
@@ -356,15 +293,12 @@ export default function ThemePreview({ themeJson, templates, parts, customCss }:
       <html>
         <head>
           <script src="https://cdn.tailwindcss.com"></script>
-          <style>
-            ${cssVars}
-            ${baseCss}
-          </style>
+          <style>${cssVars}${baseCss}</style>
           ${customCss ? `<style>${customCss}</style>` : ""}
         </head>
         <body>
           ${rawHtml}
-          ${SELECTION_BRIDGE_SCRIPT}
+          ${SELECTION_BRIDGE_SCRIPT(mode)}
         </body>
       </html>
       `;
@@ -375,11 +309,11 @@ export default function ThemePreview({ themeJson, templates, parts, customCss }:
     } catch (e) {
       console.error("Preview render error:", e);
     }
-  }, [themeJson, templates, parts, customCss]);
+  }, [themeJson, templates, parts, pages, activePage, customCss, mode]);
 
   return (
     <div className="flex flex-col h-full w-full space-y-3">
-      {/* Toolbar */}
+      {/* Viewport Toolbar */}
       <div className="flex items-center justify-between shrink-0">
         <div className="flex items-center gap-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 p-1">
           {(Object.keys(VIEWPORT_WIDTHS) as ViewportSize[]).map((size) => (

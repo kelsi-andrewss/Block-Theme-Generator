@@ -103,6 +103,7 @@ export interface ThemeFilesData {
   templates: Record<string, string>;
   parts: Record<string, string>;
   patterns: Record<string, string>;
+  pages: Record<string, { title: string; content: string }>;
   customCss?: string;
 }
 
