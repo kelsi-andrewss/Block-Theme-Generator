@@ -13,7 +13,7 @@ import IterationChat, { SelectedBlockEvent } from "@/components/IterationChat";
 import WorkbenchHeader from "@/components/WorkbenchHeader";
 import type { ThemeArchetype } from "@/lib/prompts/archetypes";
 import type { PremadeTheme } from "@/lib/premade-themes";
-import { SAAS_FRONT_PAGE_HTML, SAAS_HEADER_HTML, SAAS_FOOTER_HTML } from "@/lib/generators/saas-template";
+import { SAAS_FRONT_PAGE_HTML, SAAS_HEADER_HTML, SAAS_FOOTER_HTML, SAAS_SIGNUP_HTML, SAAS_PRICING_HTML, SAAS_DOCS_HTML, SAAS_CONTACT_HTML, SAAS_404_HTML } from "@/lib/generators/saas-template";
 import { generateSaasCustomCss } from "@/lib/generators/custom-css";
 import type { AuditResult } from "@/lib/validation/design-audit";
 import { applyThemeOverrides, buildThemeFileMap, type ThemeFilesData, type IframeState } from "@/lib/packer/constants";
@@ -525,7 +525,7 @@ export default function Home() {
       "index.html": theme.id === "saas" ? SAAS_FRONT_PAGE_HTML : `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->\n<div class="wp-block-group">\n<!-- wp:heading {"level":1} -->\n<h1 class="wp-block-heading">Latest Posts</h1>\n<!-- /wp:heading -->\n</div>\n<!-- /wp:group -->\n<!-- wp:spacer {"height":"2rem"} -->\n<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>\n<!-- /wp:spacer -->\n<!-- wp:query {"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true}} -->\n<div class="wp-block-query">\n<!-- wp:post-template -->\n<!-- wp:group {"style":{"spacing":{"padding":{"top":"1.5rem","right":"1.5rem","bottom":"1.5rem","left":"1.5rem"}}},"layout":{"type":"flex","orientation":"vertical"}} -->\n<div class="wp-block-group" style="padding-top:1.5rem;padding-right:1.5rem;padding-bottom:1.5rem;padding-left:1.5rem">\n<!-- wp:post-title {"isLink":true} /-->\n<!-- wp:post-date /-->\n<!-- wp:post-excerpt /-->\n</div>\n<!-- /wp:group -->\n<!-- /wp:post-template -->\n<!-- wp:query-pagination -->\n<!-- wp:query-pagination-previous /-->\n<!-- wp:query-pagination-numbers /-->\n<!-- wp:query-pagination-next /-->\n<!-- /wp:query-pagination -->\n<!-- wp:query-no-results -->\n<!-- wp:paragraph -->\n<p>No posts found.</p>\n<!-- /wp:paragraph -->\n<!-- /wp:query-no-results -->\n</div>\n<!-- /wp:query -->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
       "single.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:post-featured-image {"isLink":false,"align":"wide"} /-->\n<!-- wp:spacer {"height":"2rem"} -->\n<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>\n<!-- /wp:spacer -->\n<!-- wp:post-title {"level":1} /-->\n<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->\n<div class="wp-block-group">\n<!-- wp:post-date /-->\n<!-- wp:post-author {"showAvatar":false,"showBio":false} /-->\n</div>\n<!-- /wp:group -->\n<!-- wp:spacer {"height":"2rem"} -->\n<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>\n<!-- /wp:spacer -->\n<!-- wp:post-content /-->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
       "page.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:post-title {"level":1} /-->\n<!-- wp:spacer {"height":"2rem"} -->\n<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>\n<!-- /wp:spacer -->\n<!-- wp:post-content /-->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
-      "404.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:heading {"textAlign":"center","level":1} -->\n<h1 class="wp-block-heading has-text-align-center">404 - Page Not Found</h1>\n<!-- /wp:heading -->\n<!-- wp:search {"showLabel":false,"buttonText":"Search"} /-->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
+      "404.html": theme.id === "saas" ? SAAS_404_HTML : `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:heading {"textAlign":"center","level":1} -->\n<h1 class="wp-block-heading has-text-align-center">404 - Page Not Found</h1>\n<!-- /wp:heading -->\n<!-- wp:search {"showLabel":false,"buttonText":"Search"} /-->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
       "archive.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:query-title {"type":"archive","textAlign":"center"} /-->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
       "search.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:query-title {"type":"search","textAlign":"center"} /-->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`
     };
@@ -550,6 +550,14 @@ export default function Home() {
         parts,
         patterns: {},
         customCss,
+        ...(theme.id === "saas" ? {
+          skeletonPages: {
+            signup: { title: "Sign Up", slug: "signup", content: SAAS_SIGNUP_HTML },
+            pricing: { title: "Pricing", slug: "pricing", content: SAAS_PRICING_HTML },
+            docs: { title: "Documentation", slug: "docs", content: SAAS_DOCS_HTML },
+            contact: { title: "Contact", slug: "contact", content: SAAS_CONTACT_HTML },
+          }
+        } : {}),
       },
       audit: {
         score: 100,
