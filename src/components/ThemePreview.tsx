@@ -137,9 +137,11 @@ const SELECTION_BRIDGE_SCRIPT = (enabled: boolean) => `
       }
     }
     if (e.data.type === 'PATCH_ELEMENT' && e.data.html) {
-      // sel holds the live DOM reference — swap it directly
       if (sel) {
-        sel.outerHTML = e.data.html;
+        var w = sel.offsetWidth;
+        var h = sel.offsetHeight;
+        var wrapper = '<div style="max-width:' + w + 'px;max-height:' + h + 'px;overflow:hidden">' + e.data.html + '</div>';
+        sel.outerHTML = wrapper;
       }
       hl = null; sel = null;
     }

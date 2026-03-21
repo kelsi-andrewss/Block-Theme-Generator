@@ -278,7 +278,7 @@ export default function Home() {
   const handleImageUpload = useCallback((file: File) => {
     if (!selectedBlock) return;
     const blobUrl = URL.createObjectURL(file);
-    const imgHtml = `<img src="${blobUrl}" alt="${file.name}" style="max-width:100%;height:auto;display:block" />`;
+    const imgHtml = `<img src="${blobUrl}" alt="${file.name}" style="width:100%;height:100%;object-fit:cover;display:block" />`;
 
     // Snapshot for undo
     pushUndo({ type: "element", html: selectedBlock.html, newHtml: imgHtml });
