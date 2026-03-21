@@ -12,6 +12,8 @@ interface IterationChatProps {
   onRegenerateLayout: () => void;
   onUndo?: () => void;
   canUndo?: boolean;
+  onRedo?: () => void;
+  canRedo?: boolean;
   onImageUpload?: (file: File) => void;
   isProcessing?: boolean;
   selectedBlock?: SelectedBlockEvent | null;
@@ -31,6 +33,8 @@ export default function IterationChat({
   onRegenerateLayout,
   onUndo,
   canUndo = false,
+  onRedo,
+  canRedo = false,
   onImageUpload,
   isProcessing = false,
   selectedBlock,
@@ -128,6 +132,15 @@ export default function IterationChat({
               className="text-xs font-medium px-3 py-1.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors border border-transparent hover:border-amber-300 dark:hover:border-amber-700 focus:ring-2 focus:ring-amber-400 focus:outline-none disabled:opacity-50"
             >
               Undo
+            </button>
+          )}
+          {canRedo && (
+            <button
+              onClick={onRedo}
+              disabled={isProcessing}
+              className="text-xs font-medium px-3 py-1.5 rounded-md bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors border border-transparent hover:border-indigo-300 dark:hover:border-indigo-700 focus:ring-2 focus:ring-indigo-400 focus:outline-none disabled:opacity-50"
+            >
+              Redo
             </button>
           )}
           {showUndoTooltip && (

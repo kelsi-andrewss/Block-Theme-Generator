@@ -70,15 +70,22 @@ export default function Home() {
     | { type: "element"; html: string; newHtml: string }
     | { type: "css"; overrides: Record<string, string> }
     | { type: "style-props"; iterateId: string; oldProps: Record<string, string> };
+  type RedoEntry =
+    | { type: "element"; html: string; newHtml: string }
+    | { type: "css"; overrides: Record<string, string> };
   const MAX_UNDO = 20;
   const undoRef = useRef<UndoEntry[]>([]);
   const [undoCount, setUndoCount] = useState(0);
+  const redoRef = useRef<RedoEntry[]>([]);
+  const [redoCount, setRedoCount] = useState(0);
 
   function pushUndo(entry: UndoEntry) {
     const stack = undoRef.current;
     stack.push(entry);
     if (stack.length > MAX_UNDO) stack.shift();
     setUndoCount(stack.length);
+    redoRef.current = [];
+    setRedoCount(0);
   }
 
 
@@ -236,6 +243,8 @@ export default function Home() {
     setUndoCount(stack.length);
 
     if (last.type === "element") {
+      redoRef.current.push({ type: "element", html: last.html, newHtml: last.newHtml });
+      setRedoCount(redoRef.current.length);
       document.querySelectorAll('iframe').forEach(f => {
         f.contentWindow?.postMessage({
           type: 'UNDO_ELEMENT',
@@ -245,11 +254,18 @@ export default function Home() {
       });
     } else if (last.type === "css") {
       const iframe = document.querySelector('iframe');
+      const redoOverrides: Record<string, string> = {};
       if (iframe?.contentDocument) {
+        const computed = iframe.contentWindow!.getComputedStyle(iframe.contentDocument.documentElement);
+        for (const prop of Object.keys(last.overrides)) {
+          redoOverrides[prop] = computed.getPropertyValue(prop).trim();
+        }
         for (const [prop, value] of Object.entries(last.overrides)) {
           iframe.contentDocument.documentElement.style.setProperty(prop, value);
         }
       }
+      redoRef.current.push({ type: "css", overrides: redoOverrides });
+      setRedoCount(redoRef.current.length);
     } else if (last.type === "style-props") {
       document.querySelectorAll('iframe').forEach(f => {
         f.contentWindow?.postMessage({
@@ -258,6 +274,35 @@ export default function Home() {
           oldProps: last.oldProps,
         }, '*');
       });
+    }
+  }, []);
+
+  const handleRedo = useCallback(() => {
+    const stack = redoRef.current;
+    if (stack.length === 0) return;
+    const entry = stack.pop()!;
+    setRedoCount(stack.length);
+
+    if (entry.type === "element") {
+      undoRef.current.push({ type: "element", html: entry.html, newHtml: entry.newHtml });
+      setUndoCount(undoRef.current.length);
+      document.querySelectorAll('iframe').forEach(f => {
+        f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: entry.newHtml }, '*');
+      });
+    } else if (entry.type === "css") {
+      const iframe = document.querySelector('iframe');
+      const undoOverrides: Record<string, string> = {};
+      if (iframe?.contentDocument) {
+        const computed = iframe.contentWindow!.getComputedStyle(iframe.contentDocument.documentElement);
+        for (const prop of Object.keys(entry.overrides)) {
+          undoOverrides[prop] = computed.getPropertyValue(prop).trim();
+        }
+        for (const [prop, value] of Object.entries(entry.overrides)) {
+          iframe.contentDocument.documentElement.style.setProperty(prop, value);
+        }
+      }
+      undoRef.current.push({ type: "css", overrides: undoOverrides });
+      setUndoCount(undoRef.current.length);
     }
   }, []);
 
@@ -591,6 +636,8 @@ export default function Home() {
                         onRegenerateLayout={() => {}}
                         onUndo={handleUndo}
                         canUndo={undoCount > 0}
+                        onRedo={handleRedo}
+                        canRedo={redoCount > 0}
                         onImageUpload={selectedBlock ? handleImageUpload : undefined}
                         isProcessing={isIterating}
                         selectedBlock={selectedBlock}
