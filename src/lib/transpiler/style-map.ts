@@ -1,4 +1,5 @@
 export function extractPresetSlug(value: string): string | null {
+  if (typeof value !== 'string') return null;
   const colorMatch = value.match(/^var\(--wp--preset--color--([^)]+)\)$/);
   if (colorMatch) return colorMatch[1];
   const fontSizeMatch = value.match(/^var\(--wp--preset--font-size--([^)]+)\)$/);
@@ -7,7 +8,8 @@ export function extractPresetSlug(value: string): string | null {
 }
 
 export function parseShorthandSpacing(value: string): { top: string; right: string; bottom: string; left: string } {
-  const parts = value.trim().split(/\s+/);
+  const str = typeof value === 'string' ? value : String(value);
+  const parts = str.trim().split(/\s+/);
   switch (parts.length) {
     case 1:
       return { top: parts[0], right: parts[0], bottom: parts[0], left: parts[0] };

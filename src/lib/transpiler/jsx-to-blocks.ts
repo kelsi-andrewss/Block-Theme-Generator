@@ -284,6 +284,7 @@ function mergeDeep(target: Record<string, unknown>, source: Record<string, unkno
 }
 
 export function transpileJSXToBlocks(jsx: string): string {
+  if (typeof jsx !== 'string') return '';
   const wrappedJsx = jsx.trim();
   const ast = parse(wrappedJsx, {
     sourceType: 'module',
