@@ -63,6 +63,35 @@ RESPONSE FORMAT — JSON only, no markdown fences:
   "explanation": "<one sentence>"
 }`;
 
+const JSX_EDIT_SYSTEM_PROMPT = `You are a JSX template editor. You modify JSX template strings used by a SaaS website builder.
+
+You receive:
+1. The full JSX source string for one page/component
+2. A selected element's rendered HTML (for identification — this is DOM HTML, not JSX)
+3. The user's instruction
+
+Your task: find the corresponding element in the JSX source and apply the requested change.
+
+The JSX uses inline styles as objects: style={{fontSize:"2rem",fontWeight:"700"}}
+Colors use WordPress CSS custom properties: var(--wp--preset--color--primary), var(--wp--preset--color--contrast), etc.
+Some values use color-mix(): color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)
+
+RULES:
+1. Return the COMPLETE modified JSX source string — not just the changed element.
+2. Match the selected element by its text content and structure, not by exact HTML syntax (DOM HTML differs from JSX).
+3. Keep all styles as JSX object syntax: style={{prop:"value"}} not style="prop:value".
+4. Preserve all WordPress CSS variable references — do not replace with hardcoded colors.
+5. For text changes, modify the text directly in the JSX.
+6. For style changes, modify the style object properties.
+7. For structural changes, modify the JSX tree.
+8. Return ONLY valid JSON — no markdown fences.
+
+RESPONSE FORMAT:
+{
+  "jsxSource": "<complete modified JSX string>",
+  "explanation": "<one sentence>"
+}`;
+
 const MULTI_FILE_SYSTEM_PROMPT = `You are a WordPress block theme editor. You modify multiple HTML template files based on a user instruction.
 
 You will receive:
@@ -90,13 +119,14 @@ RESPONSE FORMAT:
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { instruction, selectedElement, palette, isGlobal, themeFiles, activeFile } = body as {
+    const { instruction, selectedElement, palette, isGlobal, themeFiles, activeFile, jsxSource } = body as {
       instruction: string;
       selectedElement?: { html: string; content: string };
       palette?: string;
       isGlobal?: boolean;
       themeFiles?: any;
       activeFile?: string;
+      jsxSource?: string;
     };
 
     if (!instruction) {
@@ -115,6 +145,21 @@ export async function POST(req: NextRequest) {
         cleaned = cleaned.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
       }
       return NextResponse.json(JSON.parse(cleaned));
+    }
+
+    if (jsxSource && selectedElement) {
+      // JSX-level edit — modify JSX source directly
+      const prompt = `## Current JSX Source\n\`\`\`jsx\n${jsxSource}\n\`\`\`\n\n## Selected Element (rendered HTML)\n\`\`\`html\n${selectedElement.html}\n\`\`\`\n\nText content: "${selectedElement.content}"\n\n## Instruction\n${instruction}`;
+      const raw = await provider.generateText(prompt, JSX_EDIT_SYSTEM_PROMPT, { temperature: 0.3 });
+      let cleaned = raw.trim();
+      if (cleaned.startsWith("```")) {
+        cleaned = cleaned.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+      }
+      const result = JSON.parse(cleaned);
+      if (!result.jsxSource) {
+        return NextResponse.json({ error: "AI returned invalid JSX response" }, { status: 502 });
+      }
+      return NextResponse.json(result);
     }
 
     if (selectedElement) {

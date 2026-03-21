@@ -163,12 +163,7 @@ export default function Home() {
     }
   }
 
-  async function persistJsxChange(slug: string, oldHtml: string, newHtml: string) {
-    const pages = await get<Record<string, string>>("jsx-pages");
-    if (!pages || !pages[slug]) return;
-    pages[slug] = pages[slug].replace(oldHtml, newHtml);
-    await set("jsx-pages", pages);
-  }
+  const [iframeKey, setIframeKey] = useState(0);
 
   const handleSendMessage = useCallback(async (message: string, block?: SelectedBlockEvent): Promise<string> => {
     if (!result) return "No theme loaded.";
@@ -182,7 +177,36 @@ export default function Home() {
       const isHeaderFooter = block?.blockName.toLowerCase().includes('header') || block?.blockName.toLowerCase().includes('footer') || activeFile.includes('parts/');
 
       if (block) {
-        // Targeted edit: send element HTML, get modified HTML back
+        // JSX path: when IDB has jsx-pages, edit JSX source directly via API
+        const jsxPagesData = await get<Record<string, string>>("jsx-pages");
+        if (jsxPagesData) {
+          const editSlug = isHeaderFooter
+            ? (block.blockName.toLowerCase().includes('header') ? 'header' : 'footer')
+            : activeSlug;
+          const currentJsx = jsxPagesData[editSlug];
+          if (currentJsx) {
+            const res = await fetch("/api/iterate", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                instruction: message,
+                jsxSource: currentJsx,
+                selectedElement: { html: block.html, content: block.content },
+              }),
+            });
+            if (!res.ok) {
+              const body = await res.json().catch(() => ({}));
+              throw new Error(body.error ?? `Iteration failed (${res.status})`);
+            }
+            const data: { jsxSource: string; explanation: string } = await res.json();
+            jsxPagesData[editSlug] = data.jsxSource;
+            await set("jsx-pages", jsxPagesData);
+            setIframeKey(k => k + 1);
+            return data.explanation;
+          }
+        }
+
+        // DOM path: generated themes that use ThemePreview (no jsx-pages in IDB)
         const res = await fetch("/api/iterate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -218,14 +242,12 @@ export default function Home() {
           document.querySelectorAll('iframe').forEach(f => {
             f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: newHtml }, '*');
           });
-          await persistJsxChange(activeSlug, block.html, newHtml);
           if (!isHeaderFooter) setShowGlobalApplyPrompt(true);
         } else if (data.html) {
           pushUndo({ type: "element", html: block.html, newHtml: data.html });
           document.querySelectorAll('iframe').forEach(f => {
             f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: data.html }, '*');
           });
-          await persistJsxChange(activeSlug, block.html, data.html);
           if (!isHeaderFooter) setShowGlobalApplyPrompt(true);
         }
 
@@ -271,7 +293,7 @@ export default function Home() {
     } finally {
       setIsIterating(false);
     }
-  }, [result, activeSlug]);
+  }, [result]);
 
   const handleApplySitewide = useCallback(async () => {
     if (!result || !lastInstructionRef.current) return;
@@ -936,7 +958,7 @@ export default function Home() {
                       const iframeSrc = `/templates/${themeSlug}${iframeSlug ? `/${iframeSlug}` : ''}${isPart ? '?isolate=true' : ''}`;
                       return (
                         <iframe
-                          key={activeFile}
+                          key={`${activeFile}-${iframeKey}`}
                           src={iframeSrc}
                           className="w-full h-full border-0"
                           title={`${themeSlug} Template Iteration Preview`}
