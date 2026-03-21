@@ -1,38 +1,85 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProvider } from "@/lib/ai";
 
-const TARGETED_SYSTEM_PROMPT = `You are a web design editor. You modify a single HTML element based on a user instruction.
+const TARGETED_SYSTEM_PROMPT = `You are a web design editor. You modify HTML elements based on a user instruction.
 
-You receive the element's current outerHTML (with inline styles) and the user's instruction.
-Decide which response mode fits the instruction:
+You receive a selected element's outerHTML (with data-uid attributes and inline styles) and the user's instruction.
 
-MODE 1 — STYLES (visual/style changes: colors, fonts, spacing, shadows, borders, gradients):
-Return a map of CSS property names (hyphenated) to CSS values. Empty string means remove the property.
+Return a JSON object with an "edits" array. Each edit targets one element by its data-uid attribute.
+
+EDIT KINDS:
+
+KIND "style" — visual changes (colors, fonts, spacing, shadows, borders, gradients, opacity):
+{ "kind": "style", "uid": "<data-uid>", "styles": { "<css-property>": "<value>" } }
+Empty string value means remove the property.
+
+KIND "text" — replacing visible text only, no structural change:
+{ "kind": "text", "uid": "<data-uid>", "textContent": "new text" }
+
+KIND "attribute" — changing element attributes (src, href, alt, class, aria-*, data-*):
+{ "kind": "attribute", "uid": "<data-uid>", "attributes": { "<attr>": "<value>" } }
+null value means remove the attribute. Do NOT use this for style — use kind "style" instead.
+
+KIND "html" — structural changes (adding/removing child elements, changing the tag):
+{ "kind": "html", "uid": "<data-uid>", "html": "<full modified outerHTML>" }
+The outerHTML MUST preserve all data-uid attributes from the original.
+
+RESPONSE FORMAT — JSON only, no markdown fences:
 {
-  "styles": { "background": "linear-gradient(...)", "color": "#fff" },
-  "explanation": "<one sentence>"
-}
-
-MODE 2 — TEXT CONTENT (replacing visible text only, no structural change):
-{
-  "textContent": "new text",
-  "explanation": "<one sentence>"
-}
-
-MODE 3 — HTML (structural changes: adding/removing elements, changing tags, adding new attributes):
-{
-  "html": "<full modified outerHTML>",
+  "edits": [ { "kind": "...", "uid": "...", ... } ],
   "explanation": "<one sentence>"
 }
 
 RULES:
-1. Use MODE 1 (styles) for ALL visual changes — colors, gradients, spacing, fonts, borders, shadows, opacity.
-2. For text color changes, always use the "color" property. Do NOT set "background" for color changes — the handler takes care of gradient-text elements automatically.
-3. For color values, use actual hex/rgb values — not CSS variable references like var(--...).
-4. Use MODE 2 only when the instruction explicitly changes the displayed text string.
-5. Use MODE 3 only when the instruction requires adding/removing child elements or changing the tag.
+1. Prefer "style" for ALL visual changes. Use "html" only when structure must change.
+2. For text color, use the "color" CSS property. Do NOT set "background" for color changes.
+3. Use actual hex/rgb color values — not CSS variable references like var(--...).
+4. Each edit MUST include a valid "uid" from the provided HTML's data-uid attributes.
+5. You may return multiple edits if the instruction affects multiple elements within the selected subtree.
 6. Return ONLY valid JSON — no markdown fences, no extra keys.
 7. Keep explanation to one sentence.`;
+
+type EditIntent =
+  | { kind: "style"; uid: string; styles: Record<string, string> }
+  | { kind: "text"; uid: string; textContent: string }
+  | { kind: "attribute"; uid: string; attributes: Record<string, string | null> }
+  | { kind: "html"; uid: string; html: string };
+
+interface EditIntentResponse {
+  edits: EditIntent[];
+  explanation: string;
+}
+
+function isValidEditIntent(e: unknown): e is EditIntent {
+  if (typeof e !== "object" || e === null) return false;
+  const obj = e as Record<string, unknown>;
+  if (typeof obj.uid !== "string" || !obj.uid) return false;
+  switch (obj.kind) {
+    case "style":
+      return typeof obj.styles === "object" && obj.styles !== null;
+    case "text":
+      return typeof obj.textContent === "string";
+    case "attribute":
+      return typeof obj.attributes === "object" && obj.attributes !== null;
+    case "html":
+      return typeof obj.html === "string";
+    default:
+      return false;
+  }
+}
+
+function validateEditIntentResponse(
+  result: unknown
+): EditIntentResponse | null {
+  if (typeof result !== "object" || result === null) return null;
+  const obj = result as Record<string, unknown>;
+  if (!Array.isArray(obj.edits) || obj.edits.length === 0) return null;
+  if (!obj.edits.every(isValidEditIntent)) return null;
+  return {
+    edits: obj.edits as EditIntent[],
+    explanation: typeof obj.explanation === "string" ? obj.explanation : "",
+  };
+}
 
 const GLOBAL_SYSTEM_PROMPT = `You are a web design theme editor. You modify a site's visual theme by overriding CSS custom properties.
 
@@ -92,7 +139,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { instruction, selectedElement, palette, isGlobal, themeFiles, activeFile } = body as {
       instruction: string;
-      selectedElement?: { html: string; content: string };
+      selectedElement?: { html: string; content: string; uid?: string };
       palette?: string;
       isGlobal?: boolean;
       themeFiles?: any;
@@ -118,8 +165,14 @@ export async function POST(req: NextRequest) {
     }
 
     if (selectedElement) {
-      // Targeted edit — element HTML in, element HTML out
-      const prompt = `## Current Element HTML\n\`\`\`html\n${selectedElement.html}\n\`\`\`\n\nText content: "${selectedElement.content}"${paletteCtx}\n\n## Instruction\n${instruction}`;
+      // Targeted edit — structured edit intents
+      const uidHeader = selectedElement.uid
+        ? `## Selected Element (uid="${selectedElement.uid}")`
+        : `## Selected Element`;
+      const uidNotice = selectedElement.uid
+        ? `\nNOTE: The HTML contains data-uid attributes on elements. Reference these UIDs in your edits array.`
+        : "";
+      const prompt = `${uidHeader}\n\`\`\`html\n${selectedElement.html}\n\`\`\`\n\nText content: "${selectedElement.content}"${uidNotice}${paletteCtx}\n\n## Instruction\n${instruction}`;
 
       const raw = await provider.generateText(prompt, TARGETED_SYSTEM_PROMPT, { temperature: 0.3 });
 
@@ -128,12 +181,16 @@ export async function POST(req: NextRequest) {
         cleaned = cleaned.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
       }
 
-      const result = JSON.parse(cleaned);
-      if (!result.styles && !result.html && !result.textContent) {
-        return NextResponse.json({ error: "AI returned invalid response" }, { status: 502 });
+      const parsed = JSON.parse(cleaned);
+      const intentResponse = validateEditIntentResponse(parsed);
+      if (intentResponse) {
+        return NextResponse.json(intentResponse);
       }
-
-      return NextResponse.json(result);
+      // Legacy fallback — old 3-mode response
+      if (parsed.styles || parsed.html || parsed.textContent) {
+        return NextResponse.json(parsed);
+      }
+      return NextResponse.json({ error: "AI returned invalid response" }, { status: 502 });
     } else {
       // Global edit — CSS variable overrides
       const prompt = `## Current Palette\n${palette || "No palette provided"}\n\n## Instruction\n${instruction}`;
