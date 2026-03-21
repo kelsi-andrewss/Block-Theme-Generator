@@ -70,6 +70,14 @@ export default function Home() {
   const [activeFile, setActiveFile] = useState<string>("index.html");
   const [openFiles, setOpenFiles] = useState<string[]>(["index.html"]);
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
+
+  // Broadcast mode changes to iframes (NativeIframeController listens for SET_MODE)
+  useEffect(() => {
+    document.querySelectorAll('iframe').forEach(f => {
+      f.contentWindow?.postMessage({ type: 'SET_MODE', mode: viewMode }, '*');
+    });
+  }, [viewMode]);
+
   const [showGlobalApplyPrompt, setShowGlobalApplyPrompt] = useState(false);
   const lastInstructionRef = useRef<string>("");
   const lastElementRef = useRef<SelectedBlockEvent | null>(null);

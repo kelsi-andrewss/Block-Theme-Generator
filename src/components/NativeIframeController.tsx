@@ -114,6 +114,25 @@ export default function NativeIframeController() {
         highlightedEl = null;
         selectedEl = null;
       }
+
+      if (event.data.type === 'SET_MODE') {
+        editMode = event.data.mode === 'edit';
+        if (!editMode) {
+          // Clear any selection/highlight when switching to browse
+          if (highlightedEl) {
+            highlightedEl.style.outline = '';
+            highlightedEl.style.outlineOffset = '';
+            highlightedEl.style.cursor = '';
+            highlightedEl = null;
+          }
+          if (selectedEl) {
+            selectedEl.style.outline = '';
+            selectedEl.style.outlineOffset = '';
+            selectedEl.style.backgroundColor = '';
+            selectedEl = null;
+          }
+        }
+      }
     }
     window.addEventListener('message', handleMessage);
 
@@ -135,6 +154,7 @@ export default function NativeIframeController() {
     // 2. Click-to-edit semantic bridge
     let highlightedEl: HTMLElement | null = null;
     let selectedEl: HTMLElement | null = null;
+    let editMode = true;
 
     function isSelectable(target: HTMLElement) {
       const tagName = target.tagName.toLowerCase();
@@ -144,6 +164,7 @@ export default function NativeIframeController() {
     }
 
     function handleMouseOver(e: MouseEvent) {
+      if (!editMode) return;
       const target = e.target as HTMLElement;
       if (!isSelectable(target)) return;
       if (target === selectedEl) return;
@@ -161,6 +182,7 @@ export default function NativeIframeController() {
     }
 
     function handleMouseOut(e: MouseEvent) {
+      if (!editMode) return;
       if (highlightedEl && highlightedEl !== selectedEl) {
         highlightedEl.style.outline = '';
         highlightedEl.style.outlineOffset = '';
@@ -170,6 +192,7 @@ export default function NativeIframeController() {
     }
 
     function handleClick(e: MouseEvent) {
+      if (!editMode) return;
       const target = e.target as HTMLElement;
       if (!isSelectable(target)) return;
       
