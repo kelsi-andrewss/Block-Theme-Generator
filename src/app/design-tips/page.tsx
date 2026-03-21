@@ -205,19 +205,19 @@ export default function DesignTipsPage() {
               <h2 className="text-3xl font-bold text-zinc-900 dark:text-white">Global vs. Specific Changes</h2>
             </div>
             <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-10 leading-relaxed">
-              Decide if you want to change **one** thing or **everything** like it. This saves you from repeating yourself.
+              Decide if you want to change <span className="font-bold text-zinc-900 dark:text-white underline decoration-orange-500/30 underline-offset-4">one</span> thing or <span className="font-bold text-zinc-900 dark:text-white underline decoration-orange-500/30 underline-offset-4">everything</span> like it. This saves you from repeating yourself.
             </p>
             
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-3xl">
                 <p className="text-xs font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-4">🏠 Global (Sitewide)</p>
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">Changes every block of that type on the whole site.</p>
-                <code className="text-xs bg-zinc-50 dark:bg-zinc-800 p-3 rounded-xl block font-mono">"Make <span className="text-orange-600">all</span> buttons rounded."</code>
+                <code className="text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 p-4 rounded-xl block font-mono border border-zinc-200 dark:border-zinc-700">"Make <span className="text-orange-600 font-bold">all</span> buttons rounded."</code>
               </div>
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-3xl">
                 <p className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-4">📍 Specific (Local)</p>
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">Changes only the one item you are looking at.</p>
-                <code className="text-xs bg-zinc-50 dark:bg-zinc-800 p-3 rounded-xl block font-mono">"Make <span className="text-blue-600">this</span> button red."</code>
+                <code className="text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 p-4 rounded-xl block font-mono border border-zinc-200 dark:border-zinc-700">"Make <span className="text-blue-600 font-bold">this</span> button red."</code>
               </div>
             </div>
           </section>
@@ -234,13 +234,19 @@ export default function DesignTipsPage() {
             
             <div className="bg-zinc-100 dark:bg-zinc-800 p-8 rounded-[2.5rem] border border-zinc-200 dark:border-zinc-700">
                <div className="grid sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                     <p className="font-bold text-zinc-900 dark:text-white">Fixing Columns</p>
-                     <code className="text-xs bg-white dark:bg-zinc-900 p-3 rounded-xl block border border-zinc-200 dark:border-zinc-700 font-mono">"Make these columns stack on top of each other on mobile."</code>
+                  <div className="space-y-3">
+                     <p className="font-bold text-zinc-900 dark:text-white flex items-center gap-2 text-sm">
+                        <svg className="w-4 h-4 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor font-mono"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                        Fixing Columns
+                     </p>
+                     <code className="text-xs bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 p-4 rounded-xl block border border-zinc-200 dark:border-zinc-800 font-mono shadow-sm">"Make these columns stack on top of each other on mobile."</code>
                   </div>
-                  <div className="space-y-2">
-                     <p className="font-bold text-zinc-900 dark:text-white">Adjusting Size</p>
-                     <code className="text-xs bg-white dark:bg-zinc-900 p-3 rounded-xl block border border-zinc-200 dark:border-zinc-700 font-mono">"Make the main headline smaller on phone screens."</code>
+                  <div className="space-y-3">
+                     <p className="font-bold text-zinc-900 dark:text-white flex items-center gap-2 text-sm">
+                        <svg className="w-4 h-4 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor font-mono"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2z" /></svg>
+                        Adjusting Size
+                     </p>
+                     <code className="text-xs bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 p-4 rounded-xl block border border-zinc-200 dark:border-zinc-800 font-mono shadow-sm">"Make the main headline smaller on phone screens."</code>
                   </div>
                </div>
             </div>
