@@ -190,7 +190,7 @@ export default function Home() {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 instruction: message,
-                jsxSource: currentJsx,
+                jsxSource: "jsx-mode",
                 selectedElement: { html: block.html, content: block.content },
               }),
             });
@@ -198,8 +198,12 @@ export default function Home() {
               const body = await res.json().catch(() => ({}));
               throw new Error(body.error ?? `Iteration failed (${res.status})`);
             }
-            const data: { jsxSource: string; explanation: string } = await res.json();
-            jsxPagesData[editSlug] = data.jsxSource;
+            const data: { originalJsx: string; modifiedJsx: string; explanation: string } = await res.json();
+            const updatedJsx = currentJsx.replace(data.originalJsx, data.modifiedJsx);
+            if (updatedJsx === currentJsx) {
+              console.warn("JSX element replace did not match — change may not persist");
+            }
+            jsxPagesData[editSlug] = updatedJsx;
             await set("jsx-pages", jsxPagesData);
             setIframeKey(k => k + 1);
             return data.explanation;

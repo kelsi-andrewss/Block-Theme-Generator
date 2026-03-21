@@ -63,32 +63,29 @@ RESPONSE FORMAT — JSON only, no markdown fences:
   "explanation": "<one sentence>"
 }`;
 
-const JSX_EDIT_SYSTEM_PROMPT = `You are a JSX template editor. You modify JSX template strings used by a SaaS website builder.
+const JSX_ELEMENT_EDIT_PROMPT = `You are a JSX element editor for a SaaS website builder.
 
-You receive:
-1. The full JSX source string for one page/component
-2. A selected element's rendered HTML (for identification — this is DOM HTML, not JSX)
-3. The user's instruction
+You receive a single HTML element (as rendered in the browser DOM) and an edit instruction.
 
-Your task: find the corresponding element in the JSX source and apply the requested change.
+Your job:
+1. Convert the DOM HTML element to its JSX equivalent (style attributes become style objects: style={{prop:"value"}}, class becomes className, etc.)
+2. Apply the user's edit instruction to produce the modified JSX element
+3. Return BOTH the original JSX and the modified JSX
 
-The JSX uses inline styles as objects: style={{fontSize:"2rem",fontWeight:"700"}}
-Colors use WordPress CSS custom properties: var(--wp--preset--color--primary), var(--wp--preset--color--contrast), etc.
-Some values use color-mix(): color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)
+The JSX uses WordPress CSS custom properties: var(--wp--preset--color--primary), var(--wp--preset--color--contrast), etc.
+Style values use color-mix(): color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)
 
 RULES:
-1. Return the COMPLETE modified JSX source string — not just the changed element.
-2. Match the selected element by its text content and structure, not by exact HTML syntax (DOM HTML differs from JSX).
-3. Keep all styles as JSX object syntax: style={{prop:"value"}} not style="prop:value".
-4. Preserve all WordPress CSS variable references — do not replace with hardcoded colors.
-5. For text changes, modify the text directly in the JSX.
-6. For style changes, modify the style object properties.
-7. For structural changes, modify the JSX tree.
-8. Return ONLY valid JSON — no markdown fences.
+1. The originalJsx must be the EXACT JSX representation of the input HTML — this will be used for string matching.
+2. The modifiedJsx must be the edited version with the instruction applied.
+3. Keep styles as JSX object syntax: style={{fontSize:"2rem"}} not style="font-size:2rem"
+4. Preserve WordPress CSS variable references.
+5. Return ONLY valid JSON — no markdown fences.
 
 RESPONSE FORMAT:
 {
-  "jsxSource": "<complete modified JSX string>",
+  "originalJsx": "<JSX version of the input element>",
+  "modifiedJsx": "<modified JSX element>",
   "explanation": "<one sentence>"
 }`;
 
@@ -148,16 +145,16 @@ export async function POST(req: NextRequest) {
     }
 
     if (jsxSource && selectedElement) {
-      // JSX-level edit — modify JSX source directly
-      const prompt = `## Current JSX Source\n\`\`\`jsx\n${jsxSource}\n\`\`\`\n\n## Selected Element (rendered HTML)\n\`\`\`html\n${selectedElement.html}\n\`\`\`\n\nText content: "${selectedElement.content}"\n\n## Instruction\n${instruction}`;
-      const raw = await provider.generateText(prompt, JSX_EDIT_SYSTEM_PROMPT, { temperature: 0.3 });
+      // Element-level JSX edit — send only the element, not the whole page
+      const prompt = `## Selected Element (browser DOM HTML)\n\`\`\`html\n${selectedElement.html}\n\`\`\`\n\nText content: "${selectedElement.content}"\n\n## Instruction\n${instruction}`;
+      const raw = await provider.generateText(prompt, JSX_ELEMENT_EDIT_PROMPT, { temperature: 0.3 });
       let cleaned = raw.trim();
       if (cleaned.startsWith("```")) {
         cleaned = cleaned.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
       }
       const result = JSON.parse(cleaned);
-      if (!result.jsxSource) {
-        return NextResponse.json({ error: "AI returned invalid JSX response" }, { status: 502 });
+      if (!result.originalJsx || !result.modifiedJsx) {
+        return NextResponse.json({ error: "AI returned invalid JSX element response" }, { status: 502 });
       }
       return NextResponse.json(result);
     }
