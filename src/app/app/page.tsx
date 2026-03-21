@@ -830,9 +830,10 @@ export default function Home() {
                 <div className="flex-1 bg-white dark:bg-zinc-900/40 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 flex flex-col overflow-hidden shadow-2xl ring-1 ring-black/5 dark:ring-white/5">
                   <WorkbenchHeader
                     files={[
-                      ...Object.keys(result.themeFiles.templates),
+                      ...(result.themeFiles.templates['front-page.html'] || result.themeFiles.templates['index.html'] ? ['front-page.html'] : []),
+                      ...(result.themeFiles.templates['404.html'] ? ['404.html'] : []),
+                      ...Object.keys(result.themeFiles.skeletonPages || {}).map(s => `pages/${s}`),
                       ...Object.keys(result.themeFiles.parts).map(p => `parts/${p}`),
-                      ...Object.keys(result.themeFiles.skeletonPages || {}).map(s => `pages/${s}`)
                     ]}
                     activeFile={activeFile}
                     openFiles={openFiles}
