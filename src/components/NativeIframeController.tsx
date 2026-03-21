@@ -27,7 +27,6 @@ export default function NativeIframeController() {
       if (event.data.type === 'CLEAR_SELECTION' && selectedEl) {
         selectedEl.style.outline = '';
         selectedEl.style.outlineOffset = '';
-        selectedEl.style.backgroundColor = '';
         selectedEl = null;
       }
 
@@ -128,7 +127,6 @@ export default function NativeIframeController() {
           if (selectedEl) {
             selectedEl.style.outline = '';
             selectedEl.style.outlineOffset = '';
-            selectedEl.style.backgroundColor = '';
             selectedEl = null;
           }
         }
@@ -202,7 +200,6 @@ export default function NativeIframeController() {
       if (selectedEl) {
         selectedEl.style.outline = '';
         selectedEl.style.outlineOffset = '';
-        selectedEl.style.backgroundColor = '';
       }
 
       // Capture clean outerHTML BEFORE adding selection highlight styles
@@ -211,7 +208,6 @@ export default function NativeIframeController() {
       selectedEl = target;
       selectedEl.style.outline = '2px solid #f97316'; // Orange-500 for selection
       selectedEl.style.outlineOffset = '4px';
-      selectedEl.style.backgroundColor = 'rgba(249, 115, 22, 0.1)';
 
       const blockName = target.tagName.toLowerCase();
       const rawText = target.innerText || target.textContent || '';
