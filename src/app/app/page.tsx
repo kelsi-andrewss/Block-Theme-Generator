@@ -163,6 +163,13 @@ export default function Home() {
     }
   }
 
+  async function persistJsxChange(slug: string, oldHtml: string, newHtml: string) {
+    const pages = await get<Record<string, string>>("jsx-pages");
+    if (!pages || !pages[slug]) return;
+    pages[slug] = pages[slug].replace(oldHtml, newHtml);
+    await set("jsx-pages", pages);
+  }
+
   const handleSendMessage = useCallback(async (message: string, block?: SelectedBlockEvent): Promise<string> => {
     if (!result) return "No theme loaded.";
 
@@ -211,12 +218,14 @@ export default function Home() {
           document.querySelectorAll('iframe').forEach(f => {
             f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: newHtml }, '*');
           });
+          await persistJsxChange(activeSlug, block.html, newHtml);
           if (!isHeaderFooter) setShowGlobalApplyPrompt(true);
         } else if (data.html) {
           pushUndo({ type: "element", html: block.html, newHtml: data.html });
           document.querySelectorAll('iframe').forEach(f => {
             f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: data.html }, '*');
           });
+          await persistJsxChange(activeSlug, block.html, data.html);
           if (!isHeaderFooter) setShowGlobalApplyPrompt(true);
         }
 
@@ -262,7 +271,7 @@ export default function Home() {
     } finally {
       setIsIterating(false);
     }
-  }, [result]);
+  }, [result, activeSlug]);
 
   const handleApplySitewide = useCallback(async () => {
     if (!result || !lastInstructionRef.current) return;
