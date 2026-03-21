@@ -102,10 +102,16 @@ const SELECTION_BRIDGE_SCRIPT = `
 
       var keys = Object.keys(styles);
       for (var k = 0; k < keys.length; k++) {
-        var prop = keys[k];
-        if (!(prop in oldProps)) { oldProps[prop] = sel.style.getPropertyValue(prop); }
-        if (styles[prop] === '') { sel.style.removeProperty(prop); }
-        else { sel.style.setProperty(prop, styles[prop]); }
+        var p = keys[k];
+        var v = styles[p];
+        if (p === 'background' && isGradientText && !styles['color']) { p = 'background-image'; }
+        if (!(p in oldProps)) { oldProps[p] = sel.style.getPropertyValue(p); }
+        if (v === '') { sel.style.removeProperty(p); }
+        else { sel.style.setProperty(p, v); }
+      }
+      if (isGradientText && styles['background'] && !styles['color']) {
+        sel.style.setProperty('-webkit-background-clip', 'text');
+        sel.style.setProperty('background-clip', 'text');
       }
       sel.style.outline = ''; sel.style.outlineOffset = ''; sel.style.backgroundColor = '';
       window.parent.postMessage({ type: 'STYLE_SNAPSHOT', iterateId: iterateId, oldProps: oldProps }, '*');

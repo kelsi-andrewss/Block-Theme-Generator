@@ -52,7 +52,11 @@ export default function NativeIframeController() {
           selectedEl.style.setProperty('-webkit-text-fill-color', colorVal);
         }
 
-        for (const [prop, value] of Object.entries(styles)) {
+        for (let [prop, value] of Object.entries(styles)) {
+          // background shorthand resets background-clip — use background-image instead
+          if (prop === 'background' && isGradientText && !styles['color']) {
+            prop = 'background-image';
+          }
           if (!(prop in oldProps)) {
             oldProps[prop] = selectedEl.style.getPropertyValue(prop);
           }
@@ -61,6 +65,11 @@ export default function NativeIframeController() {
           } else {
             selectedEl.style.setProperty(prop, value);
           }
+        }
+        // Re-assert background-clip if we redirected background → background-image
+        if (isGradientText && styles['background'] && !styles['color']) {
+          selectedEl.style.setProperty('-webkit-background-clip', 'text');
+          selectedEl.style.setProperty('background-clip', 'text');
         }
         selectedEl.style.outline = '';
         selectedEl.style.outlineOffset = '';
