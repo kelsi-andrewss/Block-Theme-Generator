@@ -374,7 +374,7 @@ export default function Home() {
     setStep("generating");
     setError(null);
     setResult({
-      themeFiles: { themeJson: "", darkMode: "", templates: {}, parts: {}, patterns: {}, customCss: "" },
+      themeFiles: { themeJson: "", darkMode: "", templates: {}, parts: {}, patterns: {}, pages: {}, customCss: "" },
       audit: { score: 0, grade: "F", checks: [] },
       meta: { themeName: "generating", displayName: "Generating...", description: data.description }
     });
@@ -443,6 +443,8 @@ export default function Home() {
               setResult(prev => prev ? { ...prev, themeFiles: { ...prev.themeFiles, darkMode: parsed.content } } : null);
             } else if (parsed.type === "custom-css") {
               setResult(prev => prev ? { ...prev, themeFiles: { ...prev.themeFiles, customCss: parsed.content } } : null);
+            } else if (parsed.type === "skeleton-pages" && parsed.files) {
+              setResult(prev => prev ? { ...prev, themeFiles: { ...prev.themeFiles, skeletonPages: { ...prev.themeFiles.skeletonPages, ...parsed.files } } } : null);
             }
           } else if (eventType === "complete") {
             setResult(parsed as GenerationResult);
@@ -547,6 +549,7 @@ export default function Home() {
         templates,
         parts,
         patterns: {},
+        pages: {},
         customCss,
       },
       audit: {
@@ -821,7 +824,8 @@ export default function Home() {
                   <WorkbenchHeader
                     files={[
                       ...Object.keys(result.themeFiles.templates),
-                      ...Object.keys(result.themeFiles.parts).map(p => `parts/${p}`)
+                      ...Object.keys(result.themeFiles.parts).map(p => `parts/${p}`),
+                      ...Object.keys(result.themeFiles.skeletonPages || {}).map(s => `pages/${s}`)
                     ]}
                     activeFile={activeFile}
                     openFiles={openFiles}
@@ -853,6 +857,7 @@ export default function Home() {
                         parts={result?.themeFiles.parts}
                         patterns={result?.themeFiles.patterns}
                         customCss={result?.themeFiles.customCss}
+                        skeletonPages={result?.themeFiles.skeletonPages}
                         activeFile={activeFile}
                         mode={viewMode}
                       />

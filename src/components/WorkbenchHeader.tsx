@@ -25,9 +25,10 @@ export default function WorkbenchHeader({
 }: WorkbenchHeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Group files into Templates and Parts
-  const templates = files.filter(f => !f.includes('parts/'));
+  // Group files into Templates, Parts, and Pages
+  const templates = files.filter(f => !f.includes('parts/') && !f.includes('pages/'));
   const parts = files.filter(f => f.includes('parts/'));
+  const pages = files.filter(f => f.includes('pages/'));
 
   return (
     <div className="flex flex-col w-full bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shrink-0 relative z-40">
@@ -84,6 +85,26 @@ export default function WorkbenchHeader({
                       {f.replace('parts/', '')}
                     </button>
                   ))}
+
+                  {pages.length > 0 && (
+                    <>
+                      <div className="px-4 py-1 mt-3 mb-1 border-t border-zinc-100 dark:border-zinc-800 pt-3">
+                        <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Pages</p>
+                      </div>
+                      {pages.map(f => (
+                        <button
+                          key={f}
+                          onClick={() => { onFileSelect(f); setIsDropdownOpen(false); }}
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-2 ${activeFile === f ? 'text-blue-600 dark:text-blue-400 font-bold bg-blue-50/50 dark:bg-blue-900/10' : 'text-zinc-600 dark:text-zinc-400'}`}
+                        >
+                          <svg className="w-4 h-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          </svg>
+                          {f.replace('pages/', '')}
+                        </button>
+                      ))}
+                    </>
+                  )}
                 </div>
               </>
             )}
@@ -133,11 +154,13 @@ export default function WorkbenchHeader({
             <span className="opacity-50">
               {f.includes('parts/') ? (
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>
+              ) : f.includes('pages/') ? (
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
               ) : (
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
               )}
             </span>
-            {f.replace('parts/', '')}
+            {f.replace('parts/', '').replace('pages/', '')}
             <button
               onClick={(e) => { e.stopPropagation(); onFileClose(f); }}
               className={`p-0.5 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors ${activeFile === f ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}

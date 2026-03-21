@@ -105,6 +105,7 @@ export interface ThemeFilesData {
   patterns: Record<string, string>;
   pages: Record<string, { title: string; content: string }>;
   customCss?: string;
+  skeletonPages?: Record<string, { title: string; slug: string; content: string }>;
 }
 
 export interface ThemeMetaInput {
@@ -223,6 +224,12 @@ export function buildThemeFileMap(
 
   if (themeFiles.customCss) {
     fileMap["assets/css/saas-sections.css"] = themeFiles.customCss;
+  }
+
+  if (themeFiles.skeletonPages) {
+    for (const [, page] of Object.entries(themeFiles.skeletonPages)) {
+      if (page.content) fileMap[`templates/page-${page.slug}.html`] = page.content;
+    }
   }
 
   return fileMap;

@@ -16,6 +16,7 @@ export interface ThemePreviewProps {
   parts?: Record<string, string>;
   patterns?: Record<string, string>;
   customCss?: string;
+  skeletonPages?: Record<string, { title: string; slug: string; content: string }>;
   activeFile?: string;
   mode?: 'edit' | 'preview';
 }
@@ -160,13 +161,14 @@ const SELECTION_BRIDGE_SCRIPT = (enabled: boolean) => `
 })();
 </script>`;
 
-export default function ThemePreview({ 
-  themeJson, 
-  templates, 
-  parts, 
-  customCss, 
-  activeFile = "index.html", 
-  mode = "edit" 
+export default function ThemePreview({
+  themeJson,
+  templates,
+  parts,
+  customCss,
+  skeletonPages,
+  activeFile = "index.html",
+  mode = "edit"
 }: ThemePreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [viewport, setViewport] = useState<ViewportSize>("desktop");
@@ -349,6 +351,9 @@ export default function ThemePreview({
       if (activeFile.startsWith('parts/')) {
         const partSlug = activeFile.replace('parts/', '');
         templateHTML = parts?.[partSlug] || "";
+      } else if (activeFile.startsWith('pages/')) {
+        const pageSlug = activeFile.replace('pages/', '');
+        templateHTML = skeletonPages?.[pageSlug]?.content || "";
       } else {
         templateHTML = templates?.[activeFile] || templates?.["index.html"] || templates?.["front-page.html"] || "";
       }
@@ -396,7 +401,7 @@ export default function ThemePreview({
     } catch (e) {
       console.error("Preview render error:", e);
     }
-  }, [themeJson, templates, parts, customCss, activeFile, mode]);
+  }, [themeJson, templates, parts, customCss, skeletonPages, activeFile, mode]);
 
   return (
     <div className="flex flex-col h-full w-full space-y-3">
