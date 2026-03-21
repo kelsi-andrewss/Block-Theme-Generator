@@ -8,6 +8,8 @@ import {
   SAAS_PRICING_JSX_SOURCE,
   SAAS_DOCS_JSX_SOURCE,
   SAAS_CONTACT_JSX_SOURCE,
+  SAAS_HEADER_JSX_SOURCE,
+  SAAS_FOOTER_JSX_SOURCE,
 } from '../jsx-sources';
 
 const TEMPLATE_MAP: Record<string, string> = {
@@ -16,6 +18,8 @@ const TEMPLATE_MAP: Record<string, string> = {
   'pricing': SAAS_PRICING_JSX_SOURCE,
   'docs': SAAS_DOCS_JSX_SOURCE,
   'contact': SAAS_CONTACT_JSX_SOURCE,
+  'header': SAAS_HEADER_JSX_SOURCE,
+  'footer': SAAS_FOOTER_JSX_SOURCE,
 };
 
 const WP_VAR_BRIDGE: Record<string, string> = {

@@ -860,7 +860,8 @@ export default function Home() {
                   <div className="flex-1 w-full bg-zinc-100 dark:bg-zinc-950 relative z-0 overflow-hidden flex flex-col">
                     {(themeSlug && themeSlug !== "generated-theme") ? (() => {
                       const iframeSlug = (() => {
-                        if (!activeFile || activeFile === 'index.html' || activeFile === 'front-page.html' || activeFile.startsWith('parts/')) return '';
+                        if (!activeFile || activeFile === 'index.html' || activeFile === 'front-page.html') return '';
+                        if (activeFile.startsWith('parts/')) return activeFile.replace('parts/', '').replace('.html', '');
                         if (activeFile.startsWith('pages/')) return activeFile.replace('pages/', '').replace('.html', '');
                         return activeFile.replace('.html', '');
                       })();
