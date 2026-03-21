@@ -198,6 +198,78 @@ export default function DesignTipsPage() {
             </div>
           </section>
 
+          {/* New Tip 5: Global vs Specific */}
+          <section>
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 rounded-full bg-orange-600 text-white flex items-center justify-center font-bold shadow-lg shadow-orange-500/20 text-xl">5</div>
+              <h2 className="text-3xl font-bold text-zinc-900 dark:text-white">Global vs. Specific Changes</h2>
+            </div>
+            <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-10 leading-relaxed">
+              Decide if you want to change **one** thing or **everything** like it. This saves you from repeating yourself.
+            </p>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-3xl">
+                <p className="text-xs font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-4">🏠 Global (Sitewide)</p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">Changes every block of that type on the whole site.</p>
+                <code className="text-xs bg-zinc-50 dark:bg-zinc-800 p-3 rounded-xl block font-mono">"Make <span className="text-orange-600">all</span> buttons rounded."</code>
+              </div>
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-3xl">
+                <p className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-4">📍 Specific (Local)</p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">Changes only the one item you are looking at.</p>
+                <code className="text-xs bg-zinc-50 dark:bg-zinc-800 p-3 rounded-xl block font-mono">"Make <span className="text-blue-600">this</span> button red."</code>
+              </div>
+            </div>
+          </section>
+
+          {/* New Tip 6: Mobile First */}
+          <section>
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 rounded-full bg-cyan-600 text-white flex items-center justify-center font-bold shadow-lg shadow-cyan-500/20 text-xl">6</div>
+              <h2 className="text-3xl font-bold text-zinc-900 dark:text-white">Mobile & Screen Sizes</h2>
+            </div>
+            <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-10 leading-relaxed">
+              Sometimes things look great on a laptop but crowded on a phone. You can tell the AI how to behave on smaller screens.
+            </p>
+            
+            <div className="bg-zinc-100 dark:bg-zinc-800 p-8 rounded-[2.5rem] border border-zinc-200 dark:border-zinc-700">
+               <div className="grid sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                     <p className="font-bold text-zinc-900 dark:text-white">Fixing Columns</p>
+                     <code className="text-xs bg-white dark:bg-zinc-900 p-3 rounded-xl block border border-zinc-200 dark:border-zinc-700 font-mono">"Make these columns stack on top of each other on mobile."</code>
+                  </div>
+                  <div className="space-y-2">
+                     <p className="font-bold text-zinc-900 dark:text-white">Adjusting Size</p>
+                     <code className="text-xs bg-white dark:bg-zinc-900 p-3 rounded-xl block border border-zinc-200 dark:border-zinc-700 font-mono">"Make the main headline smaller on phone screens."</code>
+                  </div>
+               </div>
+            </div>
+          </section>
+
+          {/* New Tip 7: Content & Tone */}
+          <section>
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold shadow-lg shadow-violet-500/20 text-xl">7</div>
+              <h2 className="text-3xl font-bold text-zinc-900 dark:text-white">Change the "Voice"</h2>
+            </div>
+            <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-10 leading-relaxed">
+              Design isn't just colors—it's the words. You can ask the AI to rewrite your text to match your brand's personality.
+            </p>
+            
+            <div className="flex flex-col gap-4">
+               {[
+                 { tone: "Professional", text: "Rewrite the welcome text to sound like a serious law firm." },
+                 { tone: "Exciting", text: "Make the product descriptions sound energetic and hype." },
+                 { tone: "Short", text: "Summarize this whole section into just 3 punchy bullet points." },
+               ].map((item, i) => (
+                 <div key={i} className="flex items-center gap-4 p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl group hover:border-violet-500 transition-colors">
+                   <span className="w-24 text-[10px] font-black uppercase text-zinc-400 group-hover:text-violet-500 transition-colors">{item.tone}</span>
+                   <code className="text-sm text-violet-600 dark:text-violet-400 font-mono">"{item.text}"</code>
+                 </div>
+               ))}
+            </div>
+          </section>
+
           {/* Troubleshooting */}
           <section className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[3rem] p-12 text-white shadow-2xl shadow-blue-500/30 relative overflow-hidden">
             <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>

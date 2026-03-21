@@ -281,19 +281,31 @@ export default function IterationChat({
                 ? "Describe how to change this block..." 
                 : "Type here to tweak colors, fonts, or copy..."
             }
-            className="w-full bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 rounded-xl pl-4 pr-12 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 border border-transparent dark:border-zinc-800 custom-scrollbar shadow-inner text-sm disabled:opacity-50 transition-all placeholder:text-zinc-400"
+            className="w-full bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 rounded-xl pl-4 pr-20 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 border border-transparent dark:border-zinc-800 custom-scrollbar shadow-inner text-sm disabled:opacity-50 transition-all placeholder:text-zinc-400"
             rows={Math.min(Math.max(input.split('\n').length, 1), 4)}
             style={{ minHeight: '44px', maxHeight: '120px' }}
           />
-          <button
-            type="submit"
-            disabled={!input.trim() || isProcessing}
-            className="absolute right-2 bottom-2 w-8 h-8 flex items-center justify-center rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-colors shadow-sm"
-          >
-            <svg className="w-4 h-4 translate-x-px translate-y-px" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-          </button>
+          <div className="absolute right-2 bottom-2 flex items-center gap-1.5">
+            <a
+              href="/design-tips"
+              target="_blank"
+              title="Design Tips & Tricks"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </a>
+            <button
+              type="submit"
+              disabled={!input.trim() || isProcessing}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-colors shadow-sm"
+            >
+              <svg className="w-4 h-4 translate-x-px translate-y-px" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </button>
+          </div>
         </form>
       </div>
     </div>
