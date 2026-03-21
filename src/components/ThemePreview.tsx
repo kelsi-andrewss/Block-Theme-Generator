@@ -47,6 +47,14 @@ const SELECTION_BRIDGE_SCRIPT = (enabled: boolean) => `
     return n !== 'html' && n !== 'body' && !t.closest('[data-no-select]');
   }
 
+  function resolveEl(uid) {
+    if (uid) {
+      var found = document.querySelector('[data-uid="' + uid + '"]');
+      if (found) return found;
+    }
+    return sel;
+  }
+
   document.addEventListener('mouseover', function(e) {
     var t = e.target;
     if (!ok(t) || t === sel) return;
@@ -70,6 +78,7 @@ const SELECTION_BRIDGE_SCRIPT = (enabled: boolean) => `
     e.stopPropagation();
     if (sel) { sel.style.outline = ''; sel.style.outlineOffset = ''; sel.style.backgroundColor = ''; }
     var cleanHtml = t.outerHTML;
+    var uid = t.getAttribute('data-uid') || null;
     sel = t;
     sel.style.outline = '2px solid #f97316';
     sel.style.outlineOffset = '4px';
@@ -79,7 +88,7 @@ const SELECTION_BRIDGE_SCRIPT = (enabled: boolean) => `
     var c = r.slice(0, 50) + (r.length > 50 ? '...' : '');
     window.parent.postMessage({
       type: 'BLOCK_SELECTED',
-      payload: { blockId: bid(t), blockName: 'Native <' + n + '>', content: c, html: cleanHtml }
+      payload: { blockId: bid(t), blockName: 'Native <' + n + '>', content: c, html: cleanHtml, uid: uid }
     }, '*');
   }, { capture: true });
 
@@ -92,19 +101,21 @@ const SELECTION_BRIDGE_SCRIPT = (enabled: boolean) => `
     if (e.data.type === 'PATCH_STYLES' && e.data.styles && sel) {
       var iterateId = e.data.iterateId;
       var styles = e.data.styles;
-      sel.setAttribute('data-iterate-id', iterateId);
+      var target = resolveEl(sel.getAttribute('data-uid'));
+      if (!target) return;
+      target.setAttribute('data-iterate-id', iterateId);
       var oldProps = {};
-      var isGradientText = (sel.style.getPropertyValue('-webkit-background-clip') === 'text'
-        || sel.style.getPropertyValue('background-clip') === 'text')
-        && sel.style.getPropertyValue('-webkit-text-fill-color') === 'transparent';
+      var isGradientText = (target.style.getPropertyValue('-webkit-background-clip') === 'text'
+        || target.style.getPropertyValue('background-clip') === 'text')
+        && target.style.getPropertyValue('-webkit-text-fill-color') === 'transparent';
 
       if (isGradientText && styles['color']) {
         var gps = ['background', 'background-image', '-webkit-background-clip', 'background-clip', '-webkit-text-fill-color'];
-        for (var g = 0; g < gps.length; g++) { oldProps[gps[g]] = sel.style.getPropertyValue(gps[g]); }
-        sel.style.setProperty('background', 'none');
-        sel.style.removeProperty('-webkit-background-clip');
-        sel.style.removeProperty('background-clip');
-        sel.style.setProperty('-webkit-text-fill-color', styles['color']);
+        for (var g = 0; g < gps.length; g++) { oldProps[gps[g]] = target.style.getPropertyValue(gps[g]); }
+        target.style.setProperty('background', 'none');
+        target.style.removeProperty('-webkit-background-clip');
+        target.style.removeProperty('background-clip');
+        target.style.setProperty('-webkit-text-fill-color', styles['color']);
       }
 
       var keys = Object.keys(styles);
@@ -112,13 +123,13 @@ const SELECTION_BRIDGE_SCRIPT = (enabled: boolean) => `
         var p = keys[k];
         var v = styles[p];
         if (p === 'background' && isGradientText && !styles['color']) { p = 'background-image'; }
-        if (!(p in oldProps)) { oldProps[p] = sel.style.getPropertyValue(p); }
-        if (v === '') { sel.style.removeProperty(p); }
-        else { sel.style.setProperty(p, v); }
+        if (!(p in oldProps)) { oldProps[p] = target.style.getPropertyValue(p); }
+        if (v === '') { target.style.removeProperty(p); }
+        else { target.style.setProperty(p, v); }
       }
       if (isGradientText && styles['background'] && !styles['color']) {
-        sel.style.setProperty('-webkit-background-clip', 'text');
-        sel.style.setProperty('background-clip', 'text');
+        target.style.setProperty('-webkit-background-clip', 'text');
+        target.style.setProperty('background-clip', 'text');
       }
       window.parent.postMessage({ type: 'STYLE_SNAPSHOT', iterateId: iterateId, oldProps: oldProps }, '*');
     }
@@ -137,11 +148,12 @@ const SELECTION_BRIDGE_SCRIPT = (enabled: boolean) => `
       }
     }
     if (e.data.type === 'PATCH_ELEMENT' && e.data.html) {
-      if (sel) {
-        var w = sel.offsetWidth;
-        var h = sel.offsetHeight;
+      var patchTarget = resolveEl(e.data.uid);
+      if (patchTarget) {
+        var w = patchTarget.offsetWidth;
+        var h = patchTarget.offsetHeight;
         var wrapper = '<div style="max-width:' + w + 'px;max-height:' + h + 'px;overflow:hidden">' + e.data.html + '</div>';
-        sel.outerHTML = wrapper;
+        patchTarget.outerHTML = wrapper;
       }
       hl = null; sel = null;
     }
@@ -158,6 +170,17 @@ const SELECTION_BRIDGE_SCRIPT = (enabled: boolean) => `
       // Global fallback: swap entire body
       document.body.innerHTML = e.data.html;
       hl = null; sel = null;
+    }
+    if (e.data.type === 'HOT_SWAP_ELEMENT' && e.data.uid && e.data.html) {
+      var swapUid = e.data.uid;
+      var swapHtml = e.data.html;
+      var swapEl = document.querySelector('[data-uid="' + swapUid + '"]');
+      if (swapEl) {
+        swapEl.outerHTML = swapHtml;
+        window.parent.postMessage({ type: 'HOT_SWAP_ACK', uid: swapUid }, '*');
+      } else {
+        window.parent.postMessage({ type: 'HOT_SWAP_FAIL', uid: swapUid, reason: 'NOT_FOUND' }, '*');
+      }
     }
   });
 })();

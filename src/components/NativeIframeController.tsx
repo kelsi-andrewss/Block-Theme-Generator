@@ -32,23 +32,25 @@ export default function NativeIframeController() {
 
       if (event.data.type === 'PATCH_STYLES' && event.data.styles && selectedEl) {
         const { iterateId, styles } = event.data as { iterateId: string; styles: Record<string, string> };
-        selectedEl.setAttribute('data-iterate-id', iterateId);
+        const target = resolveEl(selectedEl.getAttribute('data-uid'));
+        if (!target) return;
+        target.setAttribute('data-iterate-id', iterateId);
         const oldProps: Record<string, string> = {};
-        const isGradientText = (selectedEl.style.getPropertyValue('-webkit-background-clip') === 'text'
-          || selectedEl.style.getPropertyValue('background-clip') === 'text')
-          && selectedEl.style.getPropertyValue('-webkit-text-fill-color') === 'transparent';
+        const isGradientText = (target.style.getPropertyValue('-webkit-background-clip') === 'text'
+          || target.style.getPropertyValue('background-clip') === 'text')
+          && target.style.getPropertyValue('-webkit-text-fill-color') === 'transparent';
 
         // If setting "color" on a gradient-text element, clear the gradient so color is visible
         if (isGradientText && styles['color']) {
           const colorVal = styles['color'];
           // Snapshot gradient-related props for undo
           for (const gp of ['background', 'background-image', '-webkit-background-clip', 'background-clip', '-webkit-text-fill-color']) {
-            oldProps[gp] = selectedEl.style.getPropertyValue(gp);
+            oldProps[gp] = target.style.getPropertyValue(gp);
           }
-          selectedEl.style.setProperty('background', 'none');
-          selectedEl.style.removeProperty('-webkit-background-clip');
-          selectedEl.style.removeProperty('background-clip');
-          selectedEl.style.setProperty('-webkit-text-fill-color', colorVal);
+          target.style.setProperty('background', 'none');
+          target.style.removeProperty('-webkit-background-clip');
+          target.style.removeProperty('background-clip');
+          target.style.setProperty('-webkit-text-fill-color', colorVal);
         }
 
         for (let [prop, value] of Object.entries(styles)) {
@@ -57,18 +59,18 @@ export default function NativeIframeController() {
             prop = 'background-image';
           }
           if (!(prop in oldProps)) {
-            oldProps[prop] = selectedEl.style.getPropertyValue(prop);
+            oldProps[prop] = target.style.getPropertyValue(prop);
           }
           if (value === '') {
-            selectedEl.style.removeProperty(prop);
+            target.style.removeProperty(prop);
           } else {
-            selectedEl.style.setProperty(prop, value);
+            target.style.setProperty(prop, value);
           }
         }
         // Re-assert background-clip if we redirected background → background-image
         if (isGradientText && styles['background'] && !styles['color']) {
-          selectedEl.style.setProperty('-webkit-background-clip', 'text');
-          selectedEl.style.setProperty('background-clip', 'text');
+          target.style.setProperty('-webkit-background-clip', 'text');
+          target.style.setProperty('background-clip', 'text');
         }
         window.parent.postMessage({ type: 'STYLE_SNAPSHOT', iterateId, oldProps }, '*');
       }
@@ -89,9 +91,9 @@ export default function NativeIframeController() {
       }
 
       if (event.data.type === 'PATCH_ELEMENT' && event.data.html) {
-        // selectedEl still holds the live DOM reference — swap it directly
-        if (selectedEl) {
-          selectedEl.outerHTML = event.data.html;
+        const target = resolveEl(event.data.uid);
+        if (target) {
+          target.outerHTML = event.data.html;
         }
         highlightedEl = null;
         selectedEl = null;
@@ -112,6 +114,17 @@ export default function NativeIframeController() {
         document.body.innerHTML = event.data.html;
         highlightedEl = null;
         selectedEl = null;
+      }
+
+      if (event.data.type === 'HOT_SWAP_ELEMENT' && event.data.uid && event.data.html) {
+        const { uid, html } = event.data as { uid: string; html: string };
+        const el = document.querySelector<HTMLElement>(`[data-uid="${uid}"]`);
+        if (el) {
+          el.outerHTML = html;
+          window.parent.postMessage({ type: 'HOT_SWAP_ACK', uid }, '*');
+        } else {
+          window.parent.postMessage({ type: 'HOT_SWAP_FAIL', uid, reason: 'NOT_FOUND' }, '*');
+        }
       }
 
       if (event.data.type === 'SET_MODE') {
@@ -147,6 +160,15 @@ export default function NativeIframeController() {
         current = parent;
       }
       return parts.join('-');
+    }
+
+    // Resolve element by data-uid selector, falling back to selectedEl
+    function resolveEl(uid?: string | null): HTMLElement | null {
+      if (uid) {
+        const found = document.querySelector<HTMLElement>(`[data-uid="${uid}"]`);
+        if (found) return found;
+      }
+      return selectedEl;
     }
 
     // 2. Click-to-edit semantic bridge
@@ -204,6 +226,7 @@ export default function NativeIframeController() {
 
       // Capture clean outerHTML BEFORE adding selection highlight styles
       const cleanHtml = target.outerHTML;
+      const uid = target.getAttribute('data-uid') || null;
 
       selectedEl = target;
       selectedEl.style.outline = '2px solid #f97316'; // Orange-500 for selection
@@ -219,7 +242,8 @@ export default function NativeIframeController() {
           blockId: getBlockId(target),
           blockName: `Native <${blockName}>`,
           content: content,
-          html: cleanHtml
+          html: cleanHtml,
+          uid
         }
       }, '*');
     }
