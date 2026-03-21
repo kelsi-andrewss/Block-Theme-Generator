@@ -17,7 +17,8 @@ import { SAAS_FRONT_PAGE_HTML, SAAS_HEADER_HTML, SAAS_FOOTER_HTML, SAAS_SIGNUP_H
 import { generateSaasCustomCss } from "@/lib/generators/custom-css";
 import type { AuditResult } from "@/lib/validation/design-audit";
 import { applyThemeOverrides, buildThemeFileMap, type ThemeFilesData, type IframeState } from "@/lib/packer/constants";
-import { set } from "idb-keyval";
+import { get, set } from "idb-keyval";
+import { applyAstMutation, type EditIntent } from "@/lib/transpiler/ast-mutator";
 import {
   SAAS_JSX_SOURCE, SAAS_HEADER_JSX_SOURCE, SAAS_FOOTER_JSX_SOURCE,
   SAAS_404_JSX_SOURCE, SAAS_SIGNUP_JSX_SOURCE, SAAS_PRICING_JSX_SOURCE,
@@ -40,6 +41,8 @@ interface StepState {
   status: "pending" | "active" | "done" | "error";
   detail?: string;
 }
+
+const IDB_KEY = "jsx-pages";
 
 const INITIAL_STEPS: StepState[] = [
   { name: "Enriching prompt", key: "enrich", status: "pending" },
@@ -77,6 +80,8 @@ export default function Home() {
   const [openFiles, setOpenFiles] = useState<string[]>(["index.html"]);
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
   const [jsxPages, setJsxPages] = useState<Record<string, string> | null>(null);
+  const jsxPagesRef = useRef<Record<string, string> | null>(null);
+  jsxPagesRef.current = jsxPages;
 
   const activeSlug = useMemo(() => {
     if (!activeFile || activeFile === 'index.html' || activeFile === 'front-page.html') return 'home';
@@ -84,6 +89,12 @@ export default function Home() {
     if (activeFile.startsWith('pages/')) return activeFile.replace('pages/', '');
     return activeFile.replace('.html', '');
   }, [activeFile]);
+
+  useEffect(() => {
+    get<Record<string, string>>(IDB_KEY).then(stored => {
+      if (stored) setJsxPages(stored);
+    });
+  }, []);
 
   // Broadcast mode changes to iframes (NativeIframeController listens for SET_MODE)
   useEffect(() => {
@@ -165,6 +176,19 @@ export default function Home() {
     }
   }
 
+  const commitJsxEdit = useCallback((slug: string, edits: EditIntent[]) => {
+    try {
+      const pages = jsxPagesRef.current;
+      if (!pages || !pages[slug]) return;
+      const updatedJsx = applyAstMutation(pages[slug], edits);
+      setJsxPages(prev => prev ? { ...prev, [slug]: updatedJsx } : null);
+      const updated = { ...pages, [slug]: updatedJsx };
+      set(IDB_KEY, updated).catch(err => console.error("[commitJsxEdit] IDB write failed", err));
+    } catch (err) {
+      console.error("[commitJsxEdit]", err);
+    }
+  }, []);
+
   const handleSendMessage = useCallback(async (message: string, block?: SelectedBlockEvent): Promise<string> => {
     if (!result) return "No theme loaded.";
 
@@ -172,6 +196,7 @@ export default function Home() {
     setShowGlobalApplyPrompt(false);
     lastInstructionRef.current = message;
     lastElementRef.current = block || null;
+    const currentSlug = activeSlug;
     try {
       const palette = getPaletteContext();
       const isHeaderFooter = block?.blockName.toLowerCase().includes('header') || block?.blockName.toLowerCase().includes('footer') || activeFile.includes('parts/');
@@ -195,7 +220,7 @@ export default function Home() {
           throw new Error(body.error ?? `Iteration failed (${res.status})`);
         }
 
-        const data: { themeFiles?: any; styles?: Record<string, string>; html?: string; textContent?: string; explanation: string } = await res.json();
+        const data: { themeFiles?: any; edits?: EditIntent[]; styles?: Record<string, string>; html?: string; textContent?: string; explanation: string } = await res.json();
 
         if (data.themeFiles) {
           setResult(prev => prev ? { ...prev, themeFiles: data.themeFiles } : null);
@@ -220,6 +245,10 @@ export default function Home() {
             f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: data.html }, '*');
           });
           if (!isHeaderFooter) setShowGlobalApplyPrompt(true);
+        }
+
+        if (data.edits && Array.isArray(data.edits)) {
+          commitJsxEdit(currentSlug, data.edits);
         }
 
         return data.explanation;
@@ -264,7 +293,7 @@ export default function Home() {
     } finally {
       setIsIterating(false);
     }
-  }, [result]);
+  }, [result, activeSlug, commitJsxEdit]);
 
   const handleApplySitewide = useCallback(async () => {
     if (!result || !lastInstructionRef.current) return;
@@ -565,6 +594,7 @@ export default function Home() {
     setInitialArch(null);
     setFormKey(k => k + 1);
     setJsxPages(null);
+    set(IDB_KEY, undefined).catch(() => {});
   }
 
   function handleSelectGalleryTheme(theme: PremadeTheme) {
@@ -589,7 +619,7 @@ export default function Home() {
     setArchetypeId(theme.id);
 
     if (theme.id === "saas") {
-      setJsxPages({
+      const pages = {
         home: SAAS_JSX_SOURCE,
         header: SAAS_HEADER_JSX_SOURCE,
         footer: SAAS_FOOTER_JSX_SOURCE,
@@ -598,9 +628,12 @@ export default function Home() {
         pricing: SAAS_PRICING_JSX_SOURCE,
         docs: SAAS_DOCS_JSX_SOURCE,
         contact: SAAS_CONTACT_JSX_SOURCE,
-      });
+      };
+      setJsxPages(pages);
+      set(IDB_KEY, pages).catch(err => console.error("[handleSelectGalleryTheme] IDB seed failed", err));
     } else {
       setJsxPages(null);
+      set(IDB_KEY, undefined).catch(() => {});
     }
 
     const customCss = theme.id === "saas" ? generateSaasCustomCss() : undefined;
