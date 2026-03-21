@@ -37,6 +37,7 @@ export default function IterationChat({
   onClearSelection,
 }: IterationChatProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showUndoTooltip, setShowUndoTooltip] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "initial",
@@ -52,6 +53,13 @@ export default function IterationChat({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isProcessing]);
+
+  useEffect(() => {
+    if (showUndoTooltip) {
+      const timer = setTimeout(() => setShowUndoTooltip(false), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [showUndoTooltip]);
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
@@ -83,6 +91,13 @@ export default function IterationChat({
     }]);
   }
 
+  const handleInternalUndo = () => {
+    if (onUndo) {
+      onUndo();
+      setShowUndoTooltip(true);
+    }
+  };
+
   // Helper to format block names cleanly (e.g. "core/heading" -> "Heading Block")
   function formatBlockName(name: string) {
     if (!name) return "Selected Block";
@@ -105,15 +120,54 @@ export default function IterationChat({
           Iterate Design
         </h3>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 relative">
           {canUndo && (
             <button
-              onClick={onUndo}
+              onClick={handleInternalUndo}
               disabled={isProcessing}
               className="text-xs font-medium px-3 py-1.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors border border-transparent hover:border-amber-300 dark:hover:border-amber-700 focus:ring-2 focus:ring-amber-400 focus:outline-none disabled:opacity-50"
             >
               Undo
             </button>
+          )}
+          {showUndoTooltip && (
+            <div className="absolute top-full right-0 mt-2 w-64 p-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-xl z-50 animate-in fade-in slide-in-from-top-2">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 shrink-0 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-xs font-semibold text-zinc-900 dark:text-white leading-tight">
+                    Not what you wanted?
+                  </p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-snug">
+                    Check out our design tips to learn how to guide the AI better.
+                  </p>
+                  <a 
+                    href="/design-tips" 
+                    target="_blank"
+                    className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline mt-1 inline-flex items-center gap-1"
+                    onClick={() => setShowUndoTooltip(false)}
+                  >
+                    See tips and tricks
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+                <button 
+                  onClick={() => setShowUndoTooltip(false)}
+                  className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="absolute -top-1 right-8 w-2 h-2 bg-white dark:bg-zinc-800 border-l border-t border-zinc-200 dark:border-zinc-700 rotate-45"></div>
+            </div>
           )}
           <button
             onClick={onRegenerateLayout}
