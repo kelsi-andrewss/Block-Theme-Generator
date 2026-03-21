@@ -170,7 +170,6 @@ export default function Home() {
           });
         }
 
-        setSelectedBlock(null);
         return data.explanation;
       } else {
         // Global edit: CSS variable overrides
