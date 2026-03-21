@@ -844,12 +844,22 @@ export default function Home() {
                   />
                   {/* Theme Preview Flex Container */}
                   <div className="flex-1 w-full bg-zinc-100 dark:bg-zinc-950 relative z-0 overflow-hidden flex flex-col">
-                    {(themeSlug && themeSlug !== "generated-theme") ? (
-                      <iframe 
-                        src={`/templates/${themeSlug}`}
-                        className="w-full h-full border-0"
-                        title={`${themeSlug} Template Iteration Preview`}
-                      />
+                    {(themeSlug && themeSlug !== "generated-theme") ? (() => {
+                      const iframeSlug = (() => {
+                        if (!activeFile || activeFile === 'index.html' || activeFile === 'front-page.html' || activeFile.startsWith('parts/')) return '';
+                        if (activeFile.startsWith('pages/')) return activeFile.replace('pages/', '').replace('.html', '');
+                        return activeFile.replace('.html', '');
+                      })();
+                      const iframeSrc = `/templates/${themeSlug}${iframeSlug ? `/${iframeSlug}` : ''}`;
+                      return (
+                        <iframe
+                          key={activeFile}
+                          src={iframeSrc}
+                          className="w-full h-full border-0"
+                          title={`${themeSlug} Template Iteration Preview`}
+                        />
+                      );
+                    })()
                     ) : (
                       <ThemePreview
                         themeJson={result?.themeFiles.darkMode || result?.themeFiles.themeJson}
