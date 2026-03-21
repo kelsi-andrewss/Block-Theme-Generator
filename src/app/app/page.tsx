@@ -6,10 +6,11 @@ import dynamic from "next/dynamic";
 import GeneratorForm from "@/components/GeneratorForm";
 import ProgressIndicator from "@/components/ProgressIndicator";
 import AuditResults from "@/components/AuditResults";
-import ThemePreview, { PreviewMode } from "@/components/ThemePreview";
+import ThemePreview from "@/components/ThemePreview";
 import ColorSwitcher from "@/components/ColorSwitcher";
 import TemplateGallery from "@/components/TemplateGallery";
 import IterationChat, { SelectedBlockEvent } from "@/components/IterationChat";
+import WorkbenchHeader from "@/components/WorkbenchHeader";
 import type { ThemeArchetype } from "@/lib/prompts/archetypes";
 import type { PremadeTheme } from "@/lib/premade-themes";
 import { SAAS_FRONT_PAGE_HTML, SAAS_HEADER_HTML, SAAS_FOOTER_HTML } from "@/lib/generators/saas-template";
@@ -55,9 +56,6 @@ export default function Home() {
   const [archetypeId, setArchetypeId] = useState("blog");
   const themeSlugRef = useRef("generated-theme");
 
-  const [activePage, setActivePage] = useState("home");
-  const [previewMode, setPreviewMode] = useState<PreviewMode>("edit");
-
   // Tab State & Initial Data for the Form
   const [activeTab, setActiveTab] = useState<"generator" | "gallery">("generator");
   const [formKey, setFormKey] = useState(0); // Used to force remount GeneratorForm when initial data changes
@@ -67,6 +65,14 @@ export default function Home() {
   const [isIterating, setIsIterating] = useState(false);
   const [selectedBlock, setSelectedBlock] = useState<SelectedBlockEvent | null>(null);
   const [iframeState, setIframeState] = useState<{ isDarkMode: boolean; activeThemeId: string; activeFontId: string; colors: any } | null>(null);
+
+  // Multi-page Workbench State
+  const [activeFile, setActiveFile] = useState<string>("index.html");
+  const [openFiles, setOpenFiles] = useState<string[]>(["index.html"]);
+  const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
+  const [showGlobalApplyPrompt, setShowGlobalApplyPrompt] = useState(false);
+  const lastInstructionRef = useRef<string>("");
+  const lastElementRef = useRef<SelectedBlockEvent | null>(null);
 
   // Undo stack: ref for data (no stale closures), counter for reactivity
   type UndoEntry =
@@ -141,8 +147,12 @@ export default function Home() {
     if (!result) return "No theme loaded.";
 
     setIsIterating(true);
+    setShowGlobalApplyPrompt(false);
+    lastInstructionRef.current = message;
+    lastElementRef.current = block || null;
     try {
       const palette = getPaletteContext();
+      const isHeaderFooter = block?.blockName.toLowerCase().includes('header') || block?.blockName.toLowerCase().includes('footer') || activeFile.includes('parts/');
 
       if (block) {
         // Targeted edit: send element HTML, get modified HTML back
@@ -152,6 +162,9 @@ export default function Home() {
           body: JSON.stringify({
             instruction: message,
             selectedElement: { html: block.html, content: block.content },
+            activeFile,
+            isGlobal: isHeaderFooter,
+            themeFiles: result.themeFiles,
           }),
         });
 
@@ -160,24 +173,31 @@ export default function Home() {
           throw new Error(body.error ?? `Iteration failed (${res.status})`);
         }
 
-        const data: { styles?: Record<string, string>; html?: string; textContent?: string; explanation: string } = await res.json();
+        const data: { themeFiles?: any; styles?: Record<string, string>; html?: string; textContent?: string; explanation: string } = await res.json();
+
+        if (data.themeFiles) {
+          setResult(prev => prev ? { ...prev, themeFiles: data.themeFiles } : null);
+        }
 
         if (data.styles) {
           const iterateId = `iter-${Date.now()}`;
           document.querySelectorAll('iframe').forEach(f => {
             f.contentWindow?.postMessage({ type: 'PATCH_STYLES', iterateId, styles: data.styles }, '*');
           });
+          if (!isHeaderFooter) setShowGlobalApplyPrompt(true);
         } else if (data.textContent !== undefined) {
           const newHtml = block.html.replace(/>([^<]*)</, `>${data.textContent}<`);
           pushUndo({ type: "element", html: block.html, newHtml });
           document.querySelectorAll('iframe').forEach(f => {
             f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: newHtml }, '*');
           });
+          if (!isHeaderFooter) setShowGlobalApplyPrompt(true);
         } else if (data.html) {
           pushUndo({ type: "element", html: block.html, newHtml: data.html });
           document.querySelectorAll('iframe').forEach(f => {
             f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: data.html }, '*');
           });
+          if (!isHeaderFooter) setShowGlobalApplyPrompt(true);
         }
 
         return data.explanation;
@@ -186,7 +206,7 @@ export default function Home() {
         const res = await fetch("/api/iterate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ instruction: message, palette }),
+          body: JSON.stringify({ instruction: message, palette, isGlobal: true }),
         });
 
         if (!res.ok) {
@@ -219,6 +239,37 @@ export default function Home() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Iteration failed";
       return `Error: ${msg}`;
+    } finally {
+      setIsIterating(false);
+    }
+  }, [result]);
+
+  const handleApplySitewide = useCallback(async () => {
+    if (!result || !lastInstructionRef.current) return;
+    setIsIterating(true);
+    setShowGlobalApplyPrompt(false);
+    try {
+      const res = await fetch("/api/iterate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          instruction: lastInstructionRef.current,
+          selectedElement: lastElementRef.current ? { 
+            html: lastElementRef.current.html, 
+            content: lastElementRef.current.content 
+          } : undefined,
+          isGlobal: true,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Sitewide update failed");
+      
+      const data = await res.json();
+      if (data.themeFiles) {
+        setResult(prev => prev ? { ...prev, themeFiles: data.themeFiles } : null);
+      }
+    } catch (err) {
+      console.error(err);
     } finally {
       setIsIterating(false);
     }
@@ -323,7 +374,7 @@ export default function Home() {
     setStep("generating");
     setError(null);
     setResult({
-      themeFiles: { themeJson: "", darkMode: "", templates: {}, parts: {}, patterns: {}, pages: {}, customCss: "" },
+      themeFiles: { themeJson: "", darkMode: "", templates: {}, parts: {}, patterns: {}, customCss: "" },
       audit: { score: 0, grade: "F", checks: [] },
       meta: { themeName: "generating", displayName: "Generating...", description: data.description }
     });
@@ -392,8 +443,6 @@ export default function Home() {
               setResult(prev => prev ? { ...prev, themeFiles: { ...prev.themeFiles, darkMode: parsed.content } } : null);
             } else if (parsed.type === "custom-css") {
               setResult(prev => prev ? { ...prev, themeFiles: { ...prev.themeFiles, customCss: parsed.content } } : null);
-            } else if (parsed.type === "skeleton-pages" && parsed.files) {
-              setResult(prev => prev ? { ...prev, themeFiles: { ...prev.themeFiles, pages: parsed.files } } : null);
             }
           } else if (eventType === "complete") {
             setResult(parsed as GenerationResult);
@@ -498,7 +547,6 @@ export default function Home() {
         templates,
         parts,
         patterns: {},
-        pages: {},
         customCss,
       },
       audit: {
@@ -653,6 +701,9 @@ export default function Home() {
                             f.contentWindow?.postMessage({ type: 'CLEAR_SELECTION' }, '*');
                           });
                         }}
+                        onApplySitewide={handleApplySitewide}
+                        showGlobalBadge={showGlobalApplyPrompt}
+                        isGlobalMode={selectedBlock?.blockName.toLowerCase().includes('header') || selectedBlock?.blockName.toLowerCase().includes('footer') || activeFile.includes('parts/')}
                       />
                     )}
                   </div>
@@ -767,100 +818,45 @@ export default function Home() {
             {step === "results" && result && (
               <div className="flex-1 w-full h-full relative z-10 flex flex-col overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
                 <div className="flex-1 bg-white dark:bg-zinc-900/40 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 flex flex-col overflow-hidden shadow-2xl ring-1 ring-black/5 dark:ring-white/5">
-                  {/* Preview Workbench Header */}
-                  <div className="h-14 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-4 flex items-center justify-between shrink-0 z-30">
-                    <div className="flex items-center gap-4">
-                      <div className="flex gap-1.5 mr-2">
-                        <div className="w-3 h-3 rounded-full bg-zinc-300 dark:bg-zinc-800"></div>
-                        <div className="w-3 h-3 rounded-full bg-zinc-300 dark:bg-zinc-800"></div>
-                        <div className="w-3 h-3 rounded-full bg-zinc-300 dark:bg-zinc-800"></div>
-                      </div>
-                      
-                      {/* File Tree Dropdown */}
-                      <div className="relative group">
-                        <button className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:border-blue-500 transition-colors shadow-sm">
-                          <svg className="w-3.5 h-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2z" />
-                          </svg>
-                          Pages & Components
-                          <svg className="w-3 h-3 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </button>
-                        
-                        <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2">
-                          <p className="px-3 py-2 text-[10px] font-black uppercase text-zinc-400 tracking-widest">Main Templates</p>
-                          <button 
-                            onClick={() => setActivePage('home')}
-                            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors ${activePage === 'home' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-zinc-600 dark:text-zinc-400'}`}
-                          >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-                            index.html (Home)
-                          </button>
-                          
-                          <div className="mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                            <p className="px-3 py-2 text-[10px] font-black uppercase text-zinc-400 tracking-widest">AI Generated Pages</p>
-                            {result && Object.entries(result.themeFiles.pages || {}).map(([slug, page]) => (
-                              <button 
-                                key={slug}
-                                onClick={() => setActivePage(slug)}
-                                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors ${activePage === slug ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-zinc-600 dark:text-zinc-400'}`}
-                              >
-                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                {slug}.html ({page.title})
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Active Tabs */}
-                    <div className="hidden sm:flex items-center gap-1">
-                      <div className={`px-4 py-1.5 rounded-t-lg border-b-2 transition-all cursor-default flex items-center gap-2 text-xs font-bold ${activePage === 'home' ? 'border-blue-500 text-blue-600 bg-blue-50/50 dark:bg-blue-900/10' : 'border-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'}`}>
-                        index.html
-                      </div>
-                      {activePage !== 'home' && (
-                        <div className="px-4 py-1.5 rounded-t-lg border-b-2 border-blue-500 text-blue-600 bg-blue-50/50 dark:bg-blue-900/10 transition-all cursor-default flex items-center gap-2 text-xs font-bold">
-                          {activePage}.html
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Mode Toggle */}
-                    <div className="flex items-center gap-1 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-1 shadow-inner">
-                      <button 
-                        onClick={() => setPreviewMode('edit')}
-                        className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${previewMode === 'edit' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'}`}
-                      >
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" /></svg>
-                        Edit
-                      </button>
-                      <button 
-                        onClick={() => setPreviewMode('preview')}
-                        className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${previewMode === 'preview' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'}`}
-                      >
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                        Preview
-                      </button>
-                    </div>
-                  </div>
+                  <WorkbenchHeader
+                    files={[
+                      ...Object.keys(result.themeFiles.templates),
+                      ...Object.keys(result.themeFiles.parts).map(p => `parts/${p}`)
+                    ]}
+                    activeFile={activeFile}
+                    openFiles={openFiles}
+                    onFileSelect={(file) => {
+                      setActiveFile(file);
+                      if (!openFiles.includes(file)) setOpenFiles(prev => [...prev, file]);
+                    }}
+                    onFileClose={(file) => {
+                      const newOpen = openFiles.filter(f => f !== file);
+                      setOpenFiles(newOpen);
+                      if (activeFile === file && newOpen.length > 0) setActiveFile(newOpen[newOpen.length - 1]);
+                    }}
+                    mode={viewMode}
+                    onModeChange={setViewMode}
+                    isGlobalScope={selectedBlock?.blockName.toLowerCase().includes('header') || selectedBlock?.blockName.toLowerCase().includes('footer') || activeFile.includes('parts/')}
+                  />
                   {/* Theme Preview Flex Container */}
                   <div className="flex-1 w-full bg-zinc-100 dark:bg-zinc-950 relative z-0 overflow-hidden flex flex-col">
-                    <ThemePreview
-                      themeJson={result?.themeFiles.darkMode || result?.themeFiles.themeJson}
-                      templates={result?.themeFiles.templates}
-                      parts={result?.themeFiles.parts}
-                      patterns={result?.themeFiles.patterns}
-                      pages={result?.themeFiles.pages}
-                      activePage={activePage}
-                      customCss={result?.themeFiles.customCss}
-                      mode={previewMode}
-                      onNavigate={(slug) => {
-                        setActivePage(slug);
-                        setPreviewMode('preview'); // Keep in preview mode when following links
-                      }}
-                    />
+                    {(themeSlug && themeSlug !== "generated-theme") ? (
+                      <iframe 
+                        src={`/templates/${themeSlug}`}
+                        className="w-full h-full border-0"
+                        title={`${themeSlug} Template Iteration Preview`}
+                      />
+                    ) : (
+                      <ThemePreview
+                        themeJson={result?.themeFiles.darkMode || result?.themeFiles.themeJson}
+                        templates={result?.themeFiles.templates}
+                        parts={result?.themeFiles.parts}
+                        patterns={result?.themeFiles.patterns}
+                        customCss={result?.themeFiles.customCss}
+                        activeFile={activeFile}
+                        mode={viewMode}
+                      />
+                    )}
                   </div>
                 </div>
               </div>

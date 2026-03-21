@@ -63,13 +63,40 @@ RESPONSE FORMAT — JSON only, no markdown fences:
   "explanation": "<one sentence>"
 }`;
 
+const MULTI_FILE_SYSTEM_PROMPT = `You are a WordPress block theme editor. You modify multiple HTML template files based on a user instruction.
+
+You will receive:
+1. A dictionary of current template files (templates and parts).
+2. A selected element that triggered the change.
+3. The user's instruction.
+
+Your task is to identify every occurrence of the target element or similar elements across ALL files and apply the requested change.
+
+RULES:
+1. Return the COMPLETE updated file dictionary.
+2. For visual changes, apply them as inline styles on the WordPress block markup.
+3. Ensure consistency: if a button style is changed, update ALL buttons that match the context.
+4. Only return valid JSON.
+
+RESPONSE FORMAT:
+{
+  "themeFiles": {
+    "templates": { "index.html": "...", "page.html": "..." },
+    "parts": { "header.html": "...", "footer.html": "..." }
+  },
+  "explanation": "<one sentence summary of what was changed sitewide>"
+}`;
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { instruction, selectedElement, palette } = body as {
+    const { instruction, selectedElement, palette, isGlobal, themeFiles, activeFile } = body as {
       instruction: string;
       selectedElement?: { html: string; content: string };
       palette?: string;
+      isGlobal?: boolean;
+      themeFiles?: any;
+      activeFile?: string;
     };
 
     if (!instruction) {
@@ -78,6 +105,17 @@ export async function POST(req: NextRequest) {
 
     const provider = getProvider();
     const paletteCtx = palette ? `\n\n## Available Colors\n${palette}` : "";
+
+    if (isGlobal && themeFiles && selectedElement) {
+      // Sitewide multi-file iteration
+      const prompt = `## Theme Files\n${JSON.stringify(themeFiles, null, 2)}\n\n## Trigger Element\n${selectedElement.html}\n\n## Instruction\n${instruction}`;
+      const raw = await provider.generateText(prompt, MULTI_FILE_SYSTEM_PROMPT, { temperature: 0.2 });
+      let cleaned = raw.trim();
+      if (cleaned.startsWith("```")) {
+        cleaned = cleaned.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+      }
+      return NextResponse.json(JSON.parse(cleaned));
+    }
 
     if (selectedElement) {
       // Targeted edit — element HTML in, element HTML out
