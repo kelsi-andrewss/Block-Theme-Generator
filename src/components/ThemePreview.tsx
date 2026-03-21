@@ -113,9 +113,7 @@ const SELECTION_BRIDGE_SCRIPT = `
         sel.style.setProperty('-webkit-background-clip', 'text');
         sel.style.setProperty('background-clip', 'text');
       }
-      sel.style.outline = ''; sel.style.outlineOffset = ''; sel.style.backgroundColor = '';
       window.parent.postMessage({ type: 'STYLE_SNAPSHOT', iterateId: iterateId, oldProps: oldProps }, '*');
-      hl = null; sel = null;
     }
     if (e.data.type === 'UNDO_STYLES' && e.data.iterateId) {
       var undoId = e.data.iterateId;

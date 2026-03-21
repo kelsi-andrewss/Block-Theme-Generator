@@ -71,12 +71,7 @@ export default function NativeIframeController() {
           selectedEl.style.setProperty('-webkit-background-clip', 'text');
           selectedEl.style.setProperty('background-clip', 'text');
         }
-        selectedEl.style.outline = '';
-        selectedEl.style.outlineOffset = '';
-        selectedEl.style.backgroundColor = '';
         window.parent.postMessage({ type: 'STYLE_SNAPSHOT', iterateId, oldProps }, '*');
-        highlightedEl = null;
-        selectedEl = null;
       }
 
       if (event.data.type === 'UNDO_STYLES' && event.data.iterateId) {
