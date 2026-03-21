@@ -1,7 +1,7 @@
 import TemplateProvider from "@/components/TemplateProvider";
 import NativeIframeController from "@/components/NativeIframeController";
 import JsxStringRenderer from "@/components/JsxStringRenderer";
-import { SAAS_HEADER_JSX_SOURCE, SAAS_FOOTER_JSX_SOURCE } from "./page";
+import { SAAS_HEADER_JSX_SOURCE, SAAS_FOOTER_JSX_SOURCE } from "./jsx-sources";
 import { Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });

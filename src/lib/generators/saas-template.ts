@@ -1,5 +1,5 @@
 import { transpileJSXToBlocks } from '../transpiler/jsx-to-blocks';
-import { SAAS_JSX_SOURCE, SAAS_HEADER_JSX_SOURCE, SAAS_FOOTER_JSX_SOURCE } from '../../app/templates/saas/page';
+import { SAAS_JSX_SOURCE, SAAS_HEADER_JSX_SOURCE, SAAS_FOOTER_JSX_SOURCE } from '../../app/templates/saas/jsx-sources';
 
 const HEADER_PART = '<!-- wp:template-part {"slug":"header","tagName":"header"} /-->';
 const FOOTER_PART = '<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->';
