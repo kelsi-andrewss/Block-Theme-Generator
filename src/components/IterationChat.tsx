@@ -5,6 +5,7 @@ export interface SelectedBlockEvent {
   clientId: string;
   content: string;
   html: string;
+  uid: string | null;
 }
 
 interface IterationChatProps {

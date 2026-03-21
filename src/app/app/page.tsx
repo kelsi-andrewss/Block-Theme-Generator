@@ -208,7 +208,7 @@ export default function Home() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             instruction: message,
-            selectedElement: { html: block.html, content: block.content },
+            selectedElement: { html: block.html, content: block.content, uid: block.uid },
             activeFile,
             isGlobal: isHeaderFooter,
             themeFiles: result.themeFiles,
@@ -226,7 +226,34 @@ export default function Home() {
           setResult(prev => prev ? { ...prev, themeFiles: data.themeFiles } : null);
         }
 
-        if (data.styles) {
+        if (data.edits && Array.isArray(data.edits) && data.edits.length > 0) {
+          // New structured edit format — dispatch DOM patches from edits
+          for (const edit of data.edits) {
+            if (edit.kind === 'style') {
+              const iterateId = `iter-${Date.now()}`;
+              document.querySelectorAll('iframe').forEach(f => {
+                f.contentWindow?.postMessage({ type: 'PATCH_STYLES', iterateId, styles: edit.styles, uid: edit.uid }, '*');
+              });
+            } else if (edit.kind === 'text') {
+              document.querySelectorAll('iframe').forEach(f => {
+                f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: `<span>${edit.textContent}</span>`, uid: edit.uid }, '*');
+              });
+            } else if (edit.kind === 'html') {
+              document.querySelectorAll('iframe').forEach(f => {
+                f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: edit.html, uid: edit.uid }, '*');
+              });
+            } else if (edit.kind === 'attribute') {
+              // Attribute changes — use HOT_SWAP approach or fall through
+              document.querySelectorAll('iframe').forEach(f => {
+                f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: edit.attributes?.class ? block.html : block.html, uid: edit.uid }, '*');
+              });
+            }
+          }
+          if (!isHeaderFooter) setShowGlobalApplyPrompt(true);
+          // Persist to AST/IDB concurrently
+          commitJsxEdit(currentSlug, data.edits);
+        } else if (data.styles) {
+          // Legacy fallback — old 3-mode response
           const iterateId = `iter-${Date.now()}`;
           document.querySelectorAll('iframe').forEach(f => {
             f.contentWindow?.postMessage({ type: 'PATCH_STYLES', iterateId, styles: data.styles }, '*');
@@ -245,10 +272,6 @@ export default function Home() {
             f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: data.html }, '*');
           });
           if (!isHeaderFooter) setShowGlobalApplyPrompt(true);
-        }
-
-        if (data.edits && Array.isArray(data.edits)) {
-          commitJsxEdit(currentSlug, data.edits);
         }
 
         return data.explanation;
