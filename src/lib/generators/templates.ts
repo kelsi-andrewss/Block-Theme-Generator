@@ -181,7 +181,7 @@ ${themeContext}
 Generate the ${spec.name}.html template now.`;
 }
 
-import { SAAS_FRONT_PAGE_HTML } from "./saas-template";
+import { SAAS_FRONT_PAGE_HTML, SAAS_404_HTML } from "./saas-template";
 
 export async function generateTemplates(
   enrichedPrompt: any,
@@ -408,7 +408,7 @@ export async function generateTemplates(
   templates.set("front-page.html", frontPageHtml);
   templates.set("index.html", frontPageHtml);
 
-  templates.set("404.html", `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+  const generic404 = `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
 <!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
 <main class="wp-block-group">
 <!-- wp:heading {"textAlign":"center","level":1} -->
@@ -420,7 +420,9 @@ export async function generateTemplates(
 <!-- wp:search {"showLabel":false,"buttonText":"Search"} /-->
 </main>
 <!-- /wp:group -->
-<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`);
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`;
+
+  templates.set("404.html", enrichedPrompt?.archetype?.id === "saas" ? SAAS_404_HTML : generic404);
 
   templates.set("archive.html", `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
 <!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
