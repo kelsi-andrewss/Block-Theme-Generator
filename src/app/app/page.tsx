@@ -865,7 +865,8 @@ export default function Home() {
                         if (activeFile.startsWith('pages/')) return activeFile.replace('pages/', '').replace('.html', '');
                         return activeFile.replace('.html', '');
                       })();
-                      const iframeSrc = `/templates/${themeSlug}${iframeSlug ? `/${iframeSlug}` : ''}`;
+                      const isPart = activeFile.startsWith('parts/');
+                      const iframeSrc = `/templates/${themeSlug}${iframeSlug ? `/${iframeSlug}` : ''}${isPart ? '?isolate=true' : ''}`;
                       return (
                         <iframe
                           key={activeFile}
