@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import GeneratorForm from "@/components/GeneratorForm";
@@ -18,6 +18,12 @@ import { generateSaasCustomCss } from "@/lib/generators/custom-css";
 import type { AuditResult } from "@/lib/validation/design-audit";
 import { applyThemeOverrides, buildThemeFileMap, type ThemeFilesData, type IframeState } from "@/lib/packer/constants";
 import { set } from "idb-keyval";
+import {
+  SAAS_JSX_SOURCE, SAAS_HEADER_JSX_SOURCE, SAAS_FOOTER_JSX_SOURCE,
+  SAAS_404_JSX_SOURCE, SAAS_SIGNUP_JSX_SOURCE, SAAS_PRICING_JSX_SOURCE,
+  SAAS_DOCS_JSX_SOURCE, SAAS_CONTACT_JSX_SOURCE,
+} from "@/app/templates/saas/jsx-sources";
+import { transpileJSXToBlocks } from "@/lib/transpiler/jsx-to-blocks";
 
 type AppStep = "input" | "generating" | "results";
 
@@ -70,6 +76,14 @@ export default function Home() {
   const [activeFile, setActiveFile] = useState<string>("index.html");
   const [openFiles, setOpenFiles] = useState<string[]>(["index.html"]);
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
+  const [jsxPages, setJsxPages] = useState<Record<string, string> | null>(null);
+
+  const activeSlug = useMemo(() => {
+    if (!activeFile || activeFile === 'index.html' || activeFile === 'front-page.html') return 'home';
+    if (activeFile.startsWith('parts/')) return activeFile.replace('parts/', '').replace('.html', '');
+    if (activeFile.startsWith('pages/')) return activeFile.replace('pages/', '');
+    return activeFile.replace('.html', '');
+  }, [activeFile]);
 
   // Broadcast mode changes to iframes (NativeIframeController listens for SET_MODE)
   useEffect(() => {
@@ -465,11 +479,38 @@ export default function Home() {
     }
   }
 
+  function transpileJsxPagesToThemeFiles(base: ThemeFilesData, pages: Record<string, string>): ThemeFilesData {
+    const HEADER_PART = '<!-- wp:template-part {"slug":"header","tagName":"header"} /-->';
+    const FOOTER_PART = '<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->';
+    const headerHtml = transpileJSXToBlocks(pages.header);
+    const footerHtml = transpileJSXToBlocks(pages.footer);
+    const homeHtml = `${HEADER_PART}\n${transpileJSXToBlocks(pages.home)}\n${FOOTER_PART}`;
+    const html404 = transpileJSXToBlocks(pages["404"]);
+    const templates: Record<string, string> = {
+      ...base.templates,
+      "front-page.html": homeHtml,
+      "index.html": homeHtml,
+      "404.html": html404,
+    };
+    const parts: Record<string, string> = {
+      ...base.parts,
+      "header.html": headerHtml,
+      "footer.html": footerHtml,
+    };
+    const skeletonPages: Record<string, { title: string; slug: string; content: string }> = {};
+    const pageMap: Record<string, string> = { signup: "Sign Up", pricing: "Pricing", docs: "Documentation", contact: "Contact" };
+    for (const [slug, title] of Object.entries(pageMap)) {
+      if (pages[slug]) skeletonPages[slug] = { title, slug, content: transpileJSXToBlocks(pages[slug]) };
+    }
+    return { ...base, templates, parts, skeletonPages };
+  }
+
   async function handleDownload() {
     if (!result) return;
     setIsPackaging(true);
     try {
-      const overridden = applyThemeOverrides(result.themeFiles, iframeState as IframeState | null);
+      const themeFiles = jsxPages ? transpileJsxPagesToThemeFiles(result.themeFiles, jsxPages) : result.themeFiles;
+      const overridden = applyThemeOverrides(themeFiles, iframeState as IframeState | null);
       const fileMap = buildThemeFileMap(overridden, result.meta);
       const slug = result.meta.themeName;
 
@@ -499,7 +540,8 @@ export default function Home() {
     setIsPreviewing(true);
 
     try {
-      const overridden = applyThemeOverrides(result.themeFiles, iframeState as IframeState | null);
+      const themeFiles = jsxPages ? transpileJsxPagesToThemeFiles(result.themeFiles, jsxPages) : result.themeFiles;
+      const overridden = applyThemeOverrides(themeFiles, iframeState as IframeState | null);
 
       await set("playground-theme", {
         ...overridden,
@@ -522,6 +564,7 @@ export default function Home() {
     setInitialDesc("");
     setInitialArch(null);
     setFormKey(k => k + 1);
+    setJsxPages(null);
   }
 
   function handleSelectGalleryTheme(theme: PremadeTheme) {
@@ -544,6 +587,21 @@ export default function Home() {
     setThemeSlug(theme.id);
     themeSlugRef.current = theme.id;
     setArchetypeId(theme.id);
+
+    if (theme.id === "saas") {
+      setJsxPages({
+        home: SAAS_JSX_SOURCE,
+        header: SAAS_HEADER_JSX_SOURCE,
+        footer: SAAS_FOOTER_JSX_SOURCE,
+        "404": SAAS_404_JSX_SOURCE,
+        signup: SAAS_SIGNUP_JSX_SOURCE,
+        pricing: SAAS_PRICING_JSX_SOURCE,
+        docs: SAAS_DOCS_JSX_SOURCE,
+        contact: SAAS_CONTACT_JSX_SOURCE,
+      });
+    } else {
+      setJsxPages(null);
+    }
 
     const customCss = theme.id === "saas" ? generateSaasCustomCss() : undefined;
 
