@@ -98,11 +98,42 @@ function unescapeQuotes(s: string): string {
 
 let keyCounter = 0;
 
-function astToReact(node: t.Node): React.ReactNode {
+function generateUid(tag: string, depth: number, siblingIndex: number): string {
+  return `${tag}-${depth}-${siblingIndex}`;
+}
+
+function mapChildrenWithIndex(
+  children: t.Node[],
+  depth: number,
+): React.ReactNode[] {
+  let elementIndex = 0;
+  return children
+    .map((c) => {
+      if (t.isJSXElement(c)) {
+        return astToReact(c, depth + 1, elementIndex++);
+      }
+      if (t.isJSXExpressionContainer(c)) {
+        const isHtmlExpr = (() => {
+          if (t.isJSXEmptyExpression(c.expression)) return false;
+          let str: string | null = null;
+          if (t.isStringLiteral(c.expression)) str = c.expression.value;
+          else if (t.isTemplateLiteral(c.expression) && c.expression.expressions.length === 0) {
+            str = c.expression.quasis.map((q) => q.value.cooked ?? q.value.raw).join("");
+          }
+          return str !== null && isHtmlString(str);
+        })();
+        if (isHtmlExpr) {
+          return astToReact(c, depth, elementIndex++);
+        }
+      }
+      return astToReact(c, depth, 0);
+    })
+    .filter((c) => c !== null && c !== undefined && c !== "");
+}
+
+function astToReact(node: t.Node, depth: number = 0, siblingIndex: number = 0): React.ReactNode {
   if (t.isJSXFragment(node)) {
-    const children = node.children
-      .map((c) => astToReact(c))
-      .filter((c) => c !== null && c !== undefined && c !== "");
+    const children = mapChildrenWithIndex(node.children, depth - 1);
     return createElement(Fragment, null, ...children);
   }
 
@@ -130,6 +161,7 @@ function astToReact(node: t.Node): React.ReactNode {
       if (isHtmlString(str)) {
         return createElement("span", {
           key: `html-${++keyCounter}`,
+          "data-uid": generateUid("span", depth, siblingIndex),
           dangerouslySetInnerHTML: { __html: unescapeQuotes(str) },
         });
       }
@@ -184,9 +216,9 @@ function astToReact(node: t.Node): React.ReactNode {
     reactProps[key] = value;
   }
 
-  const children = node.children
-    .map((c) => astToReact(c))
-    .filter((c) => c !== null && c !== undefined && c !== "");
+  reactProps["data-uid"] = generateUid(resolved, depth, siblingIndex);
+
+  const children = mapChildrenWithIndex(node.children, depth);
 
   if (children.length === 0) {
     return createElement(resolved, reactProps);
