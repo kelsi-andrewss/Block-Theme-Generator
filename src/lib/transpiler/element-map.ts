@@ -73,7 +73,7 @@ elementMap['img'] = {
   wpName: 'image',
   tagName: 'img',
   cssClass: 'wp-block-image',
-  selfClosing: true,
+  selfClosing: false,
   extractAttrs: imgExtract,
 };
 

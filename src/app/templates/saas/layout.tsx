@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { get } from 'idb-keyval';
 import TemplateProvider from "@/components/TemplateProvider";
@@ -13,7 +13,11 @@ const inter = Inter({ subsets: ['latin'] });
 
 import { Suspense } from 'react';
 
-function SaaSLayoutInner({ children }: { children: React.ReactNode }) {
+function SaaSLayoutContent({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const searchParams = useSearchParams();
   const isolate = searchParams.get('isolate') === 'true';
   const [headerJsx, setHeaderJsx] = useState(SAAS_HEADER_JSX_SOURCE);
@@ -45,10 +49,14 @@ function SaaSLayoutInner({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function SaaSLayout({ children }: { children: React.ReactNode }) {
+export default function SaaSLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <SaaSLayoutInner>{children}</SaaSLayoutInner>
+    <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)' }}></div>}>
+      <SaaSLayoutContent>{children}</SaaSLayoutContent>
     </Suspense>
   );
 }

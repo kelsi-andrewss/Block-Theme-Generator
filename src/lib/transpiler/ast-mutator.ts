@@ -320,7 +320,7 @@ export function applyAstMutation(source: string, intents: EditIntent[]): string 
   const rootExpr = ast.program.body[0];
   if (t.isExpressionStatement(rootExpr) && t.isArrayExpression(rootExpr.expression)) {
     const rawNode = rootExpr.expression.elements[0];
-    if (rawNode) return recast.print(rawNode).code;
+    if (rawNode) return injectUids(recast.print(rawNode).code);
   }
 
   return source;

@@ -223,7 +223,7 @@ export default function Home() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             instruction: message,
-            selectedElement: { html: block.html, content: block.content, uid: block.uid },
+            selectedElement: { html: block.html, content: block.content, uid: block.uid, rect: block.rect },
             activeFile,
             isGlobal: false, // ALWAYS false for targeted clicks so we get AST edits
             themeFiles: result.themeFiles,
@@ -254,8 +254,19 @@ export default function Home() {
                 f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: `<span>${edit.textContent}</span>`, uid: edit.uid, location: currentSlug }, '*');
               });
             } else if (edit.kind === 'html') {
+              const match = edit.html.match(/^<([a-zA-Z0-9\-]+)/);
+              const newTag = match ? match[1].toLowerCase() : 'div';
+              // Extract the structural path ID (e.g. from 'span-0.1' -> '0.1')
+              const pathId = edit.uid.split('-').slice(1).join('-');
+              const newUid = `${newTag}-${pathId}`;
+              
+              // Ensure the injected HTML natively bears the exact UID the AST mutator will generate
+              const htmlWithUid = edit.html.includes('data-uid=') 
+                ? edit.html 
+                : edit.html.replace(/^(<[a-zA-Z0-9\-]+)/, `$1 data-uid="${newUid}"`);
+                
               document.querySelectorAll('iframe').forEach(f => {
-                f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: edit.html, uid: edit.uid, location: currentSlug }, '*');
+                f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: htmlWithUid, uid: edit.uid, location: currentSlug }, '*');
               });
             } else if (edit.kind === 'attribute') {
               // Attribute changes — use HOT_SWAP approach or fall through
@@ -366,18 +377,35 @@ export default function Home() {
 
   const handleImageUpload = useCallback((file: File) => {
     if (!selectedBlock) return;
-    const blobUrl = URL.createObjectURL(file);
-    const imgHtml = `<img src="${blobUrl}" alt="${file.name}" style="width:100%;height:100%;object-fit:cover;display:block" />`;
 
-    // Snapshot for undo
-    pushUndo({ type: "element", html: selectedBlock.html, newHtml: imgHtml });
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const b64Url = e.target?.result as string;
+      if (!b64Url) return;
 
-    // Replace selected element with the image
-    document.querySelectorAll('iframe').forEach(f => {
-      f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: imgHtml }, '*');
-    });
-    setSelectedBlock(null);
-  }, [selectedBlock]);
+      let styleStr = "max-width:100%;height:auto";
+      if (selectedBlock.rect && selectedBlock.rect.width > 0 && selectedBlock.rect.height > 0) {
+        styleStr = `width:${Math.round(selectedBlock.rect.width)}px;height:${Math.round(selectedBlock.rect.height)}px;object-fit:cover;`;
+      }
+      
+      const pathId = (selectedBlock.uid as string).split('-').slice(1).join('-');
+      const newUid = `img-${pathId}`;
+      const imgHtml = `<img data-uid="${newUid}" src="${b64Url}" alt="${file.name}" style="${styleStr}" />`;
+
+      // Snapshot for undo
+      pushUndo({ type: "element", html: selectedBlock.html, newHtml: imgHtml });
+
+      const currentSlug = selectedBlock.location && selectedBlock.location !== 'main' ? selectedBlock.location : activeSlug;
+      commitJsxEdit(currentSlug, [{ kind: "html", uid: selectedBlock.uid as string, html: imgHtml }]);
+
+      // Replace selected element with the image
+      document.querySelectorAll('iframe').forEach(f => {
+        f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: imgHtml, uid: selectedBlock.uid, location: currentSlug }, '*');
+      });
+      setSelectedBlock(null);
+    };
+    reader.readAsDataURL(file);
+  }, [selectedBlock, activeSlug, commitJsxEdit]);
 
   const handleUndo = useCallback(() => {
     const stack = undoRef.current;

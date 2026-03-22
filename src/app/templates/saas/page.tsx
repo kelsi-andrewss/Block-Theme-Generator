@@ -18,14 +18,6 @@ const WP_VAR_BRIDGE: Record<string, string> = {
 };
 
 export default function SaaSPage() {
-  const [jsxSource, setJsxSource] = useState(SAAS_JSX_SOURCE);
-
-  useEffect(() => {
-    get<Record<string, string>>("jsx-pages").then(stored => {
-      if (stored?.home) setJsxSource(stored.home);
-    });
-  }, []);
-
   return (
     <div style={{
       display: 'flex',
@@ -35,7 +27,7 @@ export default function SaaSPage() {
       backgroundColor: 'var(--color-bg)',
       color: 'var(--color-text)',
     }}>
-      <JsxStringRenderer jsxString={jsxSource} />
+      <JsxStringRenderer jsxString={SAAS_JSX_SOURCE} />
     </div>
   );
 }
