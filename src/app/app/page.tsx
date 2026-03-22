@@ -938,7 +938,7 @@ export default function Home() {
                   </div>
                   <div className="flex-1 w-full bg-zinc-100 dark:bg-zinc-950">
                     <iframe 
-                      src="/templates/saas" 
+                      src="/templates/saas?gallery=true" 
                       className="w-full h-full border-0"
                       title="SaaS Template Preview"
                     />

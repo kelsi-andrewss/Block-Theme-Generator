@@ -17,4 +17,9 @@ export interface AIProvider {
     systemPrompt: string,
     options?: GenerateOptions
   ): Promise<string>;
+
+  generateImage(
+    prompt: string,
+    options?: GenerateOptions
+  ): Promise<string>;
 }

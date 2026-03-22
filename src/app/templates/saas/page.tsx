@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { get } from 'idb-keyval';
 import { SAAS_FEATURES } from '@/lib/data/saas-features';
 import JsxStringRenderer from '@/components/JsxStringRenderer';
@@ -324,6 +324,9 @@ export default function SaaSPage() {
   const [jsxSource, setJsxSource] = useState(SAAS_JSX_SOURCE);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("gallery") === "true") {
+      return;
+    }
     get<Record<string, string>>("jsx-pages").then(stored => {
       if (stored?.home) setJsxSource(stored.home);
     });
@@ -338,7 +341,11 @@ export default function SaaSPage() {
       backgroundColor: 'var(--color-bg)',
       color: 'var(--color-text)',
     }}>
-      <JsxStringRenderer jsxString={jsxSource} />
+      <Suspense fallback={null}>
+        <JsxStringRenderer jsxString={jsxSource} />
+      </Suspense>
     </div>
   );
 }
+
+export const dynamic = 'force-dynamic';

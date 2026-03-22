@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { get } from 'idb-keyval';
 import TemplateProvider from "@/components/TemplateProvider";
@@ -11,22 +11,24 @@ import { Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export default function SaaSLayout({
+function SaaSLayoutInner({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const searchParams = useSearchParams();
   const isolate = searchParams.get('isolate') === 'true';
+  const isGallery = searchParams.get('gallery') === 'true';
   const [headerJsx, setHeaderJsx] = useState(SAAS_HEADER_JSX_SOURCE);
   const [footerJsx, setFooterJsx] = useState(SAAS_FOOTER_JSX_SOURCE);
 
   useEffect(() => {
+    if (isGallery) return;
     get<Record<string, string>>("jsx-pages").then(stored => {
       if (stored?.header) setHeaderJsx(stored.header);
       if (stored?.footer) setFooterJsx(stored.footer);
     });
-  }, []);
+  }, [isGallery]);
 
   return (
     <TemplateProvider>
@@ -44,5 +46,15 @@ export default function SaaSLayout({
 
       </div>
     </TemplateProvider>
+  );
+}
+
+export default function SaaSLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={null}>
+      <SaaSLayoutInner>
+        {children}
+      </SaaSLayoutInner>
+    </Suspense>
   );
 }

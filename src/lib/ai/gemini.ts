@@ -105,4 +105,34 @@ export class GeminiProvider implements AIProvider {
 
     return text;
   }
+
+  async generateImage(
+    prompt: string,
+    options?: GenerateOptions
+  ): Promise<string> {
+    const response = await withRetry(() =>
+      this.client.models.generateImages({
+        model: "imagen-4.0-generate-001",
+        prompt: prompt,
+        config: {
+          numberOfImages: 1,
+          outputMimeType: "image/jpeg",
+          aspectRatio: "1:1",
+        },
+      })
+    );
+
+    const generatedImages = response.generatedImages;
+    if (!generatedImages || generatedImages.length === 0) {
+      throw new Error("Gemini returned no images");
+    }
+
+    const imageBytes = generatedImages[0].image?.imageBytes;
+    if (!imageBytes) {
+      throw new Error("Gemini returned an empty image byte stream");
+    }
+
+    // Convert the returned buffer/base64 to a data URI
+    return `data:image/jpeg;base64,${imageBytes}`;
+  }
 }

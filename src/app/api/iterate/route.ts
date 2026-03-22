@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { getProvider } from "@/lib/ai";
 
 const TARGETED_SYSTEM_PROMPT = `You are a web design editor. You modify HTML elements based on a user instruction.
@@ -24,6 +25,10 @@ KIND "html" — structural changes (adding/removing child elements, changing the
 { "kind": "html", "uid": "<data-uid>", "html": "<full modified outerHTML>" }
 The outerHTML MUST preserve all data-uid attributes from the original.
 
+KIND "image" — replacing an image or background visually using AI image generation:
+{ "kind": "image", "uid": "<data-uid>", "prompt": "<a highly descriptive visual prompt for the AI image generator>" }
+Use this if the user asks to generate a completely new illustration, photo, or graphic.
+
 RESPONSE FORMAT — JSON only, no markdown fences:
 {
   "edits": [ { "kind": "...", "uid": "...", ... } ],
@@ -43,11 +48,13 @@ type EditIntent =
   | { kind: "style"; uid: string; styles: Record<string, string> }
   | { kind: "text"; uid: string; textContent: string }
   | { kind: "attribute"; uid: string; attributes: Record<string, string | null> }
-  | { kind: "html"; uid: string; html: string };
+  | { kind: "html"; uid: string; html: string }
+  | { kind: "image"; uid: string; prompt: string; _resolvedBase64?: string };
 
 interface EditIntentResponse {
   edits: EditIntent[];
   explanation: string;
+  remainingImages?: number;
 }
 
 function isValidEditIntent(e: unknown): e is EditIntent {
@@ -63,6 +70,8 @@ function isValidEditIntent(e: unknown): e is EditIntent {
       return typeof obj.attributes === "object" && obj.attributes !== null;
     case "html":
       return typeof obj.html === "string";
+    case "image":
+      return typeof obj.prompt === "string";
     default:
       return false;
   }
@@ -146,6 +155,11 @@ export async function POST(req: NextRequest) {
       activeFile?: string;
     };
 
+    const cookieStore = await cookies();
+    const countCookie = cookieStore.get("ai_image_count");
+    let imageCount = countCookie ? parseInt(countCookie.value, 10) : 0;
+    const MAX_IMAGES = 10;
+
     if (!instruction) {
       return NextResponse.json({ error: "instruction is required" }, { status: 400 });
     }
@@ -185,8 +199,48 @@ export async function POST(req: NextRequest) {
       const intentResponse = validateEditIntentResponse(parsed);
       console.log("[iterate API] parsed raw AI response:", JSON.stringify(parsed, null, 2));
       if (intentResponse) {
-        console.log("[iterate API] sending back valid intentResponse:", JSON.stringify(intentResponse, null, 2));
-        return NextResponse.json(intentResponse);
+        let cookieUpdated = false;
+        
+        // Process any image generation intents server-side
+        for (let i = 0; i < intentResponse.edits.length; i++) {
+          const edit = intentResponse.edits[i];
+          if (edit.kind === "image") {
+            if (imageCount >= MAX_IMAGES) {
+              return NextResponse.json(
+                { error: "Image limit reached (10/10 this session)." },
+                { status: 429 }
+              );
+            }
+            try {
+              const base64URI = await provider.generateImage(edit.prompt);
+              imageCount++;
+              cookieUpdated = true;
+              
+              // Mutate the intent into a standard visual update so the client handles it cleanly
+              const isImgTag = selectedElement.html.trim().toLowerCase().startsWith("<img");
+              if (isImgTag) {
+                intentResponse.edits[i] = { kind: "attribute", uid: edit.uid, attributes: { src: base64URI } };
+              } else {
+                intentResponse.edits[i] = { kind: "style", uid: edit.uid, styles: { backgroundImage: `url('${base64URI}')`, backgroundSize: "cover", backgroundPosition: "center" } };
+              }
+            } catch (err) {
+              console.error("[iterate API] Image generation failed:", err);
+              return NextResponse.json({ error: "Image generation failed." }, { status: 500 });
+            }
+          }
+        }
+
+        intentResponse.remainingImages = MAX_IMAGES - imageCount;
+        console.log("[iterate API] sending back valid intentResponse:", JSON.stringify({ ...intentResponse, edits: intentResponse.edits.map(e => e.kind === "attribute" && (e.attributes?.src?.length ?? 0) > 100 ? { ...e, attributes: { src: "[BASE64_IMAGE_DATA]" } } : e) }, null, 2));
+
+        const res = NextResponse.json(intentResponse);
+        if (cookieUpdated) {
+          res.cookies.set("ai_image_count", imageCount.toString(), {
+            path: "/",
+            maxAge: 60 * 60 * 24, // 24 hours
+          });
+        }
+        return res;
       }
       // Legacy fallback — old 3-mode response
       if (parsed.styles || parsed.html || parsed.textContent) {
