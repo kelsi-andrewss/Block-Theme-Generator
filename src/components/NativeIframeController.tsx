@@ -54,6 +54,7 @@ export default function NativeIframeController() {
         }
 
         for (let [prop, value] of Object.entries(styles)) {
+          prop = prop.replace(/[A-Z]/g, m => "-" + m.toLowerCase());
           // background shorthand resets background-clip — use background-image instead
           if (prop === 'background' && isGradientText && !styles['color']) {
             prop = 'background-image';

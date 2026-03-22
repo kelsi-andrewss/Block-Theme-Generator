@@ -62,6 +62,17 @@ export default function IterationChat({
   ]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [imageCount, setImageCount] = useState<number>(0);
+
+  const refreshImageCount = () => {
+    if (typeof document === 'undefined') return;
+    const match = document.cookie.match(/(?:^|; )ai_image_count=([^;]*)/);
+    if (match) setImageCount(parseInt(match[1], 10));
+  };
+
+  useEffect(() => {
+    refreshImageCount();
+  }, []);
 
   // Auto-scroll to bottom of chat
   useEffect(() => {
@@ -95,6 +106,9 @@ export default function IterationChat({
 
     // Call parent handler and wait for AI response
     const response = await onSendMessage(messageText, currentBlock);
+
+    // Refresh remaining images cookie if an image was generated
+    refreshImageCount();
 
     // Add AI response to chat
     setMessages((prev) => {
@@ -138,6 +152,14 @@ export default function IterationChat({
         </h3>
         
         <div className="flex items-center gap-2 relative">
+          {imageCount > 0 && (
+            <span 
+              className="text-[10px] font-bold uppercase tracking-wider text-fuchsia-700 dark:text-fuchsia-300 bg-fuchsia-100 dark:bg-fuchsia-900/30 px-2.5 py-1 rounded-full border border-fuchsia-200 dark:border-fuchsia-800/50 mr-1"
+              title="Session AI Image Generation Quota"
+            >
+              {imageCount}/10 Images
+            </span>
+          )}
           {canUndo && (
             <button
               onClick={handleInternalUndo}

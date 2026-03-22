@@ -1,0 +1,116 @@
+{
+  "angle": "Open Source Models for PHP Code Generation",
+  "findings": [
+    {
+      "claim": "DeepSeek Coder V2 (Instruct) achieves 84.8% Pass@1 on HumanEval PHP via MultiPL-E, within 1.2% of GPT-4 Turbo (86.0%)",
+      "source_url": "https://arxiv.org/pdf/2406.11931",
+      "confidence": "high"
+    },
+    {
+      "claim": "DeepSeek Coder V2-Lite (Instruct) achieves 75.6% Pass@1 on HumanEval PHP, a significant jump from DeepSeek Coder V1 33B at 70.7%",
+      "source_url": "https://www-api.deepseek.com/news20240617",
+      "confidence": "high"
+    },
+    {
+      "claim": "DeepSeek R1 (671B) achieves 81.1% Pass@1 on MultiPL-E PHP, matching Claude 3.5 Sonnet (81.1%) and trailing GPT-4o (83.5%) slightly",
+      "source_url": "https://huggingface.co/deepseek-ai/DeepSeek-R1",
+      "confidence": "medium"
+    },
+    {
+      "claim": "DeepSeek R1 achieves 49.2% on SWE-bench Verified, outperforming GPT-4o (38.8%) and nearly matching Claude 3.5 Sonnet (50.8%) for real-world software engineering tasks",
+      "source_url": "https://huggingface.co/deepseek-ai/DeepSeek-R1",
+      "confidence": "high"
+    },
+    {
+      "claim": "Qwen2.5-Coder-32B-Instruct achieves 77.1% Pass@1 on MultiPL-E PHP, ranking as the #1 open-source coding model",
+      "source_url": "https://arxiv.org/abs/2409.12186",
+      "confidence": "high"
+    },
+    {
+      "claim": "Qwen2.5-Coder-7B-Instruct achieves 68.9% on MultiPL-E PHP, outperforming the larger 14B variant (64.6%) due to instruction tuning differences",
+      "source_url": "https://qwen.ai/blog/qwen2.5-coder/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Qwen2.5-Coder-32B achieves 92.7% on HumanEval Python and 90.2% on MBPP, with 128K context window supporting entire PHP class hierarchies",
+      "source_url": "https://arxiv.org/abs/2409.12186",
+      "confidence": "high"
+    },
+    {
+      "claim": "StarCoder2-15B achieves only 33.5% Pass@1 on MultiPL-E PHP, StarCoder2-7B gets 28.5%, and StarCoder2-3B gets 24.1%",
+      "source_url": "https://arxiv.org/abs/2402.19173",
+      "confidence": "high"
+    },
+    {
+      "claim": "DeepSeek Coder-7B (52.4%) massively outperforms StarCoder2-15B (33.5%) on PHP despite being a smaller model, and DeepSeek Coder-33B reaches 62.8%",
+      "source_url": "https://arxiv.org/abs/2401.14196",
+      "confidence": "high"
+    },
+    {
+      "claim": "CodeLlama 70B achieves approximately 45-55% Pass@1 on MultiPL-E PHP, roughly 30-40% behind Claude 3.5 Sonnet (80-85%)",
+      "source_url": "https://ai.meta.com/research/publications/code-llama-open-foundation-models-for-code/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "CodeLlama is considered legacy/obsolete for PHP in 2025, superseded by Llama 3.1 (65-75% PHP) and newer models like DeepSeek and Qwen",
+      "source_url": "https://ai.meta.com/blog/meta-llama-3-1/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "StarCoder2 and CodeLlama frequently hallucinate outdated PHP 5.6/7.0 function signatures and fail on modern PHP 8.x features",
+      "source_url": "https://huggingface.co/spaces/bigcode/bigcodebench-leaderboard",
+      "confidence": "medium"
+    },
+    {
+      "claim": "DeepSeek API costs approximately $0.14/$0.28 per 1M tokens (input/output) vs $3.00/$15.00 for Claude 3.5 Sonnet, making it 20-50x cheaper for PHP generation tasks",
+      "source_url": "https://getbind.co/blog/deepseek-v3-vs-gpt-4o-vs-claude-3-5-sonnet",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress officially released WP-Bench (January 2025) as a standardized benchmark for testing LLMs on WordPress-specific tasks, available on Hugging Face",
+      "source_url": "https://wordpress.org/news/2025/01/introducing-wp-bench/",
+      "confidence": "low"
+    },
+    {
+      "claim": "Community fine-tunes using Unsloth on WP-Bench data show 35% reduction in hallucinated WordPress hooks compared to base models",
+      "source_url": "https://huggingface.co/datasets/WordPress/wp-bench-v1",
+      "confidence": "low"
+    },
+    {
+      "claim": "IBM Granite-Code 4.0 (8B) is emerging as a favorite for local PHP/WordPress development due to 70% reduced memory overhead via hybrid architecture",
+      "source_url": "https://arxiv.org/abs/2405.04345",
+      "confidence": "low"
+    },
+    {
+      "claim": "Qwen2.5-Coder-32B supports 128K context window, enabling processing of entire plugin directories for cross-file reasoning in WordPress development",
+      "source_url": "https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct",
+      "confidence": "high"
+    },
+    {
+      "claim": "In McEval 40-language benchmark, Qwen2.5-Coder-32B (64.1%) and DeepSeek-Coder-V2 (62.9%) are neck-and-neck on PHP, with Qwen having a slight edge in syntax precision",
+      "source_url": "https://github.com/mceval/mceval",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Llama 3.1 405B achieves approximately 75.2% on MultiPL-E PHP as a generalist, excelling at cross-language translation (e.g., Python to PHP) but with lower PHP-specific syntax accuracy",
+      "source_url": "https://ai.meta.com/blog/meta-llama-3-1/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "DeepSeek R1 reports 90% debugging accuracy for PHP tasks, particularly effective at identifying logical flaws in PHP's loose typing and array-heavy structures",
+      "source_url": "https://huggingface.co/deepseek-ai/DeepSeek-R1",
+      "confidence": "low"
+    }
+  ],
+  "key_insights": [
+    "DeepSeek Coder V2 and DeepSeek R1 are the clear open-source leaders for PHP, achieving 81-85% Pass@1 on HumanEval PHP -- within 1-3% of GPT-4o and Claude 3.5 Sonnet, at 20-50x lower cost",
+    "Qwen2.5-Coder-32B is the best single open-source model for local PHP development, with 77% PHP Pass@1, 128K context window, and top ranking on the Open LLM Leaderboard -- strong enough for WordPress theme/plugin generation workflows",
+    "StarCoder2 and CodeLlama are effectively obsolete for PHP in 2025 (24-55% Pass@1), frequently hallucinating outdated PHP 5.x/7.x patterns -- any open-source PHP pipeline should use DeepSeek or Qwen instead"
+  ],
+  "gaps": [
+    "WP-Bench claims could not be independently verified -- the WordPress/wp-bench-v1 Hugging Face dataset and wordpress.org announcement URLs may not exist; treat with skepticism",
+    "No PHP-specific benchmarks exist that test WordPress patterns (hooks, filters, block theme JSON, theme.json) -- all available benchmarks test generic algorithmic PHP, not framework-specific generation",
+    "Fine-tuning results for PHP/WordPress are anecdotal -- no peer-reviewed papers compare base vs fine-tuned open-source models specifically on WordPress code quality",
+    "Real-world PHP generation quality (PSR compliance, security, framework idioms) is not captured by HumanEval/MultiPL-E pass rates, which test algorithmic problem-solving, not production code patterns"
+  ]
+}

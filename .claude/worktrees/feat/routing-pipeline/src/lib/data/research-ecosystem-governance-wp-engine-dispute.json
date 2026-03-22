@@ -1,0 +1,143 @@
+{
+  "angle": "Ecosystem Governance & WP Engine Dispute",
+  "findings": [
+    {
+      "claim": "On September 20, 2024, Matt Mullenweg called WP Engine a 'cancer to WordPress' during a WordCamp US keynote, accusing them of profiting from the ecosystem while contributing minimally to the open-source project.",
+      "source_url": "https://www.404media.co/wordpress-org-now-requires-users-to-disavow-wp-engine-affiliation-to-log-in/",
+      "confidence": "high"
+    },
+    {
+      "claim": "On September 23, 2024, Automattic sent WP Engine a cease-and-desist alleging trademark infringement and demanding a licensing fee of 8% of WP Engine's gross revenue (approximately $32 million per year) for use of WordPress and WooCommerce trademarks.",
+      "source_url": "https://automattic.com/wordpress-trademark/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The proposed 7-year Trademark License Agreement offered WP Engine two compliance paths: pay 8% of gross revenue directly to Automattic, or commit 8% of revenue to salaries of WP Engine employees working on WordPress core development directed by WordPress.org.",
+      "source_url": "https://automattic.com/wordpress-trademark/",
+      "confidence": "high"
+    },
+    {
+      "claim": "On September 25, 2024, Mullenweg banned WP Engine from accessing WordPress.org resources, preventing WP Engine customers from receiving automated plugin and theme updates, creating immediate security risks for millions of websites.",
+      "source_url": "https://wptavern.com/the-loyalty-test-and-the-future-of-wordpress",
+      "confidence": "high"
+    },
+    {
+      "claim": "On October 2, 2024, WP Engine filed a federal lawsuit against Mullenweg and Automattic for attempted extortion, libel, abuse of power, and unfair competition in the Northern District of California.",
+      "source_url": "https://www.courthousenews.com/wp-content/uploads/2024/10/wp-engine-v-automattic.pdf",
+      "confidence": "high"
+    },
+    {
+      "claim": "On October 3, 2024, Automattic issued an 'Alignment Offer' buyout package: $30,000 or six months of salary (whichever higher) to employees who disagreed with the WP Engine fight. 159 employees (8.4% of workforce) accepted and resigned, with nearly 80% from the Ecosystem division.",
+      "source_url": "https://ma.tt/2024/10/alignment-offer/",
+      "confidence": "high"
+    },
+    {
+      "claim": "On October 9, 2024, WordPress.org implemented a mandatory login checkbox requiring users to affirm 'I am not affiliated with WP Engine in any way, financially or otherwise' to access their accounts.",
+      "source_url": "https://www.404media.co/wordpress-org-now-requires-users-to-disavow-wp-engine-affiliation-to-log-in/",
+      "confidence": "high"
+    },
+    {
+      "claim": "On October 12, 2024, WordPress.org seized control of the Advanced Custom Fields (ACF) plugin (owned by WP Engine) and renamed it 'Secure Custom Fields' (SCF), citing a security guideline to justify the action. ACF Pro users were unaffected as Pro updates are delivered via WP Engine's own servers.",
+      "source_url": "https://codeandcore.com/blog/wordpress-org-seizes-acf-plugin-renames-it-to-secure-custom-fields/",
+      "confidence": "high"
+    },
+    {
+      "claim": "On December 10, 2024, U.S. District Judge Araceli Martinez-Olguin granted WP Engine a preliminary injunction ordering Automattic to restore WP Engine's access to WordPress.org resources. The WP Engine affiliation checkbox was removed by December 13, 2024.",
+      "source_url": "https://wptavern.com/automattic-removes-wp-engine-checkbox-following-court-order",
+      "confidence": "high"
+    },
+    {
+      "claim": "After removing the WP Engine affiliation checkbox per court order, Automattic briefly replaced it with a satirical checkbox requiring users to agree that 'Pineapple is delicious on pizza' before logging in.",
+      "source_url": "https://mashable.com/article/wordpress-login-pineapple-pizza-checkbox-wp-engine",
+      "confidence": "high"
+    },
+    {
+      "claim": "On January 11, 2025, Mullenweg personally deactivated WordPress.org accounts of prominent community members including Joost de Valk (Yoast SEO founder), Karim Marucchi (Crowd Favorite CEO), Se Reed, Heather Burns, and Morten Rand-Hendriksen, telling them to 'fork off.'",
+      "source_url": "https://www.theregister.com/2025/01/13/wordpress_mullenweg_fork_ban/",
+      "confidence": "high"
+    },
+    {
+      "claim": "In mid-January 2025, Mullenweg announced Automattic would reduce its weekly contribution to WordPress core by 99%, dropping from approximately 4,000 hours to 45 hours per week, to match the contribution level he claimed WP Engine provided.",
+      "source_url": "https://gigazine.net/gsc_news/en/20250114-automattic-slash-contribution-to-wordpress/",
+      "confidence": "high"
+    },
+    {
+      "claim": "In early January 2025, Mullenweg officially shuttered the WordPress Sustainability Team after the resignation of a core team member in protest of the ongoing conflict.",
+      "source_url": "https://anderegg.ca/2025/01/02/the-sustainability-team-is-dead",
+      "confidence": "high"
+    },
+    {
+      "claim": "The 2010 trademark transfer from Automattic to the WordPress Foundation included a simultaneous 'license back': the Foundation granted Automattic an exclusive, perpetual, irrevocable, worldwide, royalty-free license to use WordPress trademarks commercially, with sole sublicensing authority.",
+      "source_url": "https://automattic.com/wordpress-trademark/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The WordPress Foundation retains trademark rights only for non-commercial community use (WordCamps, educational events). All commercial licensing requests must go through Automattic, not the Foundation.",
+      "source_url": "https://automattic.com/wordpress-trademark/",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress.org is personally owned and controlled by Matt Mullenweg -- it is neither part of the WordPress Foundation nor Automattic -- giving him unilateral control over the plugin repository, theme directory, and core update distribution infrastructure.",
+      "source_url": "https://lwn.net/Articles/992497/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The WordPress Foundation board has remained largely static for over a decade, consisting of only three members: Matt Mullenweg, Mark Ghosh, and Chele Farley.",
+      "source_url": "https://www.pluginvulnerabilities.com/2024/09/24/the-truth-about-the-wordpress-foundation-and-the-wordpress-trademark/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Five for the Future (5FTF), launched by Mullenweg in 2014, is a voluntary program encouraging organizations to contribute 5% of their resources to WordPress core development. Mullenweg claimed WP Engine contributed only ~40 hours/week vs Automattic's ~3,800 hours/week.",
+      "source_url": "https://wpbarista.com/five-for-the-future/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Discovery in the lawsuit (February 2026) revealed internal Automattic documents showing plans to target at least 10 other WordPress hosting companies with similar 8% royalty demands, and evidence of Mullenweg pressuring Stripe to terminate its partnership with WP Engine in October 2024.",
+      "source_url": "https://wpvswpe.report/third-amended-complaint/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "In late 2025, the USPTO rejected the WordPress Foundation's attempts to trademark terms like 'Managed WordPress' and 'Hosted WordPress,' ruling them merely descriptive and generic, weakening Automattic's legal standing.",
+      "source_url": "https://www.searchenginejournal.com/wordpress-vs-wp-engine-2025-timeline/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "An 'Uncommon Open Letter' in April 2025, signed by prominent community members, demanded total separation of power between for-profit Automattic and the non-profit WordPress Foundation to ensure transparent governance.",
+      "source_url": "https://www.searchenginejournal.com/wordpress-vs-wp-engine-2025-timeline/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Major hosting providers including Kinsta, SiteGround, and WP Engine built or expanded independent update systems (private mirrors of plugin/theme repositories) to reduce dependency on WordPress.org as a single point of failure.",
+      "source_url": "https://wpbarista.com/wordpress-hosting-licensing/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Automattic conducted a 16% staff reduction in April 2025 due to restructuring, on top of the 159 employees who left via the Alignment Offer in October 2024.",
+      "source_url": "https://siliconprairienews.com/automattic-layoffs-2025/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "WordPress market share remained at approximately 43% of the web but saw a slight contraction (~3%) in 2025 as competitors like Wix and Squarespace gained ground during the period of ecosystem uncertainty.",
+      "source_url": "https://www.searchenginejournal.com/wordpress-vs-wp-engine-2025-timeline/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "As of March 2026, the Automattic v. WP Engine case remains in litigation with no settlement. A full jury trial on trademark, antitrust, and tortious interference claims is expected in late 2026 or early 2027.",
+      "source_url": "https://wpvswpe.report",
+      "confidence": "medium"
+    }
+  ],
+  "key_insights": [
+    "The WordPress ecosystem has a critical structural governance flaw: Matt Mullenweg simultaneously controls the for-profit company (Automattic CEO), the non-profit (WordPress Foundation chairman), and the distribution infrastructure (WordPress.org personal owner), with the Foundation granting Automattic exclusive, perpetual, royalty-free commercial trademark rights and sole sublicensing authority -- creating a single point of failure and a conflict-of-interest structure that enabled the weaponization of community infrastructure for commercial disputes.",
+    "The dispute triggered a fundamental trust crisis in the WordPress ecosystem: the ACF/SCF plugin seizure established precedent that any plugin could be taken over, the contributor bans silenced dissent, and the 99% contribution reduction by Automattic punished the entire community -- prompting major hosting providers to build independent update infrastructure and community leaders to demand formal separation of powers between Automattic and the Foundation.",
+    "The Five for the Future program's transformation from voluntary community initiative to de facto enforcement tool (backed by trademark licensing demands of 8% of gross revenue) represents a novel and contested model for open-source sustainability, with discovery revealing plans to apply this model to 10+ hosting companies -- the legal outcome will set significant precedent for how open-source trademark holders can monetize ecosystem participation."
+  ],
+  "gaps": [
+    "Exact text and legal terms of the 2010 WordPress Foundation trademark sublicense agreement -- the full document has not been made public",
+    "Financial impact on WP Engine's revenue and customer base during the September-December 2024 access ban period",
+    "Detailed breakdown of which 10+ hosting companies Automattic allegedly planned to target with similar royalty demands (discovered in February 2026 filings but specifics not yet public)",
+    "Current status and specifics of Automattic's counterclaims for trademark infringement against WP Engine",
+    "Whether the WordPress Foundation board composition has changed in response to governance reform demands",
+    "Concrete metrics on how the 99% Automattic contribution reduction affected WordPress core development velocity in 2025"
+  ]
+}

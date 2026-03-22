@@ -1,0 +1,162 @@
+{
+  "angle": "Company Overview & History",
+  "findings": [
+    {
+      "claim": "Automattic Inc. was founded on June 20, 2005, by Matt Mullenweg to support and monetize the open-source WordPress project he co-founded in 2003",
+      "source_url": "https://en.wikipedia.org/wiki/Automattic",
+      "confidence": "high"
+    },
+    {
+      "claim": "Automattic is headquartered in San Francisco, California, but operates as a fully distributed company with employees in nearly 100 countries. The company closed its physical SF office in 2017 due to low usage.",
+      "source_url": "https://en.wikipedia.org/wiki/Automattic",
+      "confidence": "high"
+    },
+    {
+      "claim": "Toni Schneider served as CEO from 2006 until 2014, when Matt Mullenweg took over the role and remains CEO as of 2026",
+      "source_url": "https://en.wikipedia.org/wiki/Automattic",
+      "confidence": "high"
+    },
+    {
+      "claim": "Automattic's stated mission is to 'democratize publishing and commerce'",
+      "source_url": "https://automattic.com/about/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Series A (Jan 2006): $1.1M from Polaris Partners, Radar Partners, CNET, True Ventures",
+      "source_url": "https://www.crunchbase.com/organization/automattic/company_financials",
+      "confidence": "high"
+    },
+    {
+      "claim": "Series B (Jan 2008): $29.5M from Polaris Partners, Radar Partners, The New York Times Company, True Ventures",
+      "source_url": "https://ma.tt/2008/01/29-5-million/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Secondary market transaction (2013): Tiger Global invested $75M to provide liquidity to early shareholders",
+      "source_url": "https://www.crunchbase.com/organization/automattic/company_financials",
+      "confidence": "high"
+    },
+    {
+      "claim": "Series C (May 2014): $160M from Insight Partners, Iconiq Capital, Tiger Global, Chris Sacca",
+      "source_url": "https://www.crunchbase.com/organization/automattic/company_financials",
+      "confidence": "high"
+    },
+    {
+      "claim": "Series D (Sep 2019): $300M solely from Salesforce Ventures, valuing the company at $3 billion",
+      "source_url": "https://www.salesforce.com/news/stories/salesforce-ventures-invests-300m-in-automattic/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Series E (Feb 2021): $288M from BlackRock, Wellington Management, Alta Park, ICONIQ",
+      "source_url": "https://www.crunchbase.com/organization/automattic/company_financials",
+      "confidence": "high"
+    },
+    {
+      "claim": "In August 2021, Automattic conducted a $250M share buyback at a $7.5 billion peak valuation ($85/share)",
+      "source_url": "https://ma.tt/2021/08/7-5-billion/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Total funding raised across 12 rounds (including secondary market): approximately $986 million. No new primary funding rounds (Series F) in 2024 or 2025.",
+      "source_url": "https://tracxn.com/d/companies/automattic/__U_6CNoG3H6i7P9E8y5Z-0L-VfXjXG_8G4-8_8E7A",
+      "confidence": "high"
+    },
+    {
+      "claim": "CEO Matt Mullenweg reported in late 2024 the company generates approximately $500M in annual revenue; external estimates placed 2024 revenue between $700M-$710M",
+      "source_url": "https://en.wikipedia.org/wiki/Automattic",
+      "confidence": "medium"
+    },
+    {
+      "claim": "BlackRock issued repeated markdowns: Oct 2024 to ~$43.85/share (51% drop), Mar 2025 to $31.03/share, Jun 2025 to $27.74/share (cumulative 67.4% decline from 2021 purchase price)",
+      "source_url": "https://delta.blog",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Implied valuation as of early 2026 is estimated between $2.4B and $2.5B, down from $7.5B peak in 2021",
+      "source_url": "https://www.techzine.eu",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Automattic is described as operating at 'break-even or better' as of mid-2025, prioritizing leaner operations through workforce reductions",
+      "source_url": "https://www.techzine.eu",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Automattic has acquired at least 27 companies since 2005",
+      "source_url": "https://tracxn.com/d/acquisitions/acquisitions-by-automattic",
+      "confidence": "high"
+    },
+    {
+      "claim": "Key acquisitions: Gravatar (Oct 2007), PollDaddy/Crowdsignal (Oct 2008), Simplenote/Simperium (Jan 2013), Longreads (Apr 2014), WooCommerce/WooThemes (May 2015, ~$30M), Tumblr (Aug 2019, from Verizon), Parse.ly (Feb 2021), Day One (Jun 2021), Pocket Casts (Jul 2021), Texts (Oct 2023, ~$50M), ActivityPub (Mar 2023), Beeper (Apr 2024, ~$125M), Harper (Nov 2024), WPAI (Dec 2024), Clay (Jun 2025)",
+      "source_url": "https://tracxn.com/d/acquisitions/acquisitions-by-automattic",
+      "confidence": "high"
+    },
+    {
+      "claim": "WooCommerce (acquired 2015) powers over 20% of all e-commerce sites globally",
+      "source_url": "https://thebrandhopper.com/2023/11/14/business-model-of-automattic/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "WordPress (maintained by Automattic) powers more than 43% of all websites on the internet as of 2025",
+      "source_url": "https://contrary.com/blog/automattic",
+      "confidence": "high"
+    },
+    {
+      "claim": "Primary revenue streams: WordPress.com hosting subscriptions (Starter/Explorer/Creator/Entrepreneur tiers), WooCommerce extensions and WooPayments transaction fees, WordPress VIP enterprise hosting (clients include Meta, CNN, Salesforce), Jetpack/Akismet security SaaS, Tumblr ads and subscriptions, Day One and Pocket Casts premium subscriptions",
+      "source_url": "https://thebrandhopper.com/2023/11/14/business-model-of-automattic/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Emerging revenue: AI data licensing deals with OpenAI and Midjourney for anonymized Tumblr/WordPress.com public data (early 2024), WordAds advertising network",
+      "source_url": "https://thebrandhopper.com/2023/11/14/business-model-of-automattic/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "In October 2024, 159 employees (8.4% of staff) departed via 'voluntary alignment' buyout packages offered during the WP Engine dispute",
+      "source_url": "https://techcrunch.com",
+      "confidence": "high"
+    },
+    {
+      "claim": "In April 2025, Automattic laid off approximately 280 employees (16% of workforce)",
+      "source_url": "https://www.techzine.eu",
+      "confidence": "high"
+    },
+    {
+      "claim": "The WP Engine conflict began at WordCamp US in September 2024 when Mullenweg called WP Engine a 'cancer to WordPress' and blocked their access to WordPress.org resources",
+      "source_url": "https://www.searchenginejournal.com/automattic-wp-engine-lawsuit-timeline/528383/",
+      "confidence": "high"
+    },
+    {
+      "claim": "In December 2024, a federal judge granted WP Engine a preliminary injunction ordering Automattic to restore WordPress.org access",
+      "source_url": "https://www.searchenginejournal.com/automattic-wp-engine-lawsuit-timeline/528383/",
+      "confidence": "high"
+    },
+    {
+      "claim": "In February 2025, a class-action lawsuit was filed against Automattic by WP Engine customers alleging economic harm from service disruptions",
+      "source_url": "https://gigazine.net/news/20250212-automattic-wp-engine-class-action/",
+      "confidence": "high"
+    },
+    {
+      "claim": "As of March 2026, the WP Engine vs Automattic lawsuit remains active and unresolved with no settlement reached; WP Engine filed a Third Amended Complaint in Feb 2026 adding WooCommerce and WordPress Foundation as defendants",
+      "source_url": "https://www.searchenginejournal.com/automattic-wp-engine-lawsuit-timeline/528383/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Automattic is the largest corporate contributor to WordPress open source, historically employing over 100 full-time staff for core contributions and pledging nearly 2,000 hours/week in 2024 via the Five for the Future initiative",
+      "source_url": "https://wordpress.org/five-for-the-future/",
+      "confidence": "high"
+    }
+  ],
+  "key_insights": [
+    "Automattic is a ~$2.5B (down from $7.5B peak) privately-held distributed company with ~$500-700M annual revenue, ~27 acquisitions, and ~986M total funding across 5 primary rounds -- but its valuation has been marked down 67% by BlackRock since 2021 amid the WP Engine controversy and broader market correction",
+    "The business model is a multi-pronged freemium ecosystem: WordPress.com hosting subscriptions, WooCommerce transaction fees and extensions, WordPress VIP enterprise contracts, Jetpack/Akismet SaaS, plus diversified bets on Tumblr, messaging (Beeper/Texts), podcasting (Pocket Casts), and AI data licensing",
+    "The WP Engine legal dispute (Sep 2024-present) has been a defining crisis -- triggering a preliminary injunction, class-action lawsuit, 8.4% voluntary departures, 16% layoffs in April 2025, and significant investor confidence erosion that explains much of the valuation decline"
+  ],
+  "gaps": [
+    "Exact audited revenue figures -- Automattic is private and does not disclose financials; the $500M (CEO statement) vs $700M (external estimate) gap is unresolved",
+    "Tumblr acquisition price -- widely rumored at $3M but no official confirmation from Automattic vs Yahoo's original $1.1B purchase price",
+    "Current headcount as of March 2026 after the April 2025 layoffs -- estimates suggest ~1,400-1,500 but no official number published",
+    "Detailed revenue breakdown by product line (WordPress.com vs WooCommerce vs VIP vs Jetpack) -- not publicly disclosed",
+    "Terms of the Salesforce Ventures Series D relationship post-2024 given Salesforce's own strategic shifts"
+  ]
+}

@@ -11,8 +11,6 @@ import { Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });
 
-import { Suspense } from 'react';
-
 function SaaSLayoutContent({
   children,
 }: {
@@ -20,15 +18,17 @@ function SaaSLayoutContent({
 }) {
   const searchParams = useSearchParams();
   const isolate = searchParams.get('isolate') === 'true';
+  const isGallery = searchParams.get('gallery') === 'true';
   const [headerJsx, setHeaderJsx] = useState(SAAS_HEADER_JSX_SOURCE);
   const [footerJsx, setFooterJsx] = useState(SAAS_FOOTER_JSX_SOURCE);
 
   useEffect(() => {
+    if (isGallery) return;
     get<Record<string, string>>("jsx-pages").then(stored => {
       if (stored?.header) setHeaderJsx(stored.header);
       if (stored?.footer) setFooterJsx(stored.footer);
     });
-  }, []);
+  }, [isGallery]);
 
   return (
     <TemplateProvider>

@@ -1,0 +1,53 @@
+{
+  "slug": "ast-authoritative-persistence-arch",
+  "scope": {
+    "files": 12,
+    "stories": 6,
+    "complexity": "large"
+  },
+  "route_hint": "standard",
+  "prev": null,
+  "skill": "plan-stories",
+  "data": {
+    "epic_id": "epic-225",
+    "dev_branch": "dev/ast-authoritative-persistence-architecture",
+    "stories": [
+      {
+        "id": "story-1076",
+        "title": "Stable UID injection at transpile time (data-uid on JSX elements)",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/details/story-1076.md"
+      },
+      {
+        "id": "story-1077",
+        "title": "Structured edit intent from Gemini (change prop X to Y, not rewritten JSX)",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/details/story-1077.md"
+      },
+      {
+        "id": "story-1078",
+        "title": "Recast-based deterministic AST mutation",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/details/story-1078.md"
+      },
+      {
+        "id": "story-1079",
+        "title": "IDB persistence of modified JSX source",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/details/story-1079.md"
+      },
+      {
+        "id": "story-1080",
+        "title": "PostMessage-based iframe hot-swap (no remount)",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/details/story-1080.md"
+      },
+      {
+        "id": "story-1081",
+        "title": "SaaS layout reads header/footer from IDB instead of static imports",
+        "agent": "architect",
+        "detail_file": "/tmp/gemini/details/story-1081.md"
+      }
+    ]
+  }
+}

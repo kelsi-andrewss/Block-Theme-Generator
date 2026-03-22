@@ -1,0 +1,137 @@
+{
+  "angle": "Premium Block Theme CSS Architecture",
+  "findings": [
+    {
+      "claim": "WordPress 6.2 introduced the 'css' property in theme.json, allowing raw CSS strings to be attached globally, per-block, and per-element without external stylesheets",
+      "source_url": "https://developer.wordpress.org/news/2023/03/the-css-property-in-theme-json/",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress 6.6 expanded the css property to support elements (links, headings, buttons) and style variations, and introduced theme.json version 3 as the recommended schema",
+      "source_url": "https://developer.wordpress.org/news/2024/06/18/whats-new-for-developers-in-wordpress-6-6-core-data-custom-css-and-more/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The '&' selector in theme.json css property references the block's own container, enabling pseudo-classes (&:hover, &:focus), pseudo-elements (&::before, &::after), and child selectors (&  h2) without knowing the generated class name",
+      "source_url": "https://fullsiteediting.com/lessons/custom-css-in-theme-json/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Gradient text is implemented in block themes via theme.json css property using background-clip: text combined with linear-gradient and -webkit-text-fill-color: transparent on core/heading blocks -- no wp:html block needed",
+      "source_url": "https://developer.wordpress.org/news/2023/03/the-css-property-in-theme-json/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Glassmorphism (backdrop-filter: blur) is implemented as a Block Style Variation on core/group or core/cover blocks, with the CSS applied via theme.json styles.blocks.variations or the css property -- no native UI control exists for backdrop-filter",
+      "source_url": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-styles/",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress 6.6 introduced Section Styles (Extended Block Style Variations) allowing a variation on a container block to automatically re-theme all nested child blocks, headings, buttons, and elements",
+      "source_url": "https://developer.wordpress.org/news/2024/06/11/section-specific-styling-and-colorways-in-wordpress-6-6/",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress 6.6 standardized all generated block/global styles to uniform 0-1-0 specificity using :root :where() wrappers, making section style overrides work via source order instead of selector weight",
+      "source_url": "https://make.wordpress.org/core/2024/06/21/css-specificity-updates-in-wordpress-6-6/",
+      "confidence": "high"
+    },
+    {
+      "claim": "register_block_style() (since WP 5.3) adds is-style-{name} classes to blocks; can include inline_style for small CSS or style_handle for enqueued stylesheets",
+      "source_url": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-styles/",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress 6.6+ allows block style variations to be registered via standalone JSON files in the /styles directory using a blockTypes array, requiring zero PHP",
+      "source_url": "https://fullsiteediting.com/lessons/block-style-variations/",
+      "confidence": "high"
+    },
+    {
+      "claim": "wp_enqueue_block_style() conditionally loads CSS only when the specific block is present on the page; files under ~20KB are automatically inlined into the document head",
+      "source_url": "https://developer.wordpress.org/reference/functions/wp_enqueue_block_style/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Premium block themes (Ollie, Frost, Wabi) use a modular assets/styles/blocks/ directory with per-block CSS files (core-group.css, core-navigation.css) loaded via wp_enqueue_block_style for performance",
+      "source_url": "https://github.com/mistermcalister/ollie",
+      "confidence": "high"
+    },
+    {
+      "claim": "Twenty Twenty-Four theme uses minimal style.css (metadata only), defines all design tokens in theme.json, and loads block-specific CSS via wp_enqueue_block_style() with register_block_style() for variations like 'Pill' and 'Outline'",
+      "source_url": "https://github.com/WordPress/twentytwentyfour/blob/trunk/functions.php",
+      "confidence": "high"
+    },
+    {
+      "claim": "Twenty Twenty-Four includes style variations as separate JSON files in /styles directory (onyx.json, ember.json) providing complete alternate color palettes and typography sets",
+      "source_url": "https://wordpress.org/themes/twentytwentyfour/",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress.org theme review guidelines have no explicit ban on wp:html blocks, but themes are rejected if wp:html contains hardcoded text (violates i18n requirement) or recreates layouts achievable with core blocks",
+      "source_url": "https://make.wordpress.org/themes/handbook/review/required/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The 'Core Block First' review guideline means themes MUST use core blocks (wp:group, wp:columns, wp:heading) when they can achieve the same layout -- wp:html is only acceptable for complex SVGs or purely decorative non-text elements",
+      "source_url": "https://make.wordpress.org/themes/handbook/review/required/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Block themes can load complex layouts as PHP-based Block Patterns (in /patterns directory) which support translation functions and can wrap core blocks with specific layout settings (constrained, wide) without custom CSS classes",
+      "source_url": "https://developer.wordpress.org/themes/block-themes/templates-and-template-parts/",
+      "confidence": "high"
+    },
+    {
+      "claim": "CSS Custom Properties generated from theme.json follow the pattern --wp--preset--{category}--{slug} (e.g., --wp--preset--color--primary, --wp--preset--spacing--20) and are available globally",
+      "source_url": "https://developer.wordpress.org/themes/advanced-topics/theme-json/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Fluid typography and spacing use clamp() directly in theme.json settings, eliminating the need for media queries in block theme stylesheets",
+      "source_url": "https://rich.blog/fluid-typography-with-theme-json/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "WordPress 6.7 introduced automatic class naming for Block Variations (not Style Variations) in the format wp-block-{blockName}-{variationName}",
+      "source_url": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "theme.json css property output is rendered in the document head within a <style> block identified as global-styles-inline-css, loaded for both frontend and editor",
+      "source_url": "https://developer.wordpress.org/themes/advanced-topics/theme-json/reference-v3/",
+      "confidence": "high"
+    },
+    {
+      "claim": "CSS defined in theme.json has lower specificity than user-added CSS in the Site Editor, ensuring user customizations always win over theme defaults",
+      "source_url": "https://make.wordpress.org/core/2024/06/21/css-specificity-updates-in-wordpress-6-6/",
+      "confidence": "high"
+    },
+    {
+      "claim": "In block themes, style.css is automatically enqueued for both frontend and editor (unlike classic themes where manual enqueue was required), but it serves primarily as metadata header with minimal CSS",
+      "source_url": "https://developer.wordpress.org/themes/basics/including-css-javascript/",
+      "confidence": "high"
+    },
+    {
+      "claim": "Box shadow support was added natively to the Block Editor UI for Group, Stack, and Row blocks in WordPress 6.7, reducing the need for custom CSS for depth effects",
+      "source_url": "https://wordpress.org/news/2024/11/rolling-out-wordpress-6-7/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Media queries (@media) are fully supported within theme.json css property strings, enabling responsive overrides without external stylesheets",
+      "source_url": "https://fullsiteediting.com/lessons/custom-css-in-theme-json/",
+      "confidence": "high"
+    }
+  ],
+  "key_insights": [
+    "Premium block themes achieve all advanced CSS effects (gradient text, glassmorphism, CSS grid, backdrop-filter) through THREE layered mechanisms -- never wp:html: (1) theme.json css property for per-block raw CSS with & selector, (2) Block Style Variations registered via PHP register_block_style() or JSON files in /styles, and (3) wp_enqueue_block_style() for conditionally-loaded external CSS files. This is confirmed by WordPress.org review guidelines which mandate core blocks over wp:html.",
+    "WordPress 6.6 was the pivotal release: it introduced Section Styles (variations that cascade to nested child blocks), uniform 0-1-0 CSS specificity via :root :where() wrappers, theme.json v3, and JSON-file-based style registration in /styles -- collectively making it possible to build complex 'colorway' and 'section' designs entirely declaratively without PHP.",
+    "The performance architecture of premium block themes (Ollie, Frost, Twenty Twenty-Four) follows a strict pattern: design tokens in theme.json generate CSS custom properties, block-specific CSS lives in modular files loaded conditionally via wp_enqueue_block_style() (auto-inlined if under ~20KB), and style.css contains only the required metadata header -- resulting in minimal initial CSS payload and improved Core Web Vitals."
+  ],
+  "gaps": [
+    "No authoritative benchmarks found comparing CSS payload size between theme.json-only themes vs themes using wp_enqueue_block_style for complex designs",
+    "Limited documentation on how the WordPress KSES filter interacts with advanced CSS properties (backdrop-filter, background-clip) in wp:html blocks vs theme.json css property",
+    "No clear guidance on maximum recommended size or complexity for theme.json css property strings before external stylesheets become preferable",
+    "Sparse information on how the Interactivity API (WP 6.5) interplays with CSS architecture for animated or stateful visual effects in block themes",
+    "Could not find official WordPress.org statistics on what percentage of approved block themes use wp:html vs pure core blocks"
+  ]
+}

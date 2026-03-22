@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { get } from 'idb-keyval';
 import { SAAS_FEATURES } from '@/lib/data/saas-features';
 import JsxStringRenderer from '@/components/JsxStringRenderer';
@@ -18,6 +18,17 @@ const WP_VAR_BRIDGE: Record<string, string> = {
 };
 
 export default function SaaSPage() {
+  const [jsxSource, setJsxSource] = useState(SAAS_JSX_SOURCE);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("gallery") === "true") {
+      return;
+    }
+    get<Record<string, string>>("jsx-pages").then(stored => {
+      if (stored?.home) setJsxSource(stored.home);
+    });
+  }, []);
+
   return (
     <div style={{
       display: 'flex',
@@ -27,7 +38,11 @@ export default function SaaSPage() {
       backgroundColor: 'var(--color-bg)',
       color: 'var(--color-text)',
     }}>
-      <JsxStringRenderer jsxString={SAAS_JSX_SOURCE} />
+      <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)' }}></div>}>
+        <JsxStringRenderer jsxString={jsxSource} />
+      </Suspense>
     </div>
   );
 }
+
+export const dynamic = 'force-dynamic';

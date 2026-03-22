@@ -1,0 +1,117 @@
+{
+  "angle": "WordPress Playground Blueprint API & Theme Tooling",
+  "findings": [
+    {
+      "claim": "The official Blueprint JSON schema is hosted at https://playground.wordpress.net/blueprint-schema.json and the source lives at github.com/WordPress/wordpress-playground/blob/trunk/packages/playground/blueprints/static/blueprint-schema.json",
+      "source_url": "https://playground.wordpress.net/blueprint-schema.json",
+      "confidence": "high"
+    },
+    {
+      "claim": "@wp-playground/client is the primary npm package for embedding and controlling WordPress Playground programmatically via iframe. It exposes startPlaygroundWeb() and client.runBlueprint() methods for programmatic theme installation.",
+      "source_url": "https://www.npmjs.com/package/@wp-playground/client",
+      "confidence": "high"
+    },
+    {
+      "claim": "@wp-playground/blueprints is a separate npm package containing TypeScript definitions and validation logic for the Blueprint JSON format, including step type interfaces like InstallThemeStep.",
+      "source_url": "https://www.npmjs.com/package/@wp-playground/blueprints",
+      "confidence": "high"
+    },
+    {
+      "claim": "@wp-playground/cli provides command-line access to Playground with a --blueprint flag to initialize sites from JSON configuration files.",
+      "source_url": "https://www.npmjs.com/package/@wp-playground/cli",
+      "confidence": "high"
+    },
+    {
+      "claim": "The installTheme blueprint step accepts a themeZipFile property (a Resource type) supporting these resource types: wordpress.org/themes (by slug), url (direct ZIP URL), vfs (virtual filesystem), github (repo + branch), and input (from blueprint parameters).",
+      "source_url": "https://developer.wordpress.org/playground/blueprints/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The writeFile and mkdir (createDirectory) blueprint steps can create block theme files directly in the virtual filesystem at /wp-content/themes/. This enables building a complete theme from scratch: style.css, theme.json, templates/index.html, etc.",
+      "source_url": "https://wordpress.github.io/wordpress-playground/blueprints-api/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The runPHP blueprint step can execute arbitrary PHP code within the WordPress context, enabling dynamic generation of theme.json with computed color palettes, typography settings, or other programmatic theme configuration.",
+      "source_url": "https://developer.wordpress.org/playground/blueprints/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The Blueprint schema defines these step types: login, defineSiteUrl, installPlugin, activatePlugin, installTheme, activateTheme, writeFile, createDirectory, moveFile, copyFile, removeFile, unzip, importFile, importWxr, runPHP, setPhpIni, and wp-cli.",
+      "source_url": "https://github.com/WordPress/wordpress-playground/blob/trunk/packages/playground/blueprints/static/blueprint-schema.json",
+      "confidence": "high"
+    },
+    {
+      "claim": "WordPress Playground runs entirely in the browser via WebAssembly (PHP-WASM + SQLite). The PHP WASM binaries are approximately 15-30MB. Default PHP memory limit is 256MB. Storage is ephemeral by default unless Browser Storage (IndexedDB/OPFS) is enabled.",
+      "source_url": "https://github.com/WordPress/wordpress-playground",
+      "confidence": "high"
+    },
+    {
+      "claim": "Blueprint JSON passed via URL parameters is limited by browser URL length (typically 2,000-8,000 characters). Complex blueprints must be hosted as JSON files and referenced by URL.",
+      "source_url": "https://developer.wordpress.org/playground/blueprints/",
+      "confidence": "medium"
+    },
+    {
+      "claim": "The Create Block Theme (CBT) plugin by Automattic's Theme Team has an internal REST API endpoint at wp-json/create-block-theme/v1/save that can sync Site Editor customizations back to theme files. Its core logic is in PHP classes Create_Block_Theme_Exporter and CBT_Theme_Generator.",
+      "source_url": "https://github.com/WordPress/create-block-theme",
+      "confidence": "medium"
+    },
+    {
+      "claim": "The WordPress/blueprints GitHub repository serves as a community gallery of Blueprint examples, including examples for Create Block Theme setup and block theme testing.",
+      "source_url": "https://github.com/WordPress/blueprints",
+      "confidence": "high"
+    },
+    {
+      "claim": "An interactive Blueprint Builder tool exists at playground.wordpress.net/builder.html for writing and validating Blueprint JSON in real-time.",
+      "source_url": "https://playground.wordpress.net/builder.html",
+      "confidence": "high"
+    },
+    {
+      "claim": "Carolina Nymark's Block Theme Generator at fullsiteediting.com/block-theme-generator/ is a standalone web tool that scaffolds starter block themes with No-Code, Basic, or Advanced foundations, often used in tandem with Playground for testing.",
+      "source_url": "https://fullsiteediting.com/block-theme-generator/",
+      "confidence": "high"
+    },
+    {
+      "claim": "ZipWP (by Brainstorm Force/Astra) and InstaWP are commercial AI-powered tools that generate WordPress sites including theme styles from text prompts, using sandbox architectures similar to Playground.",
+      "source_url": "https://zipwp.com",
+      "confidence": "medium"
+    },
+    {
+      "claim": "Outbound requests from Playground require CORS-enabled endpoints and HTTPS only. Standard PHP socket functions are unavailable; wp_safe_remote_get calls are translated to JavaScript fetch() via a translation layer.",
+      "source_url": "https://github.com/WordPress/wordpress-playground",
+      "confidence": "high"
+    },
+    {
+      "claim": "Large theme ZIPs (over 30-50MB) significantly impact Playground boot times because they must be unzipped into the virtual file system on every page load.",
+      "source_url": "https://github.com/WordPress/wordpress-playground",
+      "confidence": "medium"
+    },
+    {
+      "claim": "The WordPress Community Themes project (github.com/WordPress/community-themes) uses WordPress Playground to provide a pre-configured environment where anyone can build a theme visually and submit contributions.",
+      "source_url": "https://github.com/WordPress/community-themes",
+      "confidence": "high"
+    },
+    {
+      "claim": "Themes can be installed from GitHub repositories using the installTheme step with resource type 'github', specifying repository and branch. This requires the 'networking' feature to be enabled in the blueprint.",
+      "source_url": "https://developer.wordpress.org/playground/blueprints/",
+      "confidence": "high"
+    },
+    {
+      "claim": "The Playground client API flow is: startPlaygroundWeb(options) to initialize, client.isReady() promise to wait for boot, then client.runBlueprint(blueprint) to execute steps. A blueprint can also be passed directly into the startPlaygroundWeb options.",
+      "source_url": "https://www.npmjs.com/package/@wp-playground/client",
+      "confidence": "high"
+    }
+  ],
+  "key_insights": [
+    "WordPress Playground's Blueprint API provides a complete programmatic pipeline for theme generation: writeFile/mkdir steps can create theme files from scratch, runPHP can dynamically generate theme.json, and installTheme can load pre-built zips -- all controllable from JavaScript via @wp-playground/client's startPlaygroundWeb() and runBlueprint() methods.",
+    "The Create Block Theme plugin's internal REST API (POST /wp-json/create-block-theme/v1/save) and PHP classes (CBT_Theme_Generator, Create_Block_Theme_Exporter) can be triggered programmatically via runPHP or wp-cli blueprint steps, enabling a pipeline where visual Site Editor customizations are automatically exported as theme files.",
+    "The competitive landscape for AI-powered theme generation on Playground is nascent -- ZipWP and InstaWP use similar sandbox architectures but are full SaaS platforms, while no existing tool specifically combines LLM-generated theme.json/templates with Playground's Blueprint API for instant in-browser preview. This is a clear gap our Block Theme Generator can fill."
+  ],
+  "gaps": [
+    "Exact current npm version numbers for @wp-playground packages could not be verified with high confidence -- search results returned conflicting version numbers (0.16.x vs 3.1.x), likely due to a major version bump or monorepo versioning changes",
+    "No documentation found on maximum writeFile content size limits within blueprints -- unclear if there is a practical ceiling for inline theme file content in blueprint JSON",
+    "The Create Block Theme REST API endpoint structure is not fully documented publicly -- the wp-json/create-block-theme/v1/save endpoint was mentioned but full API schema with all available endpoints and parameters is not in official docs",
+    "Performance benchmarks for Playground with custom themes (boot time with writeFile-created themes vs installTheme from zip) are not published anywhere",
+    "No examples found of anyone combining LLM-generated block theme code with WordPress Playground blueprints in a production tool -- this appears to be genuinely novel territory"
+  ]
+}

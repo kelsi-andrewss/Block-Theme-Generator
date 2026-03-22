@@ -122,6 +122,7 @@ const SELECTION_BRIDGE_SCRIPT = (enabled: boolean) => `
       for (var k = 0; k < keys.length; k++) {
         var p = keys[k];
         var v = styles[p];
+        p = p.replace(/[A-Z]/g, function(m) { return "-" + m.toLowerCase(); });
         if (p === 'background' && isGradientText && !styles['color']) { p = 'background-image'; }
         if (!(p in oldProps)) { oldProps[p] = target.style.getPropertyValue(p); }
         if (v === '') { target.style.removeProperty(p); }
