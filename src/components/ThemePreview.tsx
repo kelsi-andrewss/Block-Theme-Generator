@@ -98,10 +98,10 @@ const SELECTION_BRIDGE_SCRIPT = (enabled: boolean) => `
       sel.style.outline = ''; sel.style.outlineOffset = ''; sel.style.backgroundColor = '';
       sel = null;
     }
-    if (e.data.type === 'PATCH_STYLES' && e.data.styles && sel) {
+    if (e.data.type === 'PATCH_STYLES' && e.data.styles && (sel || e.data.uid)) {
       var iterateId = e.data.iterateId;
       var styles = e.data.styles;
-      var target = resolveEl(sel.getAttribute('data-uid'));
+      var target = resolveEl(e.data.uid || (sel ? sel.getAttribute('data-uid') : null));
       if (!target) return;
       target.setAttribute('data-iterate-id', iterateId);
       var oldProps = {};

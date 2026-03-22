@@ -216,7 +216,9 @@ function astToReact(node: t.Node, depth: number = 0, siblingIndex: number = 0): 
     reactProps[key] = value;
   }
 
-  reactProps["data-uid"] = generateUid(resolved, depth, siblingIndex);
+  if (!rawProps["data-uid"]) {
+    reactProps["data-uid"] = generateUid(resolved, depth, siblingIndex);
+  }
 
   const children = mapChildrenWithIndex(node.children, depth);
 
