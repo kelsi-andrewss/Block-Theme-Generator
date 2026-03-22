@@ -38,6 +38,10 @@ export function generateFunctionsPHP(meta: ThemeMeta): string {
     lines.push(`add_action('wp_enqueue_scripts', function () {`);
     lines.push(`    wp_enqueue_style('${meta.slug}-saas-sections', get_theme_file_uri('assets/css/saas-sections.css'), array(), '${meta.version}');`);
     lines.push(`});`);
+    lines.push("");
+    lines.push(`add_action('wp_head', function () {`);
+    lines.push(`    echo '<script src="https://cdn.tailwindcss.com"></script>';`);
+    lines.push(`});`);
   }
 
   const googleFonts = (meta.fontFamilies ?? []).filter(

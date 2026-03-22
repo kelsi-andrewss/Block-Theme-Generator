@@ -134,7 +134,12 @@ function handleAttribute(elementPath: NodePath<t.JSXElement>, attributes: Record
 }
 
 function handleText(elementPath: NodePath<t.JSXElement>, textContent: string): void {
-  elementPath.node.children = [t.jsxText(textContent)];
+  elementPath.node.children = [];
+  if (textContent !== "") {
+    elementPath.node.children.push(
+      t.jsxExpressionContainer(t.stringLiteral(textContent))
+    );
+  }
 }
 
 function handleHtml(elementPath: NodePath<t.JSXElement>, html: string): void {
@@ -182,7 +187,8 @@ function handleHtml(elementPath: NodePath<t.JSXElement>, html: string): void {
  * rendered DOM and the AST mutator reference the same IDs.
  */
 export function injectUids(source: string): string {
-  const ast = recast.parse(source, {
+  const wrapped = `[${source}]`;
+  const ast = recast.parse(wrapped, {
     parser: {
       parse(src: string) {
         return babelParse(src, {
@@ -207,16 +213,17 @@ export function injectUids(source: string): string {
 
   function walk(node: t.Node, pathId: string): void {
     if (t.isJSXElement(node)) {
-      const resolved = resolveTag(node.openingElement.name);
-      const uid = `${resolved}-${pathId}`;
+      const hasUid = node.openingElement.attributes.some(
+        attr => t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name) && attr.name.name === 'data-uid'
+      );
 
-      // Remove existing data-uid if present (re-stamp)
-      node.openingElement.attributes = node.openingElement.attributes.filter(
-        attr => !(t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name) && attr.name.name === 'data-uid')
-      );
-      node.openingElement.attributes.push(
-        t.jsxAttribute(t.jsxIdentifier('data-uid'), t.stringLiteral(uid))
-      );
+      if (!hasUid) {
+        const resolved = resolveTag(node.openingElement.name);
+        const uid = `${resolved}-${pathId}`;
+        node.openingElement.attributes.push(
+          t.jsxAttribute(t.jsxIdentifier('data-uid'), t.stringLiteral(uid))
+        );
+      }
 
       let childElementIndex = 0;
       for (const child of node.children) {
@@ -264,16 +271,19 @@ export function injectUids(source: string): string {
     }
   }
 
-  const body = ast.program.body;
-  if (body.length > 0 && t.isExpressionStatement(body[0])) {
-    walk(body[0].expression, "0");
+  const rootExpr = ast.program.body[0];
+  if (t.isExpressionStatement(rootExpr) && t.isArrayExpression(rootExpr.expression)) {
+    const rawNode = rootExpr.expression.elements[0];
+    if (rawNode) walk(rawNode, "0");
+    return recast.print(rawNode).code;
   }
 
-  return recast.print(ast).code;
+  return source;
 }
 
 export function applyAstMutation(source: string, intents: EditIntent[]): string {
-  const ast = recast.parse(source, {
+  const wrapped = `[${source}]`;
+  const ast = recast.parse(wrapped, {
     parser: {
       parse(src: string) {
         return babelParse(src, {
@@ -285,7 +295,7 @@ export function applyAstMutation(source: string, intents: EditIntent[]): string 
     },
   });
 
-  const uidMap = buildUidMap(ast.program as unknown as t.File);
+  const uidMap = buildUidMap(ast as unknown as t.File);
 
   for (const intent of intents) {
     const elementPath = uidMap.get(intent.uid);
@@ -307,5 +317,11 @@ export function applyAstMutation(source: string, intents: EditIntent[]): string 
     }
   }
 
-  return recast.print(ast).code;
+  const rootExpr = ast.program.body[0];
+  if (t.isExpressionStatement(rootExpr) && t.isArrayExpression(rootExpr.expression)) {
+    const rawNode = rootExpr.expression.elements[0];
+    if (rawNode) return recast.print(rawNode).code;
+  }
+
+  return source;
 }
