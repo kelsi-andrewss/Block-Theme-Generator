@@ -512,10 +512,11 @@ export default function Home() {
           if (eventType === "step") {
             updateStep(parsed.step, parsed.status, parsed.detail);
 
-            // When enrich completes, store the slug for packaging but keep ThemePreview as renderer
+            // When enrich completes, store the slug for packaging and set the theme slug to use the correct archetype renderer
             if (parsed.step === "enrich" && parsed.status === "done" && parsed.meta?.themeSlug) {
               themeSlugRef.current = parsed.meta.themeSlug;
               setArchetypeId(parsed.meta.archetypeId ?? "blog");
+              setThemeSlug(parsed.meta.archetypeId ?? "blog");
             }
           } else if (eventType === "files") {
             if (parsed.type === "theme-json") {
@@ -532,6 +533,9 @@ export default function Home() {
               setResult(prev => prev ? { ...prev, themeFiles: { ...prev.themeFiles, customCss: parsed.content } } : null);
             } else if (parsed.type === "skeleton-pages" && parsed.files) {
               setResult(prev => prev ? { ...prev, themeFiles: { ...prev.themeFiles, skeletonPages: { ...prev.themeFiles.skeletonPages, ...parsed.files } } } : null);
+            } else if (parsed.type === "jsx-pages" && parsed.files) {
+              setJsxPages(parsed.files);
+              set(IDB_KEY, parsed.files).catch(console.error);
             }
           } else if (eventType === "complete") {
             setResult(parsed as GenerationResult);

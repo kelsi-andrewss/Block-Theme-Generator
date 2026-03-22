@@ -17,11 +17,15 @@ const VAR_BRIDGE: Record<string, string> = {
   "--wp--preset--color--base": "var(--color-bg)",
 };
 
-function parseJsxString(jsxString: string): t.File | null {
+export function parseJsxString(jsxString: string): t.File | { error: string; snippet: string } {
   try {
     return parse(jsxString, { sourceType: "module", plugins: ["jsx"] });
-  } catch {
-    return null;
+  } catch (err: any) {
+    const msg = err.message || String(err);
+    const pos = err.loc ? err.loc.index : 0;
+    const snippet = jsxString.substring(Math.max(0, pos - 50), pos + 50);
+    console.error("BABEL PARSE ERROR:", msg, "\\nSnippet:\\n", snippet);
+    return { error: msg, snippet };
   }
 }
 
@@ -266,18 +270,22 @@ export default function JsxStringRenderer({
     keyCounter = 0;
 
     const ast = parseJsxString(jsxString);
-    if (!ast) {
+    if (!ast || ('error' in ast)) {
       return createElement(
         "div",
         {
           style: {
             padding: "1rem",
-            color: "var(--color-text)",
-            border: "1px solid var(--color-border)",
+            color: "var(--wp--preset--color--contrast, #000)",
+            backgroundColor: "white",
+            border: "1px solid red",
             borderRadius: "0.5rem",
+            fontFamily: "monospace",
+            whiteSpace: "pre-wrap",
+            margin: "2rem"
           },
         },
-        "Failed to parse JSX string",
+        ast ? `Failed to parse JSX string: ${ast.error}\n\nSnippet: ${ast.snippet}` : "Failed to parse JSX string",
       );
     }
 

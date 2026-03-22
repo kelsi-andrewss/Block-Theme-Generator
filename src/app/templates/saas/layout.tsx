@@ -6,16 +6,14 @@ import { get } from 'idb-keyval';
 import TemplateProvider from "@/components/TemplateProvider";
 import NativeIframeController from "@/components/NativeIframeController";
 import JsxStringRenderer from "@/components/JsxStringRenderer";
-import { SAAS_HEADER_JSX_SOURCE, SAAS_FOOTER_JSX_SOURCE } from "./page";
+import { SAAS_HEADER_JSX_SOURCE, SAAS_FOOTER_JSX_SOURCE } from "./jsx-sources";
 import { Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export default function SaaSLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+import { Suspense } from 'react';
+
+function SaaSLayoutInner({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const isolate = searchParams.get('isolate') === 'true';
   const [headerJsx, setHeaderJsx] = useState(SAAS_HEADER_JSX_SOURCE);
@@ -44,5 +42,13 @@ export default function SaaSLayout({
 
       </div>
     </TemplateProvider>
+  );
+}
+
+export default function SaaSLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SaaSLayoutInner>{children}</SaaSLayoutInner>
+    </Suspense>
   );
 }
