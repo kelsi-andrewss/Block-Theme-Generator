@@ -257,6 +257,7 @@ export default function NativeIframeController() {
       if (target.closest('header')) location = 'header';
       else if (target.closest('footer')) location = 'footer';
 
+      const rect = target.getBoundingClientRect();
       window.parent.postMessage({
         type: 'BLOCK_SELECTED',
         payload: {
@@ -265,7 +266,8 @@ export default function NativeIframeController() {
           content: content,
           html: cleanHtml,
           uid,
-          location
+          location,
+          rect: { width: Math.round(rect.width), height: Math.round(rect.height) }
         }
       }, '*');
     }

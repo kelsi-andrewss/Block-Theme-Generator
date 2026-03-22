@@ -159,13 +159,26 @@ function processNode(node: t.Node, parentWpName: string | null): string {
 
   // Inline elements (span, strong, em, a without role=button, etc.) render as raw HTML, not blocks
   const props = extractProps(opening.attributes);
-  if (isInlineTag(tagName) && !(tagName === 'a' && props.role === 'button')) {
+  const isInlineImg = tagName === 'img' && parentWpName && ['paragraph', 'heading', 'quote', 'navigation-link', 'list-item', 'button'].includes(parentWpName);
+
+  if (isInlineImg || (isInlineTag(tagName) && !(tagName === 'a' && props.role === 'button'))) {
     const children = processChildren(node.children, parentWpName);
-    const styleObj = typeof props.style === 'object' && props.style !== null ? props.style as Record<string, string> : null;
-    const styleStr = styleObj ? ` style="${stylesToString(styleObj)}"` : '';
+    
+    let styleStr = '';
+    if (typeof props.style === 'object' && props.style !== null) {
+      styleStr = ` style="${stylesToString(props.style as Record<string, string>)}"`;
+    } else if (typeof props.style === 'string') {
+      styleStr = ` style="${props.style}"`;
+    }
+    
     const cls = props.className ? ` class="${props.className}"` : '';
     const href = typeof props.href === 'string' ? ` href="${props.href}"` : '';
+    const src = typeof props.src === 'string' ? ` src="${props.src}"` : '';
+    const alt = typeof props.alt === 'string' ? ` alt="${props.alt}"` : '';
+    
     if (tagName === 'br') return '<br />';
+    if (tagName === 'img') return `<img${cls}${styleStr}${src}${alt} />`;
+    
     return `<${tagName}${cls}${styleStr}${href}>${children}</${tagName}>`;
   }
   const mapping = getElementMapping(tagName, props);
@@ -181,13 +194,29 @@ function processNode(node: t.Node, parentWpName: string | null): string {
   }
 
   for (const [key, value] of Object.entries(props)) {
-    if (key === 'style' && typeof value === 'object' && value !== null) {
-      const styleObj = value as Record<string, string>;
-      const skipLayout = wpName === 'list-item' || wpName === 'list';
-      const result = convertStylesToBlockAttrs(styleObj, skipLayout);
-      mergeDeep(blockAttrs, result.blockAttrs);
-      mergeDeep(blockAttrs, result.layoutAttrs);
-      residualStyles = { ...residualStyles, ...result.residualStyles };
+    if (key === 'style') {
+      let styleObj: Record<string, string> = {};
+      if (typeof value === 'object' && value !== null) {
+        styleObj = value as Record<string, string>;
+      } else if (typeof value === 'string') {
+        value.split(';').forEach(statement => {
+          const splitIdx = statement.indexOf(':');
+          if (splitIdx > 0) {
+            const k = statement.slice(0, splitIdx).trim();
+            const v = statement.slice(splitIdx + 1).trim();
+            const camelKey = k.replace(/-([a-z])/g, g => g[1].toUpperCase());
+            styleObj[camelKey] = v;
+          }
+        });
+      }
+
+      if (Object.keys(styleObj).length > 0) {
+        const skipLayout = wpName === 'list-item' || wpName === 'list';
+        const result = convertStylesToBlockAttrs(styleObj, skipLayout);
+        mergeDeep(blockAttrs, result.blockAttrs);
+        mergeDeep(blockAttrs, result.layoutAttrs);
+        residualStyles = { ...residualStyles, ...result.residualStyles };
+      }
       continue;
     }
 
@@ -233,7 +262,15 @@ function processNode(node: t.Node, parentWpName: string | null): string {
     const childContent = processChildren(node.children, wpName);
     const inlineStyle = stylesToString(residualStyles);
     const innerHtml = renderSpecialBlock(wpName, childContent, blockAttrs, inlineStyle);
-    lines.push(emitBlockOpen(wpName, blockAttrs));
+    
+    // PCRE Bypass: WordPress's regex block parser will catastrophically fail and silently delete the block
+    // if we stuff a multi-megabyte base64 string into the block comment's JSON payload. Stop that.
+    const commentAttrs = { ...blockAttrs };
+    if (wpName === 'image' && typeof commentAttrs.url === 'string' && commentAttrs.url.startsWith('data:')) {
+      delete commentAttrs.url;
+    }
+    
+    lines.push(emitBlockOpen(wpName, commentAttrs));
     lines.push(innerHtml);
     lines.push(emitBlockClose(wpName));
   } else {

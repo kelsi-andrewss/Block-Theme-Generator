@@ -7,6 +7,7 @@ export interface SelectedBlockEvent {
   html: string;
   uid: string | null;
   location?: string;
+  rect?: { width: number; height: number };
 }
 
 interface IterationChatProps {

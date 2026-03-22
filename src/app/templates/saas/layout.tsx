@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { get } from 'idb-keyval';
 import TemplateProvider from "@/components/TemplateProvider";
@@ -11,7 +11,7 @@ import { Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export default function SaaSLayout({
+function SaaSLayoutContent({
   children,
 }: {
   children: React.ReactNode;
@@ -44,5 +44,17 @@ export default function SaaSLayout({
 
       </div>
     </TemplateProvider>
+  );
+}
+
+export default function SaaSLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)' }}></div>}>
+      <SaaSLayoutContent>{children}</SaaSLayoutContent>
+    </Suspense>
   );
 }

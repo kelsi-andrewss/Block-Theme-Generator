@@ -74,7 +74,34 @@ export function renderSpecialBlock(
     const url = (_attrs.url as string) || '';
     const alt = (_attrs.alt as string) || '';
     const styleAttr = inlineStyle ? ` style="${inlineStyle}"` : '';
-    return `<figure class="wp-block-image"${styleAttr}><img src="${url}" alt="${alt}" /></figure>`;
+    
+    // WordPress core CSS sets .wp-block-image img { height: auto; max-width: 100% }.
+    // Thus if the parent <figure> gets a max-height (e.g. replacing a short wide element), 
+    // the image calculates height proportionally to its max-width and violently overflows the figure.
+    // Propagating 100% bounds down to the native <img> forces it to respect the figure wrapper entirely.
+    let imgStyle = '';
+    if (inlineStyle) {
+      let objFit = 'cover';
+      let maxW = '';
+      let maxH = '';
+
+      if (inlineStyle.includes('object-fit:')) {
+        const match = inlineStyle.match(/object-fit:\s*([^;]+)/);
+        if (match) objFit = match[1].trim();
+      }
+      if (inlineStyle.includes('max-width:')) {
+        const match = inlineStyle.match(/max-width:\s*([^;]+)/);
+        if (match) maxW = `max-width:${match[1].trim()};`;
+      }
+      if (inlineStyle.includes('max-height:')) {
+        const match = inlineStyle.match(/max-height:\s*([^;]+)/);
+        if (match) maxH = `max-height:${match[1].trim()};`;
+      }
+
+      imgStyle = ` style="width:100%;height:100%;${maxW}${maxH}object-fit:${objFit};"`;
+    }
+    
+    return `<figure class="wp-block-image"${styleAttr}><img src="${url}" alt="${alt}"${imgStyle} /></figure>`;
   }
 
   return children;

@@ -307,5 +307,6 @@ export function applyAstMutation(source: string, intents: EditIntent[]): string 
     }
   }
 
-  return recast.print(ast).code;
+  const rawMutatedCode = recast.print(ast).code;
+  return injectUids(rawMutatedCode);
 }

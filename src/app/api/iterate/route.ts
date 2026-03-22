@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { instruction, selectedElement, palette, isGlobal, themeFiles, activeFile } = body as {
       instruction: string;
-      selectedElement?: { html: string; content: string; uid?: string };
+      selectedElement?: { html: string; content: string; uid?: string; rect?: { width: number; height: number } };
       palette?: string;
       isGlobal?: boolean;
       themeFiles?: any;
@@ -172,7 +172,10 @@ export async function POST(req: NextRequest) {
       const uidNotice = selectedElement.uid
         ? `\nNOTE: The HTML contains data-uid attributes on elements. Reference these UIDs in your edits array.`
         : "";
-      const prompt = `${uidHeader}\n\`\`\`html\n${selectedElement.html}\n\`\`\`\n\nText content: "${selectedElement.content}"${uidNotice}${paletteCtx}\n\n## Instruction\n${instruction}`;
+      const rectNotice = selectedElement.rect && selectedElement.rect.width > 0 && selectedElement.rect.height > 0
+        ? `\nIMPORTANT CONSTRAINT: The original element is visually rendered at ${Math.round(selectedElement.rect.width)}px by ${Math.round(selectedElement.rect.height)}px. If you replace it with an image or resize it, you MUST set inline styles exactly to "width:${Math.round(selectedElement.rect.width)}px; height:${Math.round(selectedElement.rect.height)}px; object-fit:cover;" to prevent breaking the layout bounds. Do not use width 100% or display block.`
+        : "";
+      const prompt = `${uidHeader}\n\`\`\`html\n${selectedElement.html}\n\`\`\`\n\nText content: "${selectedElement.content}"${uidNotice}${rectNotice}${paletteCtx}\n\n## Instruction\n${instruction}`;
 
       const raw = await provider.generateText(prompt, TARGETED_SYSTEM_PROMPT, { temperature: 0.3 });
 
@@ -184,7 +187,19 @@ export async function POST(req: NextRequest) {
       const parsed = JSON.parse(cleaned);
       const intentResponse = validateEditIntentResponse(parsed);
       console.log("[iterate API] parsed raw AI response:", JSON.stringify(parsed, null, 2));
-      if (intentResponse) {
+
+      if (intentResponse && intentResponse.edits) {
+        // AI often strips requested inline styles. Enforce bounds programmatically for raw img replacements.
+        if (selectedElement.rect && selectedElement.rect.width > 0 && selectedElement.rect.height > 0) {
+          for (const edit of intentResponse.edits) {
+            if (edit.kind === 'html' && edit.html && typeof edit.html === 'string' && edit.html.trim().startsWith('<img')) {
+              if (!edit.html.includes('style=')) {
+                const s = `width:${Math.round(selectedElement.rect.width)}px; height:${Math.round(selectedElement.rect.height)}px; object-fit:cover;`;
+                edit.html = edit.html.replace('<img', `<img style="${s}" `);
+              }
+            }
+          }
+        }
         console.log("[iterate API] sending back valid intentResponse:", JSON.stringify(intentResponse, null, 2));
         return NextResponse.json(intentResponse);
       }
