@@ -30,9 +30,9 @@ export default function NativeIframeController() {
         selectedEl = null;
       }
 
-      if (event.data.type === 'PATCH_STYLES' && event.data.styles && selectedEl) {
+      if (event.data.type === 'PATCH_STYLES' && event.data.styles && (selectedEl || event.data.uid)) {
         const { iterateId, styles } = event.data as { iterateId: string; styles: Record<string, string> };
-        const target = resolveEl(selectedEl.getAttribute('data-uid'));
+        const target = resolveEl(event.data.uid || selectedEl?.getAttribute('data-uid'));
         if (!target) return;
         target.setAttribute('data-iterate-id', iterateId);
         const oldProps: Record<string, string> = {};
