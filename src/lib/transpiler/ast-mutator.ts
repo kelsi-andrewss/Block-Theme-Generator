@@ -158,6 +158,78 @@ function handleHtml(elementPath: NodePath<t.JSXElement>, html: string): void {
   elementPath.replaceWith(stmt.expression);
 }
 
+/**
+ * Inject data-uid attributes into a JSX source string using the same
+ * positional scheme as JsxStringRenderer's generateUid(tag, depth, siblingIndex).
+ * This makes the source the single source of truth for UIDs — both the
+ * rendered DOM and the AST mutator reference the same IDs.
+ */
+export function injectUids(source: string): string {
+  const ast = recast.parse(source, {
+    parser: {
+      parse(src: string) {
+        return babelParse(src, {
+          sourceType: 'module',
+          plugins: ['jsx'],
+          tokens: true,
+        });
+      },
+    },
+  });
+
+  function resolveTag(name: t.JSXOpeningElement['name']): string {
+    if (t.isJSXIdentifier(name)) {
+      const tag = name.name;
+      const isUpper = tag[0] === tag[0].toUpperCase() && tag[0] !== tag[0].toLowerCase();
+      return isUpper ? 'div' : tag;
+    }
+    return 'div';
+  }
+
+  function walk(node: t.Node, depth: number, siblingIndex: number): void {
+    if (t.isJSXElement(node)) {
+      const resolved = resolveTag(node.openingElement.name);
+      const uid = `${resolved}-${depth}-${siblingIndex}`;
+
+      // Remove existing data-uid if present (re-stamp)
+      node.openingElement.attributes = node.openingElement.attributes.filter(
+        attr => !(t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name) && attr.name.name === 'data-uid')
+      );
+      node.openingElement.attributes.push(
+        t.jsxAttribute(t.jsxIdentifier('data-uid'), t.stringLiteral(uid))
+      );
+
+      let childElementIndex = 0;
+      for (const child of node.children) {
+        if (t.isJSXElement(child)) {
+          walk(child, depth + 1, childElementIndex++);
+        } else if (t.isJSXFragment(child)) {
+          // Fragments are depth-transparent
+          for (const fChild of child.children) {
+            if (t.isJSXElement(fChild)) {
+              walk(fChild, depth + 1, childElementIndex++);
+            }
+          }
+        }
+      }
+    } else if (t.isJSXFragment(node)) {
+      let childElementIndex = 0;
+      for (const child of node.children) {
+        if (t.isJSXElement(child)) {
+          walk(child, depth, childElementIndex++);
+        }
+      }
+    }
+  }
+
+  const body = ast.program.body;
+  if (body.length > 0 && t.isExpressionStatement(body[0])) {
+    walk(body[0].expression, 0, 0);
+  }
+
+  return recast.print(ast).code;
+}
+
 export function applyAstMutation(source: string, intents: EditIntent[]): string {
   const ast = recast.parse(source, {
     parser: {

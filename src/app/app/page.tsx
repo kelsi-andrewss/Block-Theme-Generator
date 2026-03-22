@@ -18,7 +18,7 @@ import { generateSaasCustomCss } from "@/lib/generators/custom-css";
 import type { AuditResult } from "@/lib/validation/design-audit";
 import { applyThemeOverrides, buildThemeFileMap, type ThemeFilesData, type IframeState } from "@/lib/packer/constants";
 import { get, set } from "idb-keyval";
-import { applyAstMutation, type EditIntent } from "@/lib/transpiler/ast-mutator";
+import { applyAstMutation, injectUids, type EditIntent } from "@/lib/transpiler/ast-mutator";
 import {
   SAAS_JSX_SOURCE, SAAS_HEADER_JSX_SOURCE, SAAS_FOOTER_JSX_SOURCE,
   SAAS_404_JSX_SOURCE, SAAS_SIGNUP_JSX_SOURCE, SAAS_PRICING_JSX_SOURCE,
@@ -642,7 +642,8 @@ export default function Home() {
     setArchetypeId(theme.id);
 
     if (theme.id === "saas") {
-      const pages = {
+      const pages: Record<string, string> = {};
+      const raw: Record<string, string> = {
         home: SAAS_JSX_SOURCE,
         header: SAAS_HEADER_JSX_SOURCE,
         footer: SAAS_FOOTER_JSX_SOURCE,
@@ -652,6 +653,9 @@ export default function Home() {
         docs: SAAS_DOCS_JSX_SOURCE,
         contact: SAAS_CONTACT_JSX_SOURCE,
       };
+      for (const [key, src] of Object.entries(raw)) {
+        try { pages[key] = injectUids(src); } catch { pages[key] = src; }
+      }
       setJsxPages(pages);
       set(IDB_KEY, pages).catch(err => console.error("[handleSelectGalleryTheme] IDB seed failed", err));
     } else {
