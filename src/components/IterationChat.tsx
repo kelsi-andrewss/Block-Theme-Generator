@@ -24,6 +24,8 @@ interface IterationChatProps {
   onApplySitewide?: () => void;
   showGlobalBadge?: boolean;
   isGlobalMode?: boolean;
+  initialPrompt?: string;
+  selectedTemplate?: string;
 }
 
 interface ChatMessage {
@@ -49,17 +51,36 @@ export default function IterationChat({
   onApplySitewide,
   showGlobalBadge = false,
   isGlobalMode = false,
+  initialPrompt,
+  selectedTemplate,
 }: IterationChatProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showUndoTooltip, setShowUndoTooltip] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: "initial",
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const initialMsgs: ChatMessage[] = [];
+    
+    if (initialPrompt || selectedTemplate) {
+      const parts = [];
+      if (initialPrompt) parts.push(`Prompt: "${initialPrompt}"`);
+      if (selectedTemplate) parts.push(`Template: ${selectedTemplate}`);
+      
+      initialMsgs.push({
+        id: "initial-user",
+        role: "user",
+        content: parts.join("\n"),
+        timestamp: new Date(),
+      });
+    }
+
+    initialMsgs.push({
+      id: "initial-ai",
       role: "ai",
       content: "I've generated your initial block theme layout! What would you like to tweak? You can ask me to adjust global styles (like colors and typography) or click any block on the right to edit its specific design and content.",
       timestamp: new Date(),
-    }
-  ]);
+    });
+
+    return initialMsgs;
+  });
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [imageCount, setImageCount] = useState<number>(0);

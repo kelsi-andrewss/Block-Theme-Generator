@@ -867,6 +867,8 @@ export default function Home() {
                   <div className="flex-1 p-0 flex flex-col -m-6 mb-0 shadow-lg relative z-20">
                     {result && (
                       <IterationChat
+                        initialPrompt={result.meta?.description}
+                        selectedTemplate={result.meta?.displayName}
                         onSendMessage={handleSendMessage}
                         onRegenerateLayout={() => {}}
                         onUndo={handleUndo}
