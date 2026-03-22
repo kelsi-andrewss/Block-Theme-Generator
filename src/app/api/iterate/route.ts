@@ -183,7 +183,9 @@ export async function POST(req: NextRequest) {
 
       const parsed = JSON.parse(cleaned);
       const intentResponse = validateEditIntentResponse(parsed);
+      console.log("[iterate API] parsed raw AI response:", JSON.stringify(parsed, null, 2));
       if (intentResponse) {
+        console.log("[iterate API] sending back valid intentResponse:", JSON.stringify(intentResponse, null, 2));
         return NextResponse.json(intentResponse);
       }
       // Legacy fallback — old 3-mode response

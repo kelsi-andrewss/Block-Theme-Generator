@@ -177,15 +177,30 @@ export default function Home() {
   }
 
   const commitJsxEdit = useCallback((slug: string, edits: EditIntent[]) => {
+    const pagesRef = jsxPagesRef; // Use the ref directly
+    if (!pagesRef.current || !pagesRef.current[slug]) {
+      console.warn("[commitJsxEdit] activeSlug not found in pagesRef:", slug);
+      return;
+    }
+
     try {
-      const pages = jsxPagesRef.current;
-      if (!pages || !pages[slug]) return;
-      const updatedJsx = applyAstMutation(pages[slug], edits);
-      setJsxPages(prev => prev ? { ...prev, [slug]: updatedJsx } : null);
-      const updated = { ...pages, [slug]: updatedJsx };
-      set(IDB_KEY, updated).catch(err => console.error("[commitJsxEdit] IDB write failed", err));
+      console.log(`[commitJsxEdit] Applying AST mutation for slug '${slug}' with edits:`, JSON.stringify(edits, null, 2));
+      const result = applyAstMutation(pagesRef.current[slug], edits);
+      if (result !== pagesRef.current[slug]) {
+        console.log(`[commitJsxEdit] AST mutation successful! Source changed for '${slug}'. Saving to IDB...`);
+        pagesRef.current[slug] = result;
+        setJsxPages(prev => ({ ...prev, [slug]: result }));
+        // Also update IndexedDB to persist across reloads
+        import("idb-keyval").then(({ set }) => {
+          set("jsx-pages", pagesRef.current)
+            .then(() => console.log(`[commitJsxEdit] Saved to IDB for '${slug}'`))
+            .catch((err) => console.error(`[commitJsxEdit] IDB save failed for '${slug}':`, err));
+        });
+      } else {
+        console.warn("[warning] [commitJsxEdit] applyAstMutation returned IDENTICAL source — UIDs likely not matching");
+      }
     } catch (err) {
-      console.error("[commitJsxEdit]", err);
+      console.error("[commitJsxEdit] update failed:", err);
     }
   }, []);
 
@@ -196,10 +211,10 @@ export default function Home() {
     setShowGlobalApplyPrompt(false);
     lastInstructionRef.current = message;
     lastElementRef.current = block || null;
-    const currentSlug = activeSlug;
+    const currentSlug = block?.location && block.location !== 'main' ? block.location : activeSlug;
     try {
       const palette = getPaletteContext();
-      const isHeaderFooter = block?.blockName.toLowerCase().includes('header') || block?.blockName.toLowerCase().includes('footer') || activeFile.includes('parts/');
+      const isHeaderFooter = block?.location === 'header' || block?.location === 'footer';
 
       if (block) {
         // Targeted edit: send element HTML, get modified HTML back
@@ -210,7 +225,7 @@ export default function Home() {
             instruction: message,
             selectedElement: { html: block.html, content: block.content, uid: block.uid },
             activeFile,
-            isGlobal: isHeaderFooter,
+            isGlobal: false, // ALWAYS false for targeted clicks so we get AST edits
             themeFiles: result.themeFiles,
           }),
         });
@@ -232,20 +247,20 @@ export default function Home() {
             if (edit.kind === 'style') {
               const iterateId = `iter-${Date.now()}`;
               document.querySelectorAll('iframe').forEach(f => {
-                f.contentWindow?.postMessage({ type: 'PATCH_STYLES', iterateId, styles: edit.styles, uid: edit.uid }, '*');
+                f.contentWindow?.postMessage({ type: 'PATCH_STYLES', iterateId, styles: edit.styles, uid: edit.uid, location: currentSlug }, '*');
               });
             } else if (edit.kind === 'text') {
               document.querySelectorAll('iframe').forEach(f => {
-                f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: `<span>${edit.textContent}</span>`, uid: edit.uid }, '*');
+                f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: `<span>${edit.textContent}</span>`, uid: edit.uid, location: currentSlug }, '*');
               });
             } else if (edit.kind === 'html') {
               document.querySelectorAll('iframe').forEach(f => {
-                f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: edit.html, uid: edit.uid }, '*');
+                f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: edit.html, uid: edit.uid, location: currentSlug }, '*');
               });
             } else if (edit.kind === 'attribute') {
               // Attribute changes — use HOT_SWAP approach or fall through
               document.querySelectorAll('iframe').forEach(f => {
-                f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: edit.attributes?.class ? block.html : block.html, uid: edit.uid }, '*');
+                f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: edit.attributes?.class ? block.html : block.html, uid: edit.uid, location: currentSlug }, '*');
               });
             }
           }

@@ -31,8 +31,8 @@ export default function NativeIframeController() {
       }
 
       if (event.data.type === 'PATCH_STYLES' && event.data.styles && (selectedEl || event.data.uid)) {
-        const { iterateId, styles } = event.data as { iterateId: string; styles: Record<string, string> };
-        const target = resolveEl(event.data.uid || selectedEl?.getAttribute('data-uid'));
+        const { iterateId, styles, location } = event.data as { iterateId: string; styles: Record<string, string>; location?: string };
+        const target = resolveEl(event.data.uid || selectedEl?.getAttribute('data-uid'), location);
         if (!target) return;
         target.setAttribute('data-iterate-id', iterateId);
         const oldProps: Record<string, string> = {};
@@ -91,7 +91,8 @@ export default function NativeIframeController() {
       }
 
       if (event.data.type === 'PATCH_ELEMENT' && event.data.html) {
-        const target = resolveEl(event.data.uid);
+        const { location } = event.data as { location?: string };
+        const target = resolveEl(event.data.uid, location);
         if (target) {
           target.outerHTML = event.data.html;
         }
@@ -117,8 +118,8 @@ export default function NativeIframeController() {
       }
 
       if (event.data.type === 'HOT_SWAP_ELEMENT' && event.data.uid && event.data.html) {
-        const { uid, html } = event.data as { uid: string; html: string };
-        const el = document.querySelector<HTMLElement>(`[data-uid="${uid}"]`);
+        const { uid, html, location } = event.data as { uid: string; html: string; location?: string };
+        const el = resolveEl(uid, location);
         if (el) {
           el.outerHTML = html;
           window.parent.postMessage({ type: 'HOT_SWAP_ACK', uid }, '*');
@@ -163,9 +164,14 @@ export default function NativeIframeController() {
     }
 
     // Resolve element by data-uid selector, falling back to selectedEl
-    function resolveEl(uid?: string | null): HTMLElement | null {
+    function resolveEl(uid?: string | null, locationScope?: string): HTMLElement | null {
       if (uid) {
-        const found = document.querySelector<HTMLElement>(`[data-uid="${uid}"]`);
+        let root: Document | HTMLElement = document;
+        if (locationScope === 'header') root = document.querySelector('header') || document;
+        else if (locationScope === 'footer') root = document.querySelector('footer') || document;
+        else if (locationScope === 'main' || locationScope && locationScope !== 'header' && locationScope !== 'footer') root = document.querySelector('main') || document;
+
+        const found = root.querySelector<HTMLElement>(`[data-uid="${uid}"]`);
         if (found) return found;
       }
       return selectedEl;
@@ -185,8 +191,14 @@ export default function NativeIframeController() {
 
     function handleMouseOver(e: MouseEvent) {
       if (!editMode) return;
-      const target = e.target as HTMLElement;
+      let target = e.target as HTMLElement;
       if (!isSelectable(target)) return;
+      
+      const targetWithUid = target.closest('[data-uid]') as HTMLElement;
+      if (targetWithUid) {
+        target = targetWithUid;
+      }
+
       if (target === selectedEl) return;
       
       e.stopPropagation();
@@ -213,8 +225,13 @@ export default function NativeIframeController() {
 
     function handleClick(e: MouseEvent) {
       if (!editMode) return;
-      const target = e.target as HTMLElement;
+      let target = e.target as HTMLElement;
       if (!isSelectable(target)) return;
+      
+      const targetWithUid = target.closest('[data-uid]') as HTMLElement;
+      if (targetWithUid) {
+        target = targetWithUid;
+      }
       
       e.preventDefault();
       e.stopPropagation();
@@ -236,6 +253,10 @@ export default function NativeIframeController() {
       const rawText = target.innerText || target.textContent || '';
       const content = rawText.slice(0, 50) + (rawText.length > 50 ? '...' : '');
 
+      let location = 'main';
+      if (target.closest('header')) location = 'header';
+      else if (target.closest('footer')) location = 'footer';
+
       window.parent.postMessage({
         type: 'BLOCK_SELECTED',
         payload: {
@@ -243,7 +264,8 @@ export default function NativeIframeController() {
           blockName: `Native <${blockName}>`,
           content: content,
           html: cleanHtml,
-          uid
+          uid,
+          location
         }
       }, '*');
     }

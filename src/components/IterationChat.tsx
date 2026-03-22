@@ -2,10 +2,11 @@ import { useState, useRef, useEffect } from "react";
 
 export interface SelectedBlockEvent {
   blockName: string;
-  clientId: string;
+  blockId: string;
   content: string;
   html: string;
   uid: string | null;
+  location?: string;
 }
 
 interface IterationChatProps {

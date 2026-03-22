@@ -3,6 +3,7 @@ import { parse as babelParse } from '@babel/parser';
 import traverse from '@babel/traverse';
 import * as t from '@babel/types';
 import type { NodePath } from '@babel/traverse';
+import { getComponentDef } from './wp-components';
 
 export type EditIntent =
   | { kind: 'style'; uid: string; styles: Record<string, string> }
@@ -137,7 +138,23 @@ function handleText(elementPath: NodePath<t.JSXElement>, textContent: string): v
 }
 
 function handleHtml(elementPath: NodePath<t.JSXElement>, html: string): void {
-  const fragmentAst = recast.parse(html, {
+  let sanitized = html;
+  
+  // Close void elements so JSX parser doesn't crash
+  const voidTags = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
+  for (const tag of voidTags) {
+    const regex = new RegExp(`<${tag}([^>]*?)(?<!/)>`, 'gi');
+    sanitized = sanitized.replace(regex, `<${tag}$1 />`);
+  }
+
+  // Convert HTML attributes to React equivalents
+  sanitized = sanitized.replace(/\bclass=(["'])/gi, 'className=$1');
+  sanitized = sanitized.replace(/\bfor=(["'])/gi, 'htmlFor=$1');
+
+  // Strip HTML comments which break JSX parsing
+  sanitized = sanitized.replace(/<!--[\s\S]*?-->/g, '');
+
+  const fragmentAst = recast.parse(sanitized, {
     parser: {
       parse(src: string) {
         return babelParse(src, {
@@ -181,15 +198,17 @@ export function injectUids(source: string): string {
     if (t.isJSXIdentifier(name)) {
       const tag = name.name;
       const isUpper = tag[0] === tag[0].toUpperCase() && tag[0] !== tag[0].toLowerCase();
-      return isUpper ? 'div' : tag;
+      if (!isUpper) return tag;
+      const def = getComponentDef(tag);
+      return def?.htmlTag ?? 'div';
     }
     return 'div';
   }
 
-  function walk(node: t.Node, depth: number, siblingIndex: number): void {
+  function walk(node: t.Node, pathId: string): void {
     if (t.isJSXElement(node)) {
       const resolved = resolveTag(node.openingElement.name);
-      const uid = `${resolved}-${depth}-${siblingIndex}`;
+      const uid = `${resolved}-${pathId}`;
 
       // Remove existing data-uid if present (re-stamp)
       node.openingElement.attributes = node.openingElement.attributes.filter(
@@ -202,12 +221,24 @@ export function injectUids(source: string): string {
       let childElementIndex = 0;
       for (const child of node.children) {
         if (t.isJSXElement(child)) {
-          walk(child, depth + 1, childElementIndex++);
+          walk(child, `${pathId}.${childElementIndex++}`);
         } else if (t.isJSXFragment(child)) {
           // Fragments are depth-transparent
           for (const fChild of child.children) {
             if (t.isJSXElement(fChild)) {
-              walk(fChild, depth + 1, childElementIndex++);
+              walk(fChild, `${pathId}.${childElementIndex++}`);
+            }
+          }
+        } else if (t.isJSXExpressionContainer(child)) {
+          // Match JsxStringRenderer: HTML-string expressions consume a sibling index
+          if (!t.isJSXEmptyExpression(child.expression)) {
+            let str: string | null = null;
+            if (t.isStringLiteral(child.expression)) str = child.expression.value;
+            else if (t.isTemplateLiteral(child.expression) && child.expression.expressions.length === 0) {
+              str = child.expression.quasis.map((q: any) => q.value.cooked ?? q.value.raw).join("");
+            }
+            if (str !== null && /<[a-zA-Z][\s\S]*?>/.test(str)) {
+              childElementIndex++;
             }
           }
         }
@@ -216,7 +247,18 @@ export function injectUids(source: string): string {
       let childElementIndex = 0;
       for (const child of node.children) {
         if (t.isJSXElement(child)) {
-          walk(child, depth, childElementIndex++);
+          walk(child, `${pathId}.${childElementIndex++}`);
+        } else if (t.isJSXExpressionContainer(child)) {
+          if (!t.isJSXEmptyExpression(child.expression)) {
+            let str: string | null = null;
+            if (t.isStringLiteral(child.expression)) str = child.expression.value;
+            else if (t.isTemplateLiteral(child.expression) && child.expression.expressions.length === 0) {
+              str = child.expression.quasis.map((q: any) => q.value.cooked ?? q.value.raw).join("");
+            }
+            if (str !== null && /<[a-zA-Z][\s\S]*?>/.test(str)) {
+              childElementIndex++;
+            }
+          }
         }
       }
     }
@@ -224,7 +266,7 @@ export function injectUids(source: string): string {
 
   const body = ast.program.body;
   if (body.length > 0 && t.isExpressionStatement(body[0])) {
-    walk(body[0].expression, 0, 0);
+    walk(body[0].expression, "0");
   }
 
   return recast.print(ast).code;

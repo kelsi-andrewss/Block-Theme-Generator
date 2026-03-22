@@ -25,6 +25,24 @@ function parseJsxString(jsxString: string): t.File | null {
   }
 }
 
+function parseStyleString(styleStr: string): Record<string, string> {
+  const styleObj: Record<string, string> = {};
+  styleStr.split(';').forEach(rule => {
+    const splitIndex = rule.indexOf(':');
+    if (splitIndex !== -1) {
+      let key = rule.slice(0, splitIndex).trim();
+      if (!key.startsWith('--')) {
+        key = key.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+      }
+      const value = rule.slice(splitIndex + 1).trim();
+      if (key && value) {
+        styleObj[key] = value;
+      }
+    }
+  });
+  return styleObj;
+}
+
 function resolveTag(tagName: string): string {
   const isUppercase =
     tagName[0] === tagName[0].toUpperCase() &&
@@ -98,19 +116,19 @@ function unescapeQuotes(s: string): string {
 
 let keyCounter = 0;
 
-function generateUid(tag: string, depth: number, siblingIndex: number): string {
-  return `${tag}-${depth}-${siblingIndex}`;
+function generateUid(tag: string, pathId: string): string {
+  return `${tag}-${pathId}`;
 }
 
 function mapChildrenWithIndex(
   children: t.Node[],
-  depth: number,
+  pathId: string,
 ): React.ReactNode[] {
   let elementIndex = 0;
   return children
     .map((c) => {
       if (t.isJSXElement(c)) {
-        return astToReact(c, depth + 1, elementIndex++);
+        return astToReact(c, `${pathId}.${elementIndex++}`);
       }
       if (t.isJSXExpressionContainer(c)) {
         const isHtmlExpr = (() => {
@@ -123,17 +141,17 @@ function mapChildrenWithIndex(
           return str !== null && isHtmlString(str);
         })();
         if (isHtmlExpr) {
-          return astToReact(c, depth, elementIndex++);
+          return astToReact(c, `${pathId}.${elementIndex++}`);
         }
       }
-      return astToReact(c, depth, 0);
+      return astToReact(c, `${pathId}.X`); // Dummy path for non-elements to satisfy signature
     })
     .filter((c) => c !== null && c !== undefined && c !== "");
 }
 
-function astToReact(node: t.Node, depth: number = 0, siblingIndex: number = 0): React.ReactNode {
+function astToReact(node: t.Node, pathId: string = "0"): React.ReactNode {
   if (t.isJSXFragment(node)) {
-    const children = mapChildrenWithIndex(node.children, depth - 1);
+    const children = mapChildrenWithIndex(node.children, pathId);
     return createElement(Fragment, null, ...children);
   }
 
@@ -161,7 +179,6 @@ function astToReact(node: t.Node, depth: number = 0, siblingIndex: number = 0): 
       if (isHtmlString(str)) {
         return createElement("span", {
           key: `html-${++keyCounter}`,
-          "data-uid": generateUid("span", depth, siblingIndex),
           dangerouslySetInnerHTML: { __html: unescapeQuotes(str) },
         });
       }
@@ -191,8 +208,12 @@ function astToReact(node: t.Node, depth: number = 0, siblingIndex: number = 0): 
   };
 
   for (const [key, value] of Object.entries(rawProps)) {
-    if (key === "style" && typeof value === "object" && value !== null) {
-      reactProps.style = value;
+    if (key === "style") {
+      if (typeof value === "object" && value !== null) {
+        reactProps.style = value;
+      } else if (typeof value === "string") {
+        reactProps.style = parseStyleString(value);
+      }
       continue;
     }
     if (key === "className") {
@@ -217,10 +238,10 @@ function astToReact(node: t.Node, depth: number = 0, siblingIndex: number = 0): 
   }
 
   if (!rawProps["data-uid"]) {
-    reactProps["data-uid"] = generateUid(resolved, depth, siblingIndex);
+    reactProps["data-uid"] = generateUid(resolved, pathId);
   }
 
-  const children = mapChildrenWithIndex(node.children, depth);
+  const children = mapChildrenWithIndex(node.children, pathId);
 
   if (children.length === 0) {
     return createElement(resolved, reactProps);
