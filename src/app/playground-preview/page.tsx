@@ -24,6 +24,8 @@ export default function PlaygroundPreview() {
 
       const slug = data.meta.themeName;
       const fileMap = buildThemeFileMap(data, data.meta);
+      const blueprint = buildPreviewBlueprint(slug, fileMap);
+
       try {
         setStatus("Loading WordPress Playground...");
         const { startPlaygroundWeb } = await import("@wp-playground/client");
@@ -31,22 +33,8 @@ export default function PlaygroundPreview() {
         const client = await startPlaygroundWeb({
           iframe: iframeRef.current!,
           remoteUrl: "https://playground.wordpress.net/remote.html",
+          blueprint: blueprint,
         });
-
-        setStatus("Installing theme files...");
-
-        const blueprint = buildPreviewBlueprint(slug, fileMap);
-        const enc = new TextEncoder();
-        for (const step of blueprint.steps) {
-          if (step.step === "mkdir") {
-            await client.run({ code: `<?php @mkdir('${step.path}', 0777, true); echo 'OK'; ?>` });
-          } else if (step.step === "writeFile") {
-            await client.writeFile(step.path as string, enc.encode(step.data as string));
-          } else if (step.step === "runPHP") {
-            setStatus("Activating theme...");
-            await client.run({ code: step.code as string });
-          }
-        }
 
         setStatus("Navigating...");
         await client.goTo("/");

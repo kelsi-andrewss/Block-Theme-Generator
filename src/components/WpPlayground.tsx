@@ -92,7 +92,7 @@ const WpPlayground = forwardRef<PlaygroundHandle, WpPlaygroundProps>(
         setStatusMessage("Booting WordPress...");
         const client = await startPlaygroundWeb({
           iframe: iframeRef.current,
-          remoteUrl: "https://playground.wordpress.net/remote.html",
+          remoteUrl: "https://playground.wordpress.net/remote.html?wp=6.5&php=8.2",
         });
 
         clientRef.current = client;
