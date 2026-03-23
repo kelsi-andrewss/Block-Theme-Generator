@@ -323,10 +323,17 @@ function mergeDeep(target: Record<string, unknown>, source: Record<string, unkno
 export function transpileJSXToBlocks(jsx: string): string {
   if (typeof jsx !== 'string') return '';
   const wrappedJsx = jsx.trim();
-  const ast = parse(wrappedJsx, {
-    sourceType: 'module',
-    plugins: ['jsx'],
-  });
+  let ast;
+  try {
+    ast = parse(wrappedJsx, {
+      sourceType: 'module',
+      plugins: ['jsx'],
+    });
+  } catch (err) {
+    console.error("Failed to parse JSX in transpileJSXToBlocks:", err);
+    console.error("Malformatted JSX string:", wrappedJsx);
+    return `<!-- wp:paragraph {"backgroundColor":"vivid-red"} --><p class="has-vivid-red-background-color has-background"><strong>Transpiler Error:</strong> Invalid JSX syntax detected. Could not compile block.</p><!-- /wp:paragraph -->`;
+  }
 
   const body = ast.program.body;
   if (body.length === 0) return '';

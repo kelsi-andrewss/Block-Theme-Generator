@@ -45,10 +45,17 @@ function handleStyle(elementPath: NodePath<t.JSXElement>, styles: Record<string,
     }
   }
 
+  function safeCamelCase(k: string) {
+    if (k.startsWith('--')) return k;
+    return k.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+  }
+
   if (styleAttrIndex === -1) {
-    const properties = Object.entries(styles).map(([key, value]) =>
-      t.objectProperty(t.identifier(key), t.stringLiteral(value))
-    );
+    const properties = Object.entries(styles).map(([key, value]) => {
+      const safeKey = safeCamelCase(key);
+      const keyNode = safeKey.includes('-') ? t.stringLiteral(safeKey) : t.identifier(safeKey);
+      return t.objectProperty(keyNode, t.stringLiteral(value));
+    });
     const styleAttr = t.jsxAttribute(
       t.jsxIdentifier('style'),
       t.jsxExpressionContainer(t.objectExpression(properties))
@@ -82,10 +89,11 @@ function handleStyle(elementPath: NodePath<t.JSXElement>, styles: Record<string,
     }
 
     let found = false;
+    const safeKey = safeCamelCase(key);
     for (const prop of objExpr.properties) {
       if (t.isObjectProperty(prop)) {
         const propKey = t.isIdentifier(prop.key) ? prop.key.name : t.isStringLiteral(prop.key) ? prop.key.value : null;
-        if (propKey === key) {
+        if (propKey === key || propKey === safeKey) {
           prop.value = t.stringLiteral(value);
           found = true;
           break;
@@ -94,8 +102,9 @@ function handleStyle(elementPath: NodePath<t.JSXElement>, styles: Record<string,
     }
 
     if (!found) {
+      const keyNode = safeKey.includes('-') ? t.stringLiteral(safeKey) : t.identifier(safeKey);
       objExpr.properties.push(
-        t.objectProperty(t.identifier(key), t.stringLiteral(value))
+        t.objectProperty(keyNode, t.stringLiteral(value))
       );
     }
   }
