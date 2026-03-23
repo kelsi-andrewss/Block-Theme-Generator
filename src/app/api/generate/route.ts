@@ -184,7 +184,7 @@ export async function POST(request: Request) {
 
         send("step", { step: "routing", status: "active", detail: "Classifying intent against template gallery..." });
         const intentResult = archetype ? { templateId: archetype } : await classifyIntent(description);
-        send("step", { step: "routing", status: "done", detail: `Routed to template: ${intentResult.templateId}` });
+        send("step", { step: "routing", status: "done", meta: { templateId: intentResult.templateId }, detail: `Routed to template: ${intentResult.templateId}` });
         send("step", { step: "debug", status: "done", detail: `Debug Info: req=${JSON.stringify({archetype, templateId: intentResult.templateId})}` });
 
         const darkModePromise = generateDarkMode(themeJson, provider).then(r => {

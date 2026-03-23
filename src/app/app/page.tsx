@@ -117,10 +117,12 @@ export default function Home() {
   type UndoEntry =
     | { type: "element"; html: string; newHtml: string }
     | { type: "css"; overrides: Record<string, string> }
-    | { type: "style-props"; iterateId: string; oldProps: Record<string, string> };
+    | { type: "style-props"; iterateId: string; oldProps: Record<string, string> }
+    | { type: "jsx-source"; slug: string; source: string };
   type RedoEntry =
     | { type: "element"; html: string; newHtml: string }
-    | { type: "css"; overrides: Record<string, string> };
+    | { type: "css"; overrides: Record<string, string> }
+    | { type: "jsx-source"; slug: string; source: string };
   const MAX_UNDO = 20;
   const undoRef = useRef<UndoEntry[]>([]);
   const [undoCount, setUndoCount] = useState(0);
@@ -248,6 +250,9 @@ export default function Home() {
         }
 
         if (data.edits && Array.isArray(data.edits) && data.edits.length > 0) {
+          // Snapshot pre-edit JSX source for undo
+          const preEditSource = jsxPagesRef.current?.[currentSlug] ?? null;
+
           // New structured edit format — dispatch DOM patches from edits
           for (const edit of data.edits) {
             if (edit.kind === 'style') {
@@ -283,6 +288,7 @@ export default function Home() {
           }
           if (!isHeaderFooter) setShowGlobalApplyPrompt(true);
           // Persist to AST/IDB concurrently
+          if (preEditSource) pushUndo({ type: "jsx-source", slug: currentSlug, source: preEditSource });
           commitJsxEdit(currentSlug, data.edits);
         } else if (data.styles) {
           // Legacy fallback — old 3-mode response
@@ -451,6 +457,19 @@ export default function Home() {
           oldProps: last.oldProps,
         }, '*');
       });
+    } else if (last.type === "jsx-source") {
+      // Snapshot current source for redo before reverting
+      const currentSource = jsxPagesRef.current?.[last.slug] ?? "";
+      redoRef.current.push({ type: "jsx-source", slug: last.slug, source: currentSource });
+      setRedoCount(redoRef.current.length);
+      // Revert JSX source and persist
+      if (jsxPagesRef.current) {
+        jsxPagesRef.current[last.slug] = last.source;
+        setJsxPages(prev => ({ ...prev, [last.slug]: last.source }));
+        import("idb-keyval").then(({ set }) => {
+          set("jsx-pages", jsxPagesRef.current).catch(() => {});
+        });
+      }
     }
   }, []);
 
@@ -480,6 +499,19 @@ export default function Home() {
       }
       undoRef.current.push({ type: "css", overrides: undoOverrides });
       setUndoCount(undoRef.current.length);
+    } else if (entry.type === "jsx-source") {
+      // Snapshot current source for undo before re-applying
+      const currentSource = jsxPagesRef.current?.[entry.slug] ?? "";
+      undoRef.current.push({ type: "jsx-source", slug: entry.slug, source: currentSource });
+      setUndoCount(undoRef.current.length);
+      // Re-apply the redo source and persist
+      if (jsxPagesRef.current) {
+        jsxPagesRef.current[entry.slug] = entry.source;
+        setJsxPages(prev => ({ ...prev, [entry.slug]: entry.source }));
+        import("idb-keyval").then(({ set }) => {
+          set("jsx-pages", jsxPagesRef.current).catch(() => {});
+        });
+      }
     }
   }, []);
 
@@ -546,11 +578,12 @@ export default function Home() {
           if (eventType === "step") {
             updateStep(parsed.step, parsed.status, parsed.detail);
 
-            // When enrich completes, store the slug for packaging and set the theme slug to use the correct archetype renderer
             if (parsed.step === "enrich" && parsed.status === "done" && parsed.meta?.themeSlug) {
               themeSlugRef.current = parsed.meta.themeSlug;
-              setArchetypeId(parsed.meta.archetypeId ?? "blog");
-              setThemeSlug(parsed.meta.archetypeId ?? "blog");
+            }
+            if (parsed.step === "routing" && parsed.status === "done" && parsed.meta?.templateId) {
+              setArchetypeId(parsed.meta.templateId);
+              setThemeSlug(parsed.meta.templateId);
             }
           } else if (eventType === "files") {
             if (parsed.type === "theme-json") {
@@ -713,6 +746,8 @@ export default function Home() {
     setThemeSlug(theme.id);
     themeSlugRef.current = theme.id;
     setArchetypeId(theme.id);
+    setInitialArch(theme.id);
+    setFormKey(k => k + 1);
 
     let raw: Record<string, string> = {};
     const skeletonPages: Record<string, {title: string, slug: string}> = {};
@@ -1200,7 +1235,7 @@ export default function Home() {
                       const iframeSrc = `/templates/${themeSlug}${iframeSlug ? `/${iframeSlug}` : ''}${isPart ? '?isolate=true' : ''}`;
                       return (
                         <iframe
-                          key={activeFile}
+                          key={`${activeFile}-${step}`}
                           src={iframeSrc}
                           className="w-full h-full border-0"
                           title={`${themeSlug} Template Iteration Preview`}
