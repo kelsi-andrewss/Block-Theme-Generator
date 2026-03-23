@@ -132,7 +132,7 @@ export const SAAS_JSX_SOURCE = `<main>
           <div style={{width:"12px",height:"12px",borderRadius:"50%",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)"}}></div>
           <div style={{width:"12px",height:"12px",borderRadius:"50%",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)"}}></div>
         </div>
-        <div style={{aspectRatio:"16/9",width:"100%",backgroundImage:"url('undefined')",backgroundSize:"cover",backgroundPosition:"center",mixBlendMode:"multiply",opacity:"0.9"}}></div>
+        <div style={{aspectRatio:"16/9",width:"100%",backgroundImage:"url('/images/templates/saas_hero_abstract.png')",backgroundSize:"cover",backgroundPosition:"center",mixBlendMode:"multiply",opacity:"0.9"}}></div>
       </div>
     </div>
   </div>

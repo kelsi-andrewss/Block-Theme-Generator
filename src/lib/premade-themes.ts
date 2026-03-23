@@ -30,12 +30,12 @@ function generateBaseThemeJson(arch: ThemeArchetype): ThemeJson {
         defaultFontSizes: false,
         fontFamilies: [
           {
-            name: "Heading Font",
+            name: fonts.heading,
             slug: "heading",
             fontFamily: `"${fonts.heading}", sans-serif`,
           },
           {
-            name: "Body Font",
+            name: fonts.body,
             slug: "body",
             fontFamily: `"${fonts.body}", sans-serif`,
           },

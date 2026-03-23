@@ -175,10 +175,10 @@ export function applyThemeOverrides(
   return { ...themeFiles, themeJson: themeJsonStr };
 }
 
-export function buildThemeFileMap(
+export async function buildThemeFileMap(
   themeFiles: ThemeFilesData,
   meta: ThemeMetaInput
-): Record<string, string> {
+): Promise<Record<string, string | Blob | ArrayBuffer>> {
   const slug = meta.themeName;
   const themeMeta: ThemeMeta = {
     name: meta.displayName,
@@ -202,7 +202,7 @@ export function buildThemeFileMap(
 
   const fullMeta: ThemeMeta = { ...themeMeta, fontFamilies, hasCustomCss };
 
-  const fileMap: Record<string, string> = {
+  const fileMap: Record<string, string | Blob | ArrayBuffer> = {
     "style.css": generateStyleCss(fullMeta),
     "theme.json": themeFiles.themeJson,
     "functions.php": generateFunctionsPHP(fullMeta),
@@ -233,6 +233,39 @@ export function buildThemeFileMap(
     for (const [, page] of Object.entries(themeFiles.skeletonPages)) {
       if (page.content) fileMap[`templates/page-${page.slug}.html`] = page.content;
     }
+  }
+
+  // Hunt for all local images, fetch them, buffer them into the zip, and rewrite their URLs
+  // so that the WordPress Playground and native WP installs can resolve them locally inside the theme.
+  const imageRegex = /\/images\/templates\/([a-zA-Z0-9_.-]+)/g;
+  const foundImages = new Set<string>();
+
+  for (const [path, content] of Object.entries(fileMap)) {
+    if (typeof content === "string" && (path.startsWith("templates/") || path.startsWith("parts/") || path.startsWith("patterns/"))) {
+      let modifiedContent = content;
+      let match;
+      while ((match = imageRegex.exec(content)) !== null) {
+        foundImages.add(match[1]);
+      }
+      modifiedContent = content.replace(imageRegex, `/wp-content/themes/${slug}/assets/images/$1`);
+      fileMap[path] = modifiedContent;
+    }
+  }
+
+  if (typeof window !== "undefined" && foundImages.size > 0) {
+    await Promise.all(
+      Array.from(foundImages).map(async (filename) => {
+        try {
+          const res = await fetch(`/images/templates/${filename}`);
+          if (res.ok) {
+            const buffer = await res.arrayBuffer();
+            fileMap[`assets/images/${filename}`] = buffer;
+          }
+        } catch (e) {
+          console.error("Failed to bundle image:", filename, e);
+        }
+      })
+    );
   }
 
   return fileMap;

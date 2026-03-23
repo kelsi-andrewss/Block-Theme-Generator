@@ -22,6 +22,7 @@ export default function SaaSPage() {
   const [jsxSource, setJsxSource] = useState(SAAS_JSX_SOURCE);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('gallery=true')) return;
     get('jsx-pages').then((pages: any) => {
       if (pages && pages['home']) setJsxSource(pages['home']);
     });

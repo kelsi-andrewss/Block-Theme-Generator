@@ -1,7 +1,7 @@
 import JSZip from "jszip";
 
 export async function packageThemeFromFileMap(
-  fileMap: Record<string, string>,
+  fileMap: Record<string, string | Blob | ArrayBuffer>,
   slug: string
 ): Promise<Blob> {
   const zip = new JSZip();

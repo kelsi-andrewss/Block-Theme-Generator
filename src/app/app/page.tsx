@@ -12,11 +12,12 @@ import TemplateGallery from "@/components/TemplateGallery";
 import IterationChat, { SelectedBlockEvent } from "@/components/IterationChat";
 import WorkbenchHeader from "@/components/WorkbenchHeader";
 import type { ThemeArchetype } from "@/lib/prompts/archetypes";
-import type { PremadeTheme } from "@/lib/premade-themes";
+import { PREMADE_THEMES, type PremadeTheme } from "@/lib/premade-themes";
 import { SAAS_FRONT_PAGE_HTML, SAAS_FOOTER_HTML, SAAS_HEADER_HTML, SAAS_404_HTML, SAAS_SIGNUP_HTML, SAAS_PRICING_HTML, SAAS_DOCS_HTML, SAAS_CONTACT_HTML } from "@/lib/generators/saas-template";
 import { generateSaasCustomCss } from "@/lib/generators/custom-css";
 import type { AuditResult } from "@/lib/validation/design-audit";
 import { applyThemeOverrides, buildThemeFileMap, type ThemeFilesData, type IframeState } from "@/lib/packer/constants";
+import { packageThemeFromFileMap } from "@/lib/packer/zip";
 import { get, set } from "idb-keyval";
 import { applyAstMutation, injectUids, type EditIntent } from "@/lib/transpiler/ast-mutator";
 import {
@@ -610,46 +611,82 @@ export default function Home() {
   }
 
   async function handleDownload() {
-    if (!result) return;
+    console.log("[handleDownload] Clicked Download ZIP");
+    let activeResult = result;
+    if (!activeResult) {
+       const theme = PREMADE_THEMES.find(t => t.id === previewThemeId);
+       if (!theme) return;
+       // Fallback inline compilation for baseline previews
+       const templates: Record<string, string> = {};
+       const parts: Record<string, string> = {
+         "header.html": `<!-- wp:group {"tagName":"header","layout":{"type":"constrained"}} --><header class="wp-block-group"></header><!-- /wp:group -->`,
+         "footer.html": `<!-- wp:group {"tagName":"footer","layout":{"type":"constrained"}} --><footer class="wp-block-group"></footer><!-- /wp:group -->`
+       };
+       activeResult = {
+         themeFiles: {
+           themeJson: JSON.stringify(theme.themeJson, null, 2),
+           darkMode: JSON.stringify(theme.darkMode, null, 2),
+           templates, parts, patterns: {}
+         },
+         audit: { score: 100, grade: "A", checks: [] },
+         meta: { themeName: `${theme.id}-theme`, displayName: `${theme.archetype.name} Theme`, description: theme.archetype.description }
+       };
+    }
     setIsPackaging(true);
     try {
-      const themeFiles = jsxPages ? transpileJsxPagesToThemeFiles(result.themeFiles, jsxPages) : result.themeFiles;
+      const themeFiles = jsxPages ? transpileJsxPagesToThemeFiles(activeResult.themeFiles, jsxPages) : activeResult.themeFiles;
       const overridden = applyThemeOverrides(themeFiles, iframeState as IframeState | null);
-      const fileMap = buildThemeFileMap(overridden, result.meta);
-      const slug = result.meta.themeName;
+      const fileMap = await buildThemeFileMap(overridden, activeResult.meta);
+      const slug = activeResult.meta.themeName;
 
-      const res = await fetch("/api/package", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileMap, slug }),
-      });
-      if (!res.ok) throw new Error("Packaging failed");
-      const blob = await res.blob();
+      const blob = await packageThemeFromFileMap(fileMap, slug);
+      console.log("[handleDownload] Packaged blob of size:", blob.size);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = `${slug}.zip`;
       document.body.appendChild(a);
       a.click();
+      console.log("[handleDownload] Simulation of <a> click fired for", a.download);
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       setShowInstallInstructions(true);
+    } catch (err) {
+      console.error("[handleDownload] Error caught:", err);
     } finally {
       setIsPackaging(false);
     }
   }
 
   async function handlePreview() {
-    if (!result) return;
+    let activeResult = result;
+    if (!activeResult) {
+       const theme = PREMADE_THEMES.find(t => t.id === previewThemeId);
+       if (!theme) return;
+       const templates: Record<string, string> = {};
+       const parts: Record<string, string> = {
+         "header.html": `<!-- wp:group {"tagName":"header","layout":{"type":"constrained"}} --><header class="wp-block-group"></header><!-- /wp:group -->`,
+         "footer.html": `<!-- wp:group {"tagName":"footer","layout":{"type":"constrained"}} --><footer class="wp-block-group"></footer><!-- /wp:group -->`
+       };
+       activeResult = {
+         themeFiles: {
+           themeJson: JSON.stringify(theme.themeJson, null, 2),
+           darkMode: JSON.stringify(theme.darkMode, null, 2),
+           templates, parts, patterns: {}
+         },
+         audit: { score: 100, grade: "A", checks: [] },
+         meta: { themeName: `${theme.id}-theme`, displayName: `${theme.archetype.name} Theme`, description: theme.archetype.description }
+       };
+    }
     setIsPreviewing(true);
 
     try {
-      const themeFiles = jsxPages ? transpileJsxPagesToThemeFiles(result.themeFiles, jsxPages) : result.themeFiles;
+      const themeFiles = jsxPages ? transpileJsxPagesToThemeFiles(activeResult.themeFiles, jsxPages) : activeResult.themeFiles;
       const overridden = applyThemeOverrides(themeFiles, iframeState as IframeState | null);
 
       await set("playground-theme", {
         ...overridden,
-        meta: result.meta,
+        meta: activeResult.meta,
       });
       window.open("/playground-preview", "_blank");
       setIsPreviewing(false);

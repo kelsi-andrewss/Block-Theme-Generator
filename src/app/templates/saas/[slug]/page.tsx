@@ -38,6 +38,7 @@ export default function SaaSSubPage() {
   const [jsxSource, setJsxSource] = useState(fallback);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('gallery=true')) return;
     get('jsx-pages').then((pages: any) => {
       if (pages && pages[slug]) setJsxSource(pages[slug]);
     });

@@ -140,8 +140,8 @@ export function buildContentPHP(
 
 export function buildPreviewBlueprint(
   themeSlug: string,
-  fileMap: Record<string, string>
-): Blueprint {
+  fileMap: Record<string, string | Blob | ArrayBuffer>
+): any {
   const basePath = `/wordpress/wp-content/themes/${themeSlug}`;
 
   const dirs = new Set<string>();
@@ -161,11 +161,20 @@ export function buildPreviewBlueprint(
   ];
 
   const writeFileSteps: BlueprintStep[] = Object.entries(fileMap).map(
-    ([filePath, content]) => ({
-      step: "writeFile" as const,
-      path: `${basePath}/${filePath}`,
-      data: content,
-    })
+    ([filePath, content]) => {
+      let data: string | Blob | ArrayBuffer | Uint8Array = content;
+      if (content instanceof ArrayBuffer) {
+        data = new Uint8Array(content);
+      } else if (content instanceof Blob) {
+        // Blob not easily synchronous here; fileMap from buildThemeFileMap uses ArrayBuffer,
+        // so this should not be hit.
+      }
+      return {
+        step: "writeFile" as const,
+        path: `${basePath}/${filePath}`,
+        data: data,
+      };
+    }
   );
 
   const activationStep: BlueprintStep = {

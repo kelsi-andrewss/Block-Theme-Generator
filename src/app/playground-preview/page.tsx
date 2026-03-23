@@ -23,7 +23,7 @@ export default function PlaygroundPreview() {
       }
 
       const slug = data.meta.themeName;
-      const fileMap = buildThemeFileMap(data, data.meta);
+      const fileMap = await buildThemeFileMap(data, data.meta);
       const blueprint = buildPreviewBlueprint(slug, fileMap);
 
       try {

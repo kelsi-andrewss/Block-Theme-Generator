@@ -124,7 +124,7 @@ export const ECOMMERCE_JSX_SOURCE = `
         </div>
       </div>
       <div style={{position:"relative",aspectRatio:"3/4",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 5%, transparent)",overflow:"hidden",borderRadius:"1.5rem",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 10%, transparent)",boxShadow:"0 20px 40px -15px color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)"}}>
-        <img src="undefined" alt="Accessories" style={{width:"100%",height:"100%",objectFit:"cover",transition:"transform 0.7s ease"}} />
+        <img src="/images/templates/ecommerce_luxury_accessory.png" alt="Accessories" style={{width:"100%",height:"100%",objectFit:"cover",transition:"transform 0.7s ease"}} />
         <div style={{position:"absolute",bottom:"0",left:"0",width:"100%",padding:"2.5rem",background:"linear-gradient(to top, color-mix(in srgb, var(--wp--preset--color--contrast) 80%, transparent), transparent)",color:"var(--wp--preset--color--base)"}}>
           <h3 style={{fontSize:"2.5rem",fontWeight:"800",marginBottom:"1rem",letterSpacing:"-0.02em"}}>Accessories</h3>
           <span style={{fontSize:"1rem",fontWeight:"700",textTransform:"uppercase",letterSpacing:"0.1em",display:"inline-flex",alignItems:"center",gap:"0.5rem"}}>Shop Now <svg style={{width:"16px",height:"16px"}} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>

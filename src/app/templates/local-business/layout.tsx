@@ -24,6 +24,7 @@ function LocalBusinessLayoutContent({
   const [footerJsx, setFooterJsx] = useState(LOCAL_BUSINESS_FOOTER_JSX_SOURCE);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('gallery=true')) return;
     get('jsx-pages').then((pages: any) => {
       if (pages && pages['header']) setHeaderJsx(pages['header']);
       if (pages && pages['footer']) setFooterJsx(pages['footer']);

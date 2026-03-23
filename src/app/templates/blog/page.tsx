@@ -17,6 +17,7 @@ export default function BlogPage() {
   const [jsxSource, setJsxSource] = useState(BLOG_JSX_SOURCE);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('gallery=true')) return;
     get('jsx-pages').then((pages: any) => {
       if (pages && pages['home']) setJsxSource(pages['home']);
     });
