@@ -22,6 +22,22 @@ import {
   SAAS_CONTACT_JSX_SOURCE,
   SAAS_JSX_SOURCE,
 } from "@/app/templates/saas/jsx-sources";
+import {
+  PORTFOLIO_JSX_SOURCE, PORTFOLIO_HEADER_JSX_SOURCE, PORTFOLIO_FOOTER_JSX_SOURCE,
+  PORTFOLIO_404_JSX_SOURCE, PORTFOLIO_ABOUT_JSX_SOURCE
+} from "@/app/templates/portfolio/jsx-sources";
+import {
+  ECOMMERCE_JSX_SOURCE, ECOMMERCE_HEADER_JSX_SOURCE, ECOMMERCE_FOOTER_JSX_SOURCE,
+  ECOMMERCE_SHOP_JSX_SOURCE, ECOMMERCE_404_JSX_SOURCE
+} from "@/app/templates/ecommerce/jsx-sources";
+import {
+  BLOG_JSX_SOURCE, BLOG_HEADER_JSX_SOURCE, BLOG_FOOTER_JSX_SOURCE,
+  BLOG_ARCHIVE_JSX_SOURCE, BLOG_404_JSX_SOURCE
+} from "@/app/templates/blog/jsx-sources";
+import {
+  LOCAL_BUSINESS_JSX_SOURCE, LOCAL_BUSINESS_HEADER_JSX_SOURCE, LOCAL_BUSINESS_FOOTER_JSX_SOURCE,
+  LOCAL_BUSINESS_SERVICES_JSX_SOURCE, LOCAL_BUSINESS_404_JSX_SOURCE
+} from "@/app/templates/local-business/jsx-sources";
 import { injectUids } from "@/lib/transpiler/ast-mutator";
 
 function slugify(name: string): string {
@@ -177,19 +193,39 @@ export async function POST(request: Request) {
           return r;
         });
 
-        if (intentResult.templateId === "saas") {
-          send("step", { step: "templates", status: "active", detail: "Populating Saas template slots via AST..." });
+        const validArchetypes = ["saas", "portfolio", "ecommerce", "blog", "local-business"];
+        if (validArchetypes.includes(intentResult.templateId)) {
+          send("step", { step: "templates", status: "active", detail: `Populating ${intentResult.templateId} template slots via AST...` });
           
-          const rawPages: Record<string, string> = {
-            home: SAAS_JSX_SOURCE,
-            header: SAAS_HEADER_JSX_SOURCE,
-            footer: SAAS_FOOTER_JSX_SOURCE,
-            "404": SAAS_404_JSX_SOURCE,
-            signup: SAAS_SIGNUP_JSX_SOURCE,
-            pricing: SAAS_PRICING_JSX_SOURCE,
-            docs: SAAS_DOCS_JSX_SOURCE,
-            contact: SAAS_CONTACT_JSX_SOURCE,
-          };
+          let rawPages: Record<string, string> = {};
+          
+          if (intentResult.templateId === "saas") {
+            rawPages = {
+              home: SAAS_JSX_SOURCE, header: SAAS_HEADER_JSX_SOURCE, footer: SAAS_FOOTER_JSX_SOURCE,
+              "404": SAAS_404_JSX_SOURCE, signup: SAAS_SIGNUP_JSX_SOURCE, pricing: SAAS_PRICING_JSX_SOURCE,
+              docs: SAAS_DOCS_JSX_SOURCE, contact: SAAS_CONTACT_JSX_SOURCE,
+            };
+          } else if (intentResult.templateId === "portfolio") {
+            rawPages = {
+              home: PORTFOLIO_JSX_SOURCE, header: PORTFOLIO_HEADER_JSX_SOURCE, footer: PORTFOLIO_FOOTER_JSX_SOURCE,
+              "404": PORTFOLIO_404_JSX_SOURCE, about: PORTFOLIO_ABOUT_JSX_SOURCE,
+            };
+          } else if (intentResult.templateId === "ecommerce") {
+            rawPages = {
+              home: ECOMMERCE_JSX_SOURCE, header: ECOMMERCE_HEADER_JSX_SOURCE, footer: ECOMMERCE_FOOTER_JSX_SOURCE,
+              "404": ECOMMERCE_404_JSX_SOURCE, shop: ECOMMERCE_SHOP_JSX_SOURCE,
+            };
+          } else if (intentResult.templateId === "blog") {
+            rawPages = {
+              home: BLOG_JSX_SOURCE, header: BLOG_HEADER_JSX_SOURCE, footer: BLOG_FOOTER_JSX_SOURCE,
+              "404": BLOG_404_JSX_SOURCE, archive: BLOG_ARCHIVE_JSX_SOURCE,
+            };
+          } else if (intentResult.templateId === "local-business") {
+            rawPages = {
+              home: LOCAL_BUSINESS_JSX_SOURCE, header: LOCAL_BUSINESS_HEADER_JSX_SOURCE, footer: LOCAL_BUSINESS_FOOTER_JSX_SOURCE,
+              "404": LOCAL_BUSINESS_404_JSX_SOURCE, services: LOCAL_BUSINESS_SERVICES_JSX_SOURCE,
+            };
+          }
 
           const injectedPages: Record<string, string> = {};
           for (const [key, src] of Object.entries(rawPages)) {
@@ -199,7 +235,7 @@ export async function POST(request: Request) {
           const populatedJsxPages = await populateReactPages(enriched.original, injectedPages);
           
           send("files", { type: "jsx-pages", files: populatedJsxPages });
-          send("step", { step: "templates", status: "done", detail: "Saas React templates populated" });
+          send("step", { step: "templates", status: "done", detail: `${intentResult.templateId} React templates populated` });
 
           send("step", { step: "parts", status: "active", detail: "Bypassing block HTML parts population..." });
           templates = new Map();

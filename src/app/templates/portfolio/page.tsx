@@ -2,14 +2,9 @@
 
 import { useState, useEffect, Suspense } from 'react';
 
-import { SAAS_FEATURES } from '@/lib/data/saas-features';
 import JsxStringRenderer from '@/components/JsxStringRenderer';
-
-import { SAAS_HEADER_JSX_SOURCE, SAAS_FOOTER_JSX_SOURCE, SAAS_JSX_SOURCE } from './jsx-sources';
+import { PORTFOLIO_JSX_SOURCE } from './jsx-sources';
 import { get } from 'idb-keyval';
-
-
-
 
 const WP_VAR_BRIDGE: Record<string, string> = {
   '--wp--preset--color--primary': 'var(--color-primary-500)',
@@ -18,8 +13,8 @@ const WP_VAR_BRIDGE: Record<string, string> = {
   '--wp--preset--color--base': 'var(--color-bg)',
 };
 
-export default function SaaSPage() {
-  const [jsxSource, setJsxSource] = useState(SAAS_JSX_SOURCE);
+export default function PortfolioPage() {
+  const [jsxSource, setJsxSource] = useState(PORTFOLIO_JSX_SOURCE);
 
   useEffect(() => {
     get('jsx-pages').then((pages: any) => {

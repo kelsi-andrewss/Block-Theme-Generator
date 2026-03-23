@@ -274,8 +274,10 @@ export function injectUids(source: string): string {
   const rootExpr = ast.program.body[0];
   if (t.isExpressionStatement(rootExpr) && t.isArrayExpression(rootExpr.expression)) {
     const rawNode = rootExpr.expression.elements[0];
-    if (rawNode) walk(rawNode, "0");
-    return recast.print(rawNode).code;
+    if (rawNode) {
+      walk(rawNode, "0");
+      return recast.print(rawNode).code;
+    }
   }
 
   return source;

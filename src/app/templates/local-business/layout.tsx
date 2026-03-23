@@ -6,13 +6,13 @@ import { useSearchParams } from 'next/navigation';
 import TemplateProvider from "@/components/TemplateProvider";
 import NativeIframeController from "@/components/NativeIframeController";
 import JsxStringRenderer from "@/components/JsxStringRenderer";
-import { SAAS_HEADER_JSX_SOURCE, SAAS_FOOTER_JSX_SOURCE } from "./jsx-sources";
+import { LOCAL_BUSINESS_HEADER_JSX_SOURCE, LOCAL_BUSINESS_FOOTER_JSX_SOURCE } from "./jsx-sources";
 import { get } from 'idb-keyval';
 import { Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });
 
-function SaaSLayoutContent({
+function LocalBusinessLayoutContent({
   children,
 }: {
   children: React.ReactNode;
@@ -20,8 +20,8 @@ function SaaSLayoutContent({
   const searchParams = useSearchParams();
   const isolate = searchParams.get('isolate') === 'true';
 
-  const [headerJsx, setHeaderJsx] = useState(SAAS_HEADER_JSX_SOURCE);
-  const [footerJsx, setFooterJsx] = useState(SAAS_FOOTER_JSX_SOURCE);
+  const [headerJsx, setHeaderJsx] = useState(LOCAL_BUSINESS_HEADER_JSX_SOURCE);
+  const [footerJsx, setFooterJsx] = useState(LOCAL_BUSINESS_FOOTER_JSX_SOURCE);
 
   useEffect(() => {
     get('jsx-pages').then((pages: any) => {
@@ -37,7 +37,6 @@ function SaaSLayoutContent({
 
         {!isolate && <JsxStringRenderer jsxString={headerJsx} />}
 
-        {/* Main Content */}
         <main>
           {children}
         </main>
@@ -49,14 +48,14 @@ function SaaSLayoutContent({
   );
 }
 
-export default function SaaSLayout({
+export default function LocalBusinessLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)' }}></div>}>
-      <SaaSLayoutContent>{children}</SaaSLayoutContent>
+      <LocalBusinessLayoutContent>{children}</LocalBusinessLayoutContent>
     </Suspense>
   );
 }

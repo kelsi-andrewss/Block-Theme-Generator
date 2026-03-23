@@ -31,7 +31,6 @@ function buildFeatureCardsJsx(): string {
   }).join('\n');
 }
 
-const CHECK_SVG_GREEN = esc('<svg style="width:1.25rem;height:1.25rem;color:#22c55e;display:inline;vertical-align:middle;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>');
 const CHECK_SVG_PRIMARY = esc('<svg style="width:1.25rem;height:1.25rem;color:var(--wp--preset--color--primary);display:inline;vertical-align:middle;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>');
 const CHECK_SVG_CONTRAST = esc('<svg style="width:1.25rem;height:1.25rem;color:var(--wp--preset--color--contrast);display:inline;vertical-align:middle;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>');
 const QUOTE_SVG = esc('<svg style="position:absolute;top:-1.5rem;left:-2rem;width:4rem;height:4rem;color:var(--wp--preset--color--primary);opacity:0.3" fill="currentColor" viewBox="0 0 32 32" aria-hidden="true"><path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z"/></svg>');
@@ -45,22 +44,22 @@ export const SAAS_HEADER_JSX_SOURCE = `<header style={{borderBottom:"1px solid c
   <div style={{paddingRight:"1.5rem",paddingLeft:"1.5rem",maxWidth:"80rem",margin:"0 auto"}}>
     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:"5rem"}}>
       <div style={{display:"flex"}}>
-        <p><a href="/" style={{display:"flex",alignItems:"center",gap:"0.5rem",textDecoration:"none"}}><span style={{width:"2rem",height:"2rem",borderRadius:"0.5rem",backgroundColor:"var(--wp--preset--color--primary)",display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:"700",boxShadow:"0 10px 15px -3px color-mix(in srgb, var(--wp--preset--color--primary) 20%, transparent)"}}>S</span><span style={{fontSize:"1.25rem",fontWeight:"700",color:"var(--wp--preset--color--contrast)",letterSpacing:"-0.025em",fontFamily:"sans-serif"}}>SaaS<span style={{color:"var(--wp--preset--color--primary)"}}>Flow</span></span></a></p>
+        <p><a href="/" style={{display:"flex",alignItems:"center",gap:"0.5rem",textDecoration:"none"}}><span style={{width:"2rem",height:"2rem",borderRadius:"0.5rem",backgroundColor:"var(--wp--preset--color--primary)",display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:"700",boxShadow:"0 10px 15px -3px color-mix(in srgb, var(--wp--preset--color--primary) 20%, transparent)"}}>S</span><span style={{fontSize:"1.25rem",fontWeight:"700",color:"var(--wp--preset--color--contrast)",letterSpacing:"-0.025em"}}>SaaS<span style={{color:"var(--wp--preset--color--primary)"}}>Flow</span></span></a></p>
       </div>
       <div style={{display:"flex",alignItems:"center",gap:"2rem"}}>
-        <p><a href="#features" style={{fontSize:"0.875rem",fontWeight:"500",color:"color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)",textDecoration:"none",fontFamily:"sans-serif"}}>Features</a></p>
-        <p><a href="#testimonials" style={{fontSize:"0.875rem",fontWeight:"500",color:"color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)",textDecoration:"none",fontFamily:"sans-serif"}}>Customers</a></p>
-        <p><a href="#pricing" style={{fontSize:"0.875rem",fontWeight:"500",color:"color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)",textDecoration:"none",fontFamily:"sans-serif"}}>Pricing</a></p>
+        <p><a href="#features" style={{fontSize:"0.875rem",fontWeight:"500",color:"color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)",textDecoration:"none"}}>Features</a></p>
+        <p><a href="#testimonials" style={{fontSize:"0.875rem",fontWeight:"500",color:"color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)",textDecoration:"none"}}>Customers</a></p>
+        <p><a href="#pricing" style={{fontSize:"0.875rem",fontWeight:"500",color:"color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)",textDecoration:"none"}}>Pricing</a></p>
       </div>
       <div style={{display:"flex",alignItems:"center",gap:"1.5rem"}}>
-        <p><a href="#login" style={{fontSize:"0.875rem",fontWeight:"500",color:"color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)",textDecoration:"none",fontFamily:"sans-serif"}}>Log in</a></p>
-        <a role="button" href="#signup" style={{fontSize:"0.875rem",fontWeight:"500",backgroundColor:"var(--wp--preset--color--contrast)",color:"var(--wp--preset--color--base)",padding:"0.625rem 1.25rem",borderRadius:"9999px",textDecoration:"none",fontFamily:"sans-serif",boxShadow:"0 4px 6px -1px rgba(0, 0, 0, 0.1)"}}>Get Started</a>
+        <p><a href="#login" style={{fontSize:"0.875rem",fontWeight:"500",color:"color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)",textDecoration:"none"}}>Log in</a></p>
+        <a role="button" href="#signup" style={{fontSize:"0.875rem",fontWeight:"500",backgroundColor:"var(--wp--preset--color--contrast)",color:"var(--wp--preset--color--base)",padding:"0.625rem 1.25rem",borderRadius:"9999px",textDecoration:"none",boxShadow:"0 4px 6px -1px rgba(0, 0, 0, 0.1)"}}>Get Started</a>
       </div>
     </div>
   </div>
 </header>`;
 
-export const SAAS_FOOTER_JSX_SOURCE = `<footer style={{borderTop:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 5%, transparent)",backgroundColor:"var(--wp--preset--color--base)",paddingTop:"4rem",paddingBottom:"2rem",paddingRight:"0",paddingLeft:"0",fontFamily:"sans-serif"}}>
+export const SAAS_FOOTER_JSX_SOURCE = `<footer style={{borderTop:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 5%, transparent)",backgroundColor:"var(--wp--preset--color--base)",paddingTop:"4rem",paddingBottom:"2rem",paddingRight:"0",paddingLeft:"0"}}>
   <div style={{paddingRight:"1.5rem",paddingLeft:"1.5rem",maxWidth:"80rem",margin:"0 auto"}}>
     <div style={{display:"flex",flexWrap:"wrap",gap:"3rem",marginBottom:"3rem"}}>
       <div style={{flex:"2",minWidth:"250px"}}>
@@ -129,11 +128,11 @@ export const SAAS_JSX_SOURCE = `<main>
     <div style={{marginTop:"5rem",position:"relative",maxWidth:"1024px",marginLeft:"auto",marginRight:"auto",width:"100%"}}>
       <div style={{borderRadius:"1rem",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--base) 50%, transparent)",backdropFilter:"blur(24px)",boxShadow:"0 25px 50px -12px rgba(0,0,0,0.25)",overflow:"hidden"}}>
         <div style={{height:"3rem",borderBottom:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 10%, transparent)",display:"flex",alignItems:"center",padding:"0 1rem",gap:"0.5rem",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 3%, transparent)"}}>
-          <div style={{width:"12px",height:"12px",borderRadius:"50%",backgroundColor:"rgba(248, 113, 113, 0.8)"}}></div>
-          <div style={{width:"12px",height:"12px",borderRadius:"50%",backgroundColor:"rgba(251, 191, 36, 0.8)"}}></div>
-          <div style={{width:"12px",height:"12px",borderRadius:"50%",backgroundColor:"rgba(74, 222, 128, 0.8)"}}></div>
+          <div style={{width:"12px",height:"12px",borderRadius:"50%",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)"}}></div>
+          <div style={{width:"12px",height:"12px",borderRadius:"50%",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)"}}></div>
+          <div style={{width:"12px",height:"12px",borderRadius:"50%",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)"}}></div>
         </div>
-        <div style={{aspectRatio:"16/9",width:"100%",backgroundImage:"url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop')",backgroundSize:"cover",backgroundPosition:"center",mixBlendMode:"multiply",opacity:"0.9"}}></div>
+        <div style={{aspectRatio:"16/9",width:"100%",backgroundImage:"url('undefined')",backgroundSize:"cover",backgroundPosition:"center",mixBlendMode:"multiply",opacity:"0.9"}}></div>
       </div>
     </div>
   </div>
@@ -193,7 +192,7 @@ export const SAAS_JSX_SOURCE = `<main>
           <div>{"${QUOTE_SVG}"}</div>
           <p data-uid="testimonial-quote" style={{fontSize:"1.25rem",fontWeight:"500",lineHeight:"1.6",marginBottom:"2rem",position:"relative",zIndex:"10"}}>{"\\u201cSwitching to SaaSFlow was the best decision we made this year. It allowed our team to ship features 40% faster and cut our infrastructure costs in half.\\u201d"}</p>
           <div style={{display:"flex",alignItems:"center",gap:"1rem"}}>
-            <div style={{width:"3.5rem",height:"3.5rem",borderRadius:"50%",backgroundImage:"url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop')",backgroundSize:"cover",border:"2px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)"}}></div>
+            <div style={{width:"3.5rem",height:"3.5rem",borderRadius:"50%",backgroundImage:"url('/images/templates/saas_testimonial.png')",backgroundSize:"cover",border:"2px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)"}}></div>
             <div>
               <h4 data-uid="testimonial-author" style={{fontWeight:"700",marginTop:"0",marginBottom:"0"}}>Sarah Jenkins</h4>
               <p style={{color:"color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent)",fontSize:"0.875rem",marginTop:"0",marginBottom:"0"}}>CTO at TechNova</p>
@@ -249,9 +248,9 @@ export const SAAS_JSX_SOURCE = `<main>
         <a role="button" style={{display:"block",width:"100%",padding:"0.75rem",borderRadius:"0.5rem",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 20%, transparent)",backgroundColor:"var(--wp--preset--color--base)",color:"var(--wp--preset--color--contrast)",fontWeight:"500",textAlign:"center",textDecoration:"none",marginBottom:"2rem"}}>Start Free Trial</a>
         <div style={{flex:"1"}}>
           <ul style={{listStyle:"none",padding:"0",margin:"0",display:"flex",flexDirection:"column",gap:"1rem",fontSize:"0.875rem",color:"color-mix(in srgb, var(--wp--preset--color--contrast) 70%, transparent)"}}>
-            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_GREEN} Up to 5 users"}</li>
-            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_GREEN} Basic analytics"}</li>
-            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_GREEN} Community support"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_PRIMARY} Up to 5 users"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_PRIMARY} Basic analytics"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_PRIMARY} Community support"}</li>
           </ul>
         </div>
       </div>
@@ -376,9 +375,9 @@ export const SAAS_PRICING_JSX_SOURCE = `<main style={{paddingTop:"6rem",paddingB
         <a role="button" style={{display:"block",width:"100%",padding:"0.75rem",borderRadius:"0.5rem",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 20%, transparent)",backgroundColor:"var(--wp--preset--color--base)",color:"var(--wp--preset--color--contrast)",fontWeight:"500",textAlign:"center",textDecoration:"none",marginBottom:"2rem"}}>Start Free Trial</a>
         <div style={{flex:"1"}}>
           <ul style={{listStyle:"none",padding:"0",margin:"0",display:"flex",flexDirection:"column",gap:"1rem",fontSize:"0.875rem",color:"color-mix(in srgb, var(--wp--preset--color--contrast) 70%, transparent)"}}>
-            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_GREEN} Up to 5 users"}</li>
-            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_GREEN} Basic analytics"}</li>
-            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_GREEN} Community support"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_PRIMARY} Up to 5 users"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_PRIMARY} Basic analytics"}</li>
+            <li style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>{"${CHECK_SVG_PRIMARY} Community support"}</li>
           </ul>
         </div>
       </div>
@@ -466,7 +465,7 @@ export const SAAS_DOCS_JSX_SOURCE = `<main style={{paddingTop:"4rem",paddingBott
           <span style={{fontSize:"0.75rem",fontWeight:"600",color:"color-mix(in srgb, var(--wp--preset--color--contrast) 50%, transparent)",textTransform:"uppercase",letterSpacing:"0.05em"}}>Terminal</span>
         </div>
         <div style={{padding:"1.25rem 1.5rem",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 3%, transparent)"}}>
-          <pre style={{margin:"0",fontFamily:"monospace",fontSize:"0.875rem",lineHeight:"1.7",color:"var(--wp--preset--color--contrast)"}}>npm install @saasflow/sdk</pre>
+          <pre style={{margin:"0",fontSize:"0.875rem",lineHeight:"1.7",color:"var(--wp--preset--color--contrast)"}}>npm install @saasflow/sdk</pre>
         </div>
       </div>
 
@@ -478,7 +477,7 @@ export const SAAS_DOCS_JSX_SOURCE = `<main style={{paddingTop:"4rem",paddingBott
           <span style={{fontSize:"0.75rem",fontWeight:"600",color:"color-mix(in srgb, var(--wp--preset--color--contrast) 50%, transparent)",textTransform:"uppercase",letterSpacing:"0.05em"}}>JavaScript</span>
         </div>
         <div style={{padding:"1.25rem 1.5rem",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 3%, transparent)"}}>
-          <pre style={{margin:"0",fontFamily:"monospace",fontSize:"0.875rem",lineHeight:"1.7",color:"var(--wp--preset--color--contrast)"}}>{"import { SaaSFlow } from \\u0027@saasflow/sdk\\u0027;\\n\\nconst client = new SaaSFlow({\\n  apiKey: process.env.SAASFLOW_API_KEY,\\n});\\n\\nconst result = await client.query({\\n  collection: \\u0027users\\u0027,\\n  limit: 10,\\n});"}</pre>
+          <pre style={{margin:"0",fontSize:"0.875rem",lineHeight:"1.7",color:"var(--wp--preset--color--contrast)"}}>{"import { SaaSFlow } from \\u0027@saasflow/sdk\\u0027;\\n\\nconst client = new SaaSFlow({\\n  apiKey: process.env.SAASFLOW_API_KEY,\\n});\\n\\nconst result = await client.query({\\n  collection: \\u0027users\\u0027,\\n  limit: 10,\\n});"}</pre>
         </div>
       </div>
     </article>

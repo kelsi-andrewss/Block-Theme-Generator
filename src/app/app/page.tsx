@@ -13,7 +13,7 @@ import IterationChat, { SelectedBlockEvent } from "@/components/IterationChat";
 import WorkbenchHeader from "@/components/WorkbenchHeader";
 import type { ThemeArchetype } from "@/lib/prompts/archetypes";
 import type { PremadeTheme } from "@/lib/premade-themes";
-import { SAAS_FRONT_PAGE_HTML, SAAS_HEADER_HTML, SAAS_FOOTER_HTML, SAAS_SIGNUP_HTML, SAAS_PRICING_HTML, SAAS_DOCS_HTML, SAAS_CONTACT_HTML, SAAS_404_HTML } from "@/lib/generators/saas-template";
+import { SAAS_FRONT_PAGE_HTML, SAAS_FOOTER_HTML, SAAS_HEADER_HTML, SAAS_404_HTML, SAAS_SIGNUP_HTML, SAAS_PRICING_HTML, SAAS_DOCS_HTML, SAAS_CONTACT_HTML } from "@/lib/generators/saas-template";
 import { generateSaasCustomCss } from "@/lib/generators/custom-css";
 import type { AuditResult } from "@/lib/validation/design-audit";
 import { applyThemeOverrides, buildThemeFileMap, type ThemeFilesData, type IframeState } from "@/lib/packer/constants";
@@ -24,6 +24,10 @@ import {
   SAAS_404_JSX_SOURCE, SAAS_SIGNUP_JSX_SOURCE, SAAS_PRICING_JSX_SOURCE,
   SAAS_DOCS_JSX_SOURCE, SAAS_CONTACT_JSX_SOURCE,
 } from "@/app/templates/saas/jsx-sources";
+import { PORTFOLIO_JSX_SOURCE, PORTFOLIO_HEADER_JSX_SOURCE, PORTFOLIO_FOOTER_JSX_SOURCE, PORTFOLIO_404_JSX_SOURCE, PORTFOLIO_ABOUT_JSX_SOURCE } from "@/app/templates/portfolio/jsx-sources";
+import { ECOMMERCE_JSX_SOURCE, ECOMMERCE_HEADER_JSX_SOURCE, ECOMMERCE_FOOTER_JSX_SOURCE, ECOMMERCE_SHOP_JSX_SOURCE, ECOMMERCE_404_JSX_SOURCE } from "@/app/templates/ecommerce/jsx-sources";
+import { BLOG_JSX_SOURCE, BLOG_HEADER_JSX_SOURCE, BLOG_FOOTER_JSX_SOURCE, BLOG_ARCHIVE_JSX_SOURCE, BLOG_404_JSX_SOURCE } from "@/app/templates/blog/jsx-sources";
+import { LOCAL_BUSINESS_JSX_SOURCE, LOCAL_BUSINESS_HEADER_JSX_SOURCE, LOCAL_BUSINESS_FOOTER_JSX_SOURCE, LOCAL_BUSINESS_SERVICES_JSX_SOURCE, LOCAL_BUSINESS_404_JSX_SOURCE } from "@/app/templates/local-business/jsx-sources";
 import { transpileJSXToBlocks } from "@/lib/transpiler/jsx-to-blocks";
 
 type AppStep = "input" | "generating" | "results";
@@ -56,6 +60,7 @@ const INITIAL_STEPS: StepState[] = [
 export default function Home() {
   const [step, setStep] = useState<AppStep>("input");
   const [result, setResult] = useState<GenerationResult | null>(null);
+  const [previewThemeId, setPreviewThemeId] = useState<string>("saas");
   const [pipelineSteps, setPipelineSteps] = useState<StepState[]>(INITIAL_STEPS);
   const [error, setError] = useState<string | null>(null);
   const [isPackaging, setIsPackaging] = useState(false);
@@ -668,38 +673,51 @@ export default function Home() {
   }
 
   function handleSelectGalleryTheme(theme: PremadeTheme) {
-    // Construct the static files
-    const templates: Record<string, string> = {
-      ...(theme.id === "saas" ? { "front-page.html": SAAS_FRONT_PAGE_HTML } : {}),
-      "index.html": theme.id === "saas" ? SAAS_FRONT_PAGE_HTML : `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->\n<div class="wp-block-group">\n<!-- wp:heading {"level":1} -->\n<h1 class="wp-block-heading">Latest Posts</h1>\n<!-- /wp:heading -->\n</div>\n<!-- /wp:group -->\n<!-- wp:spacer {"height":"2rem"} -->\n<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>\n<!-- /wp:spacer -->\n<!-- wp:query {"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true}} -->\n<div class="wp-block-query">\n<!-- wp:post-template -->\n<!-- wp:group {"style":{"spacing":{"padding":{"top":"1.5rem","right":"1.5rem","bottom":"1.5rem","left":"1.5rem"}}},"layout":{"type":"flex","orientation":"vertical"}} -->\n<div class="wp-block-group" style="padding-top:1.5rem;padding-right:1.5rem;padding-bottom:1.5rem;padding-left:1.5rem">\n<!-- wp:post-title {"isLink":true} /-->\n<!-- wp:post-date /-->\n<!-- wp:post-excerpt /-->\n</div>\n<!-- /wp:group -->\n<!-- /wp:post-template -->\n<!-- wp:query-pagination -->\n<!-- wp:query-pagination-previous /-->\n<!-- wp:query-pagination-numbers /-->\n<!-- wp:query-pagination-next /-->\n<!-- /wp:query-pagination -->\n<!-- wp:query-no-results -->\n<!-- wp:paragraph -->\n<p>No posts found.</p>\n<!-- /wp:paragraph -->\n<!-- /wp:query-no-results -->\n</div>\n<!-- /wp:query -->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
-      "single.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:post-featured-image {"isLink":false,"align":"wide"} /-->\n<!-- wp:spacer {"height":"2rem"} -->\n<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>\n<!-- /wp:spacer -->\n<!-- wp:post-title {"level":1} /-->\n<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->\n<div class="wp-block-group">\n<!-- wp:post-date /-->\n<!-- wp:post-author {"showAvatar":false,"showBio":false} /-->\n</div>\n<!-- /wp:group -->\n<!-- wp:spacer {"height":"2rem"} -->\n<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>\n<!-- /wp:spacer -->\n<!-- wp:post-content /-->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
-      "page.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:post-title {"level":1} /-->\n<!-- wp:spacer {"height":"2rem"} -->\n<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>\n<!-- /wp:spacer -->\n<!-- wp:post-content /-->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
-      "404.html": theme.id === "saas" ? SAAS_404_HTML : `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:heading {"textAlign":"center","level":1} -->\n<h1 class="wp-block-heading has-text-align-center">404 - Page Not Found</h1>\n<!-- /wp:heading -->\n<!-- wp:search {"showLabel":false,"buttonText":"Search"} /-->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
-      "archive.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:query-title {"type":"archive","textAlign":"center"} /-->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
-      "search.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->\n<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->\n<main class="wp-block-group">\n<!-- wp:query-title {"type":"search","textAlign":"center"} /-->\n</main>\n<!-- /wp:group -->\n<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`
-    };
-
-    const parts = {
-      "header.html": SAAS_HEADER_HTML,
-      "footer.html": SAAS_FOOTER_HTML
-    };
-
     setThemeSlug(theme.id);
     themeSlugRef.current = theme.id;
     setArchetypeId(theme.id);
 
+    let raw: Record<string, string> = {};
+    const skeletonPages: Record<string, {title: string, slug: string}> = {};
+
     if (theme.id === "saas") {
-      const pages: Record<string, string> = {};
-      const raw: Record<string, string> = {
-        home: SAAS_JSX_SOURCE,
-        header: SAAS_HEADER_JSX_SOURCE,
-        footer: SAAS_FOOTER_JSX_SOURCE,
-        "404": SAAS_404_JSX_SOURCE,
-        signup: SAAS_SIGNUP_JSX_SOURCE,
-        pricing: SAAS_PRICING_JSX_SOURCE,
-        docs: SAAS_DOCS_JSX_SOURCE,
-        contact: SAAS_CONTACT_JSX_SOURCE,
+      raw = {
+        home: SAAS_JSX_SOURCE, header: SAAS_HEADER_JSX_SOURCE, footer: SAAS_FOOTER_JSX_SOURCE,
+        "404": SAAS_404_JSX_SOURCE, signup: SAAS_SIGNUP_JSX_SOURCE, pricing: SAAS_PRICING_JSX_SOURCE,
+        docs: SAAS_DOCS_JSX_SOURCE, contact: SAAS_CONTACT_JSX_SOURCE,
       };
+      skeletonPages.signup = { title: "Sign Up", slug: "signup" };
+      skeletonPages.pricing = { title: "Pricing", slug: "pricing" };
+      skeletonPages.docs = { title: "Documentation", slug: "docs" };
+      skeletonPages.contact = { title: "Contact", slug: "contact" };
+    } else if (theme.id === "portfolio") {
+      raw = {
+        home: PORTFOLIO_JSX_SOURCE, header: PORTFOLIO_HEADER_JSX_SOURCE, footer: PORTFOLIO_FOOTER_JSX_SOURCE,
+        "404": PORTFOLIO_404_JSX_SOURCE, about: PORTFOLIO_ABOUT_JSX_SOURCE,
+      };
+      skeletonPages.about = { title: "About Me", slug: "about" };
+    } else if (theme.id === "ecommerce") {
+      raw = {
+        home: ECOMMERCE_JSX_SOURCE, header: ECOMMERCE_HEADER_JSX_SOURCE, footer: ECOMMERCE_FOOTER_JSX_SOURCE,
+        "404": ECOMMERCE_404_JSX_SOURCE, shop: ECOMMERCE_SHOP_JSX_SOURCE,
+      };
+      skeletonPages.shop = { title: "Shop", slug: "shop" };
+    } else if (theme.id === "blog") {
+      raw = {
+        home: BLOG_JSX_SOURCE, header: BLOG_HEADER_JSX_SOURCE, footer: BLOG_FOOTER_JSX_SOURCE,
+        "404": BLOG_404_JSX_SOURCE, archive: BLOG_ARCHIVE_JSX_SOURCE,
+      };
+      skeletonPages.archive = { title: "Archive", slug: "archive" };
+    } else if (theme.id === "local-business") {
+      raw = {
+        home: LOCAL_BUSINESS_JSX_SOURCE, header: LOCAL_BUSINESS_HEADER_JSX_SOURCE, footer: LOCAL_BUSINESS_FOOTER_JSX_SOURCE,
+        "404": LOCAL_BUSINESS_404_JSX_SOURCE, services: LOCAL_BUSINESS_SERVICES_JSX_SOURCE,
+      };
+      skeletonPages.services = { title: "Services", slug: "services" };
+    }
+
+    const pages: Record<string, string> = {};
+    if (Object.keys(raw).length > 0) {
       for (const [key, src] of Object.entries(raw)) {
         try { pages[key] = injectUids(src); } catch { pages[key] = src; }
       }
@@ -710,26 +728,131 @@ export default function Home() {
       set(IDB_KEY, undefined).catch(() => {});
     }
 
+    const templates: Record<string, string> = {
+      "index.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
+<div class="wp-block-group">
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading">Latest Posts</h1>
+<!-- /wp:heading -->
+</div>
+<!-- /wp:group -->
+<!-- wp:spacer {"height":"2rem"} -->
+<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+<!-- wp:query {"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true}} -->
+<div class="wp-block-query">
+<!-- wp:post-template -->
+<!-- wp:group {"style":{"spacing":{"padding":{"top":"1.5rem","right":"1.5rem","bottom":"1.5rem","left":"1.5rem"}}},"layout":{"type":"flex","orientation":"vertical"}} -->
+<div class="wp-block-group" style="padding-top:1.5rem;padding-right:1.5rem;padding-bottom:1.5rem;padding-left:1.5rem">
+<!-- wp:post-title {"isLink":true} /-->
+<!-- wp:post-date /-->
+<!-- wp:post-excerpt /-->
+</div>
+<!-- /wp:group -->
+<!-- /wp:post-template -->
+<!-- wp:query-pagination -->
+<!-- wp:query-pagination-previous /-->
+<!-- wp:query-pagination-numbers /-->
+<!-- wp:query-pagination-next /-->
+<!-- /wp:query-pagination -->
+<!-- wp:query-no-results -->
+<!-- wp:paragraph -->
+<p>No posts found.</p>
+<!-- /wp:paragraph -->
+<!-- /wp:query-no-results -->
+</div>
+<!-- /wp:query -->
+</main>
+<!-- /wp:group -->
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
+      "single.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+<!-- wp:post-featured-image {"isLink":false,"align":"wide"} /-->
+<!-- wp:spacer {"height":"2rem"} -->
+<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+<!-- wp:post-title {"level":1} /-->
+<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+<div class="wp-block-group">
+<!-- wp:post-date /-->
+<!-- wp:post-author {"showAvatar":false,"showBio":false} /-->
+</div>
+<!-- /wp:group -->
+<!-- wp:spacer {"height":"2rem"} -->
+<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+<!-- wp:post-content /-->
+</main>
+<!-- /wp:group -->
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
+      "page.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+<!-- wp:post-title {"level":1} /-->
+<!-- wp:spacer {"height":"2rem"} -->
+<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+<!-- wp:post-content /-->
+</main>
+<!-- /wp:group -->
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
+      "404.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+<!-- wp:heading {"textAlign":"center","level":1} -->
+<h1 class="wp-block-heading has-text-align-center">404 - Page Not Found</h1>
+<!-- /wp:heading -->
+<!-- wp:search {"showLabel":false,"buttonText":"Search"} /-->
+</main>
+<!-- /wp:group -->
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
+      "archive.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+<!-- wp:query-title {"type":"archive","textAlign":"center"} /-->
+</main>
+<!-- /wp:group -->
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`,
+      "search.html": `<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+<!-- wp:query-title {"type":"search","textAlign":"center"} /-->
+</main>
+<!-- /wp:group -->
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->`
+    };
+
+    const parts = {
+      "header.html": `<!-- wp:group {"tagName":"header","layout":{"type":"constrained"}} --><header class="wp-block-group"></header><!-- /wp:group -->`,
+      "footer.html": `<!-- wp:group {"tagName":"footer","layout":{"type":"constrained"}} --><footer class="wp-block-group"></footer><!-- /wp:group -->`
+    };
+
     const customCss = theme.id === "saas" ? generateSaasCustomCss() : undefined;
 
-    // Instantly inject the statically generated template into the Result state and bypass the generation wait
+    let initialThemeFiles: ThemeFilesData = {
+      themeJson: JSON.stringify(theme.themeJson, null, 2),
+      darkMode: JSON.stringify(theme.darkMode, null, 2),
+      templates,
+      parts,
+      patterns: {},
+      customCss,
+      skeletonPages: Object.keys(skeletonPages).length > 0 ? (
+        Object.fromEntries(Object.entries(skeletonPages).map(([k, meta]) => [
+          k, { title: meta.title, slug: meta.slug, content: `<!-- wp:paragraph --><p>Loading ${meta.title}...</p><!-- /wp:paragraph -->` }
+        ]))
+      ) : undefined,
+    };
+
+    if (Object.keys(pages).length > 0) {
+      initialThemeFiles = transpileJsxPagesToThemeFiles(initialThemeFiles, pages);
+    }
+
     setResult({
-      themeFiles: {
-        themeJson: JSON.stringify(theme.themeJson, null, 2),
-        darkMode: JSON.stringify(theme.darkMode, null, 2),
-        templates,
-        parts,
-        patterns: {},
-        customCss,
-        ...(theme.id === "saas" ? {
-          skeletonPages: {
-            signup: { title: "Sign Up", slug: "signup", content: SAAS_SIGNUP_HTML },
-            pricing: { title: "Pricing", slug: "pricing", content: SAAS_PRICING_HTML },
-            docs: { title: "Documentation", slug: "docs", content: SAAS_DOCS_HTML },
-            contact: { title: "Contact", slug: "contact", content: SAAS_CONTACT_HTML },
-          }
-        } : {}),
-      },
+      themeFiles: initialThemeFiles,
       audit: {
         score: 100,
         grade: "A",
@@ -832,7 +955,11 @@ export default function Home() {
                     onSubmit={handleSubmit} 
                   />
                 ) : (
-                  <TemplateGallery onSelectTheme={handleSelectGalleryTheme} />
+                  <TemplateGallery 
+                    onPreviewTheme={(theme) => setPreviewThemeId(theme.id)}
+                    onGenerateTheme={handleSelectGalleryTheme}
+                    activePreviewThemeId={previewThemeId}
+                  />
                 )}
               </div>
             </>
@@ -967,14 +1094,14 @@ export default function Home() {
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                       </svg>
-                      forge-saas-blueprint.local
+                      forge-{previewThemeId}-blueprint.local
                     </div>
                   </div>
                   <div className="flex-1 w-full bg-zinc-100 dark:bg-zinc-950">
                     <iframe 
-                      src="/templates/saas?gallery=true" 
+                      src={`/templates/${previewThemeId}?gallery=true`}
                       className="w-full h-full border-0"
-                      title="SaaS Template Preview"
+                      title={`${previewThemeId} Template Preview`}
                     />
                   </div>
                 </div>

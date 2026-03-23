@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { get } from 'idb-keyval';
+
 import JsxStringRenderer from '@/components/JsxStringRenderer';
 import {
   SAAS_404_JSX_SOURCE,
@@ -13,6 +13,7 @@ import {
   SAAS_HEADER_JSX_SOURCE,
   SAAS_FOOTER_JSX_SOURCE,
 } from '../jsx-sources';
+import { get } from 'idb-keyval';
 
 const TEMPLATE_MAP: Record<string, string> = {
   '404': SAAS_404_JSX_SOURCE,
@@ -37,8 +38,8 @@ export default function SaaSSubPage() {
   const [jsxSource, setJsxSource] = useState(fallback);
 
   useEffect(() => {
-    get<Record<string, string>>("jsx-pages").then(stored => {
-      if (stored?.[slug]) setJsxSource(stored[slug]);
+    get('jsx-pages').then((pages: any) => {
+      if (pages && pages[slug]) setJsxSource(pages[slug]);
     });
   }, [slug]);
 
