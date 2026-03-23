@@ -195,7 +195,7 @@ export async function buildThemeFileMap(
     const families = tj?.settings?.typography?.fontFamilies;
     if (Array.isArray(families)) {
       for (const f of families) {
-        if (f.name) fontFamilies.push(f.name);
+        if (f.fontFamily) fontFamilies.push(f.fontFamily);
       }
     }
   } catch {}
@@ -273,6 +273,9 @@ export async function buildThemeFileMap(
 
 const SYSTEM_FONTS = new Set([
   "system-ui",
+  "ui-sans-serif",
+  "ui-serif",
+  "ui-monospace",
   "sans-serif",
   "serif",
   "monospace",
