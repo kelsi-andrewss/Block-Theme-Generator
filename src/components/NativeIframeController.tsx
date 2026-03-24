@@ -210,7 +210,7 @@ export default function NativeIframeController() {
       }
       highlightedEl = target;
       target.style.outline = '2px dashed #fb923c'; // Orange-400 for highlighting
-      target.style.outlineOffset = '4px';
+      target.style.outlineOffset = '-4px';
       target.style.cursor = 'pointer';
     }
 
@@ -248,7 +248,7 @@ export default function NativeIframeController() {
 
       selectedEl = target;
       selectedEl.style.outline = '2px solid #f97316'; // Orange-500 for selection
-      selectedEl.style.outlineOffset = '4px';
+      selectedEl.style.outlineOffset = '-4px';
 
       const blockName = target.tagName.toLowerCase();
       const rawText = target.innerText || target.textContent || '';

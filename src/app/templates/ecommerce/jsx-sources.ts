@@ -92,7 +92,7 @@ export const ECOMMERCE_JSX_SOURCE = `
     <div style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",zIndex:0,padding:"1.5rem"}}>
       <div style={{position:"relative",width:"100%",height:"100%",borderRadius:"2rem",overflow:"hidden",boxShadow:"0 25px 50px -12px color-mix(in srgb, var(--wp--preset--color--contrast) 20%, transparent)"}}>
         <img src="/images/templates/ecommerce_hero.png" alt="Spring Collection" style={{width:"100%",height:"100%",objectFit:"cover",objectPosition:"center",transform:"scale(1.05)",transition:"transform 10s ease-out"}} />
-        <div style={{position:"absolute",inset:0,background:"linear-gradient(to top, color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent), color-mix(in srgb, var(--wp--preset--color--contrast) 10%, transparent))"}}></div>
+        <div style={{position:"absolute",inset:0,pointerEvents:"none",background:"linear-gradient(to top, color-mix(in srgb, var(--wp--preset--color--contrast) 60%, transparent), color-mix(in srgb, var(--wp--preset--color--contrast) 10%, transparent))"}}></div>
       </div>
     </div>
     

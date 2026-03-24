@@ -483,7 +483,11 @@ export default function Home() {
       undoRef.current.push({ type: "element", html: entry.html, newHtml: entry.newHtml });
       setUndoCount(undoRef.current.length);
       document.querySelectorAll('iframe').forEach(f => {
-        f.contentWindow?.postMessage({ type: 'PATCH_ELEMENT', html: entry.newHtml }, '*');
+        f.contentWindow?.postMessage({
+          type: 'UNDO_ELEMENT',
+          findHtml: entry.html,
+          restoreHtml: entry.newHtml,
+        }, '*');
       });
     } else if (entry.type === "css") {
       const iframe = document.querySelector('iframe');
@@ -1038,7 +1042,7 @@ export default function Home() {
           )}
 
           {(step === "generating" || step === "results") && (
-            <div className="flex-1 overflow-y-auto p-6 flex flex-col">
+            <div className="flex-1 overflow-hidden p-6 flex flex-col">
               {step === "generating" ? (
                 <>
                   <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-6 flex items-center gap-3 tracking-tight">
@@ -1062,8 +1066,8 @@ export default function Home() {
                   )}
                 </>
               ) : (
-                <div className="flex-1 flex flex-col h-full z-10">
-                  <div className="flex-1 p-0 flex flex-col -m-6 mb-0 shadow-lg relative z-20">
+                <div className="flex-1 flex flex-col h-full z-10 min-h-0">
+                  <div className="flex-1 p-0 flex flex-col -m-6 mb-0 shadow-lg relative z-20 min-h-0">
                     {result && (
                       <IterationChat
                         initialPrompt={result.meta?.description}

@@ -62,7 +62,7 @@ const SELECTION_BRIDGE_SCRIPT = (enabled: boolean) => `
     if (hl && hl !== sel) { hl.style.outline = ''; hl.style.outlineOffset = ''; hl.style.cursor = ''; }
     hl = t;
     t.style.outline = '2px dashed #fb923c';
-    t.style.outlineOffset = '4px';
+    t.style.outlineOffset = '-4px';
     t.style.cursor = 'pointer';
   });
 
@@ -81,7 +81,7 @@ const SELECTION_BRIDGE_SCRIPT = (enabled: boolean) => `
     var uid = t.getAttribute('data-uid') || null;
     sel = t;
     sel.style.outline = '2px solid #f97316';
-    sel.style.outlineOffset = '4px';
+    sel.style.outlineOffset = '-4px';
     sel.style.backgroundColor = 'rgba(249, 115, 22, 0.1)';
     var n = t.tagName.toLowerCase();
     var r = t.innerText || t.textContent || '';

@@ -162,7 +162,7 @@ export default function IterationChat({
   }
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden flex-1">
+    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden flex-1 min-h-0">
       {/* Header & Regenerate Action */}
       <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 flex items-center justify-between shrink-0 font-sans">
         <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
@@ -181,24 +181,20 @@ export default function IterationChat({
               {imageCount}/10 Images
             </span>
           )}
-          {canUndo && (
-            <button
-              onClick={handleInternalUndo}
-              disabled={isProcessing}
-              className="text-xs font-medium px-3 py-1.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors border border-transparent hover:border-amber-300 dark:hover:border-amber-700 focus:ring-2 focus:ring-amber-400 focus:outline-none disabled:opacity-50 font-sans"
-            >
-              Undo
-            </button>
-          )}
-          {canRedo && (
-            <button
-              onClick={onRedo}
-              disabled={isProcessing}
-              className="text-xs font-medium px-3 py-1.5 rounded-md bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors border border-transparent hover:border-indigo-300 dark:hover:border-indigo-700 focus:ring-2 focus:ring-indigo-400 focus:outline-none disabled:opacity-50 font-sans"
-            >
-              Redo
-            </button>
-          )}
+          <button
+            onClick={handleInternalUndo}
+            disabled={!canUndo || isProcessing}
+            className="text-xs font-medium px-3 py-1.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors border border-transparent hover:border-amber-300 dark:hover:border-amber-700 focus:ring-2 focus:ring-amber-400 focus:outline-none disabled:opacity-50 font-sans"
+          >
+            Undo
+          </button>
+          <button
+            onClick={onRedo}
+            disabled={!canRedo || isProcessing}
+            className="text-xs font-medium px-3 py-1.5 rounded-md bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors border border-transparent hover:border-indigo-300 dark:hover:border-indigo-700 focus:ring-2 focus:ring-indigo-400 focus:outline-none disabled:opacity-50 font-sans"
+          >
+            Redo
+          </button>
           {showUndoTooltip && (
             <div className="absolute top-full right-0 mt-2 w-64 p-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-xl z-50 animate-in fade-in slide-in-from-top-2 font-sans">
               <div className="flex items-start gap-3">
@@ -238,12 +234,7 @@ export default function IterationChat({
               <div className="absolute -top-1 right-8 w-2 h-2 bg-white dark:bg-zinc-800 border-l border-t border-zinc-200 dark:border-zinc-700 rotate-45"></div>
             </div>
           )}
-          <button
-            onClick={onRegenerateLayout}
-            className="text-xs font-medium px-3 py-1.5 rounded-md bg-zinc-200/50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors border border-transparent hover:border-zinc-300 dark:hover:border-zinc-600 focus:ring-2 focus:ring-zinc-400 focus:outline-none font-sans"
-          >
-            Regenerate Layout
-          </button>
+
         </div>
       </div>
 

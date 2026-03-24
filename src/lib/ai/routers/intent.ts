@@ -2,7 +2,7 @@ import { z } from "zod";
 import { getProvider } from "@/lib/ai";
 
 const intentSchema = z.object({
-  templateId: z.enum(["saas", "blog", "portfolio", "ecommerce", "generic"]).describe("The ID of the pre-built template that best matches the user's request. If no specific match, use 'generic'."),
+  templateId: z.enum(["saas", "blog", "portfolio", "ecommerce", "local-business"]).describe("The ID of the pre-built template that best matches the user's request. If no specific match, use 'local-business'."),
   explanation: z.string().describe("A one sentence explanation of why this template was chosen.")
 });
 
@@ -19,7 +19,7 @@ Available templates:
 2. "blog" - For writers, publications, news, and magazines.
 3. "portfolio" - For designers, agencies, artists, and personal sites.
 4. "ecommerce" - For online stores, shops, and product sales.
-5. "generic" - A safe, generalized layout if none of the above are a good fit.
+5. "local-business" - A versatile layout for physical storefronts, services, communities, and anything else that doesn't fit the above.
 
 RULES:
 1. Base your classification on the primary purpose of the site.
@@ -34,7 +34,7 @@ Please classify this into the appropriate templateId.`;
   try {
     return await provider.generateJSON(prompt, systemPrompt, intentSchema, { temperature: 0.1 });
   } catch (err) {
-    console.error("Intent classification failed, falling back to saas", err);
-    return { templateId: "saas", explanation: "Fallback due to parse error." };
+    console.error("Intent classification failed, falling back to local-business", err);
+    return { templateId: "local-business", explanation: "Fallback due to parse error." };
   }
 }

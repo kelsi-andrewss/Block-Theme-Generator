@@ -108,7 +108,7 @@ export const LOCAL_BUSINESS_JSX_SOURCE = `
   <section style={{position:"relative",padding:"8rem 2rem 12rem",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 5%, transparent)",overflow:"hidden"}}>
     <div style={{position:"absolute",top:0,right:0,width:"60%",height:"100%",zIndex:0,display:"block"}}>
       <img src="/images/templates/local_guarantee.png" alt="Professional Technician" style={{width:"100%",height:"100%",objectFit:"cover",clipPath:"polygon(20% 0, 100% 0, 100% 100%, 0 100%)",filter:"contrast(1.1) brightness(0.9)"}} />
-      <div style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",background:"linear-gradient(to right, color-mix(in srgb, var(--wp--preset--color--base) 100%, transparent) 0%, color-mix(in srgb, var(--wp--preset--color--base) 80%, transparent) 30%, transparent 100%)"}}></div>
+      <div style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",pointerEvents:"none",background:"linear-gradient(to right, color-mix(in srgb, var(--wp--preset--color--base) 100%, transparent) 0%, color-mix(in srgb, var(--wp--preset--color--base) 80%, transparent) 30%, transparent 100%)"}}></div>
     </div>
 
     <div style={{maxWidth:"80rem",margin:"0 auto",position:"relative",zIndex:10}}>
@@ -168,7 +168,7 @@ export const LOCAL_BUSINESS_JSX_SOURCE = `
       <div style={{backgroundColor:"var(--wp--preset--color--base)",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)",borderRadius:"1.5rem",overflow:"hidden",boxShadow:"0 20px 40px -10px color-mix(in srgb, var(--wp--preset--color--contrast) 10%, transparent)",transition:"transform 0.3s ease",cursor:"pointer"}}>
         <div style={{height:"16rem",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 5%, transparent)",position:"relative",overflow:"hidden"}}>
           <img src="/images/templates/local_interior.png" alt="Plumbing" style={{width:"100%",height:"100%",objectFit:"cover"}} />
-          <div style={{position:"absolute",inset:0,background:"linear-gradient(to top, color-mix(in srgb, var(--wp--preset--color--base) 50%, transparent), transparent)"}}></div>
+          <div style={{position:"absolute",inset:0,pointerEvents:"none",background:"linear-gradient(to top, color-mix(in srgb, var(--wp--preset--color--base) 50%, transparent), transparent)"}}></div>
         </div>
         <div style={{padding:"2.5rem"}}>
           <h3 style={{fontSize:"1.75rem",fontWeight:"900",color:"var(--wp--preset--color--contrast)",marginBottom:"1rem"}}>Plumbing</h3>
@@ -181,7 +181,7 @@ export const LOCAL_BUSINESS_JSX_SOURCE = `
        <div style={{backgroundColor:"var(--wp--preset--color--base)",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)",borderRadius:"1.5rem",overflow:"hidden",boxShadow:"0 20px 40px -10px color-mix(in srgb, var(--wp--preset--color--contrast) 10%, transparent)",transition:"transform 0.3s ease",cursor:"pointer"}}>
         <div style={{height:"16rem",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 5%, transparent)",position:"relative",overflow:"hidden"}}>
            <img src="/images/templates/portfolio_brand.png" alt="HVAC" style={{width:"100%",height:"100%",objectFit:"cover"}} />
-           <div style={{position:"absolute",inset:0,background:"linear-gradient(to top, color-mix(in srgb, var(--wp--preset--color--base) 50%, transparent), transparent)"}}></div>
+           <div style={{position:"absolute",inset:0,pointerEvents:"none",background:"linear-gradient(to top, color-mix(in srgb, var(--wp--preset--color--base) 50%, transparent), transparent)"}}></div>
         </div>
         <div style={{padding:"2.5rem"}}>
           <h3 style={{fontSize:"1.75rem",fontWeight:"900",color:"var(--wp--preset--color--contrast)",marginBottom:"1rem"}}>Heating & Cooling</h3>
@@ -194,7 +194,7 @@ export const LOCAL_BUSINESS_JSX_SOURCE = `
        <div style={{backgroundColor:"var(--wp--preset--color--base)",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)",borderRadius:"1.5rem",overflow:"hidden",boxShadow:"0 20px 40px -10px color-mix(in srgb, var(--wp--preset--color--contrast) 10%, transparent)",transition:"transform 0.3s ease",cursor:"pointer"}}>
         <div style={{height:"16rem",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 5%, transparent)",position:"relative",overflow:"hidden"}}>
            <img src="/images/templates/local_landscaping.png" alt="Electrical" style={{width:"100%",height:"100%",objectFit:"cover"}} />
-           <div style={{position:"absolute",inset:0,background:"linear-gradient(to top, color-mix(in srgb, var(--wp--preset--color--base) 50%, transparent), transparent)"}}></div>
+           <div style={{position:"absolute",inset:0,pointerEvents:"none",background:"linear-gradient(to top, color-mix(in srgb, var(--wp--preset--color--base) 50%, transparent), transparent)"}}></div>
         </div>
         <div style={{padding:"2.5rem"}}>
           <h3 style={{fontSize:"1.75rem",fontWeight:"900",color:"var(--wp--preset--color--contrast)",marginBottom:"1rem"}}>Electrical</h3>

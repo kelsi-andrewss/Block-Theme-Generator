@@ -74,7 +74,7 @@ export const PORTFOLIO_JSX_SOURCE = `
       <div style={{display:"flex",flexDirection:"column",gap:"1.5rem",cursor:"pointer"}}>
         <div style={{position:"relative",aspectRatio:"4/3",borderRadius:"2rem",overflow:"hidden",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 5%, transparent)",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)",boxShadow:"0 25px 50px -12px rgba(0,0,0,0.15)"}}>
           <img src="/images/templates/blog_architecture.png" alt="Project 1" style={{width:"100%",height:"100%",objectFit:"cover",transition:"transform 0.5s ease"}} />
-          <div style={{position:"absolute",inset:"0",background:"linear-gradient(to top, color-mix(in srgb, var(--wp--preset--color--contrast) 40%, transparent), transparent)",opacity:"0"}}></div>
+          <div style={{position:"absolute",inset:"0",pointerEvents:"none",background:"linear-gradient(to top, color-mix(in srgb, var(--wp--preset--color--contrast) 40%, transparent), transparent)",opacity:"0"}}></div>
         </div>
         <div>
           <h3 style={{fontSize:"1.75rem",fontWeight:"800",color:"var(--wp--preset--color--contrast)",marginBottom:"0.5rem"}}>Acme FinTech Redesign</h3>

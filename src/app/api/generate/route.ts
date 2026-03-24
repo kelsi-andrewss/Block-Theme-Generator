@@ -177,9 +177,9 @@ export async function POST(request: Request) {
         });
 
         // Step 4: Routing & Dark Mode
-        let templates: Map<string, string>;
-        let parts: Map<string, string>;
-        let patterns: Map<string, string>;
+        let templates = new Map<string, string>();
+        let parts = new Map<string, string>();
+        let patterns = new Map<string, string>();
         const validationErrors: string[] = [];
 
         send("step", { step: "routing", status: "active", detail: "Classifying intent against template gallery..." });
@@ -193,117 +193,55 @@ export async function POST(request: Request) {
           return r;
         });
 
-        const validArchetypes = ["saas", "portfolio", "ecommerce", "blog", "local-business"];
-        if (validArchetypes.includes(intentResult.templateId)) {
-          send("step", { step: "templates", status: "active", detail: `Populating ${intentResult.templateId} template slots via AST...` });
-          
-          let rawPages: Record<string, string> = {};
-          
-          if (intentResult.templateId === "saas") {
-            rawPages = {
-              home: SAAS_JSX_SOURCE, header: SAAS_HEADER_JSX_SOURCE, footer: SAAS_FOOTER_JSX_SOURCE,
-              "404": SAAS_404_JSX_SOURCE, signup: SAAS_SIGNUP_JSX_SOURCE, pricing: SAAS_PRICING_JSX_SOURCE,
-              docs: SAAS_DOCS_JSX_SOURCE, contact: SAAS_CONTACT_JSX_SOURCE,
-            };
-          } else if (intentResult.templateId === "portfolio") {
-            rawPages = {
-              home: PORTFOLIO_JSX_SOURCE, header: PORTFOLIO_HEADER_JSX_SOURCE, footer: PORTFOLIO_FOOTER_JSX_SOURCE,
-              "404": PORTFOLIO_404_JSX_SOURCE, about: PORTFOLIO_ABOUT_JSX_SOURCE,
-            };
-          } else if (intentResult.templateId === "ecommerce") {
-            rawPages = {
-              home: ECOMMERCE_JSX_SOURCE, header: ECOMMERCE_HEADER_JSX_SOURCE, footer: ECOMMERCE_FOOTER_JSX_SOURCE,
-              "404": ECOMMERCE_404_JSX_SOURCE, shop: ECOMMERCE_SHOP_JSX_SOURCE,
-            };
-          } else if (intentResult.templateId === "blog") {
-            rawPages = {
-              home: BLOG_JSX_SOURCE, header: BLOG_HEADER_JSX_SOURCE, footer: BLOG_FOOTER_JSX_SOURCE,
-              "404": BLOG_404_JSX_SOURCE, archive: BLOG_ARCHIVE_JSX_SOURCE,
-            };
-          } else if (intentResult.templateId === "local-business") {
-            rawPages = {
-              home: LOCAL_BUSINESS_JSX_SOURCE, header: LOCAL_BUSINESS_HEADER_JSX_SOURCE, footer: LOCAL_BUSINESS_FOOTER_JSX_SOURCE,
-              "404": LOCAL_BUSINESS_404_JSX_SOURCE, services: LOCAL_BUSINESS_SERVICES_JSX_SOURCE,
-            };
-          }
+        send("step", { step: "templates", status: "active", detail: `Populating ${intentResult.templateId} template slots via AST...` });
+        
+        const validTemplateIds = ["saas", "portfolio", "ecommerce", "blog", "local-business"];
+        const templateIdToUse = validTemplateIds.includes(intentResult.templateId) ? intentResult.templateId : "local-business";
 
-          const injectedPages: Record<string, string> = {};
-          for (const [key, src] of Object.entries(rawPages)) {
-            try { injectedPages[key] = injectUids(src); } catch { injectedPages[key] = src; }
-          }
-          
-          const populatedJsxPages = await populateReactPages(enriched.original, injectedPages);
-          
-          send("files", { type: "jsx-pages", files: populatedJsxPages });
-          send("step", { step: "templates", status: "done", detail: `${intentResult.templateId} React templates populated` });
-
-          send("step", { step: "parts", status: "active", detail: "Bypassing block HTML parts population..." });
-          templates = new Map();
-          parts = new Map();
-          patterns = new Map();
-          send("step", { step: "parts", status: "done", detail: "Block HTML handled client-side" });
-          send("step", { step: "patterns", status: "done", detail: "Pattern injection bypassed" });
-        } else {
-          send("step", { step: "templates", status: "active", detail: "Generating page layouts (AI-powered front page)..." });
-          send("step", { step: "parts", status: "active", detail: "Structuring responsive header/footer" });
-          send("step", { step: "patterns", status: "active", detail: "Skipping pattern injection (handled by layout)" });
-
-          let templateRetries = 0;
-          let partRetries = 0;
-          let patternRetries = 0;
-
-          const [templateResult, partResult, patternResult] = await Promise.all([
-            retryWithConstraints(
-              (constraints) => {
-                if (constraints) {
-                  templateRetries++;
-                  send("step", { step: "templates", status: "active", detail: `Generating templates (retry ${templateRetries}/2)...` });
-                }
-                return generateTemplates(withNegativeConstraints(enriched, constraints), themeJson, provider);
-              },
-              validateMarkupMap
-            ).then(({ result: r, errors }) => {
-              send("files", { type: "templates", files: mapToObject(r) });
-              const retryNote = templateRetries > 0 ? ` after ${templateRetries} retries` : "";
-              send("step", { step: "templates", status: "done", detail: `${r.size} templates built${retryNote}` });
-              return { result: r, errors };
-            }),
-            retryWithConstraints(
-              (constraints) => {
-                if (constraints) {
-                  partRetries++;
-                  send("step", { step: "parts", status: "active", detail: `Generating parts (retry ${partRetries}/2)...` });
-                }
-                return generateParts(withNegativeConstraints(enriched, constraints), themeJson, provider);
-              },
-              validateMarkupMap
-            ).then(({ result: r, errors }) => {
-              send("files", { type: "parts", files: mapToObject(r) });
-              const retryNote = partRetries > 0 ? ` after ${partRetries} retries` : "";
-              send("step", { step: "parts", status: "done", detail: `${r.size} template parts built${retryNote}` });
-              return { result: r, errors };
-            }),
-            retryWithConstraints(
-              (constraints) => {
-                if (constraints) {
-                  patternRetries++;
-                  send("step", { step: "patterns", status: "active", detail: `Generating patterns (retry ${patternRetries}/2)...` });
-                }
-                return generatePatterns(withNegativeConstraints(enriched, constraints), themeJson, provider);
-              },
-              validatePatternMap
-            ).then(({ result: r, errors }) => {
-              send("files", { type: "patterns", files: mapToObject(r) });
-              send("step", { step: "patterns", status: "done", detail: "Pattern generation bypassed." });
-              return { result: r, errors };
-            }),
-          ]);
-
-          templates = templateResult.result;
-          parts = partResult.result;
-          patterns = patternResult.result;
-          validationErrors.push(...templateResult.errors, ...partResult.errors, ...patternResult.errors);
+        let rawPages: Record<string, string> = {};
+        
+        if (templateIdToUse === "saas") {
+          rawPages = {
+            home: SAAS_JSX_SOURCE, header: SAAS_HEADER_JSX_SOURCE, footer: SAAS_FOOTER_JSX_SOURCE,
+            "404": SAAS_404_JSX_SOURCE, signup: SAAS_SIGNUP_JSX_SOURCE, pricing: SAAS_PRICING_JSX_SOURCE,
+            docs: SAAS_DOCS_JSX_SOURCE, contact: SAAS_CONTACT_JSX_SOURCE,
+          };
+        } else if (templateIdToUse === "portfolio") {
+          rawPages = {
+            home: PORTFOLIO_JSX_SOURCE, header: PORTFOLIO_HEADER_JSX_SOURCE, footer: PORTFOLIO_FOOTER_JSX_SOURCE,
+            "404": PORTFOLIO_404_JSX_SOURCE, about: PORTFOLIO_ABOUT_JSX_SOURCE,
+          };
+        } else if (templateIdToUse === "ecommerce") {
+          rawPages = {
+            home: ECOMMERCE_JSX_SOURCE, header: ECOMMERCE_HEADER_JSX_SOURCE, footer: ECOMMERCE_FOOTER_JSX_SOURCE,
+            "404": ECOMMERCE_404_JSX_SOURCE, shop: ECOMMERCE_SHOP_JSX_SOURCE,
+          };
+        } else if (templateIdToUse === "blog") {
+          rawPages = {
+            home: BLOG_JSX_SOURCE, header: BLOG_HEADER_JSX_SOURCE, footer: BLOG_FOOTER_JSX_SOURCE,
+            "404": BLOG_404_JSX_SOURCE, archive: BLOG_ARCHIVE_JSX_SOURCE,
+          };
+        } else if (templateIdToUse === "local-business") {
+          rawPages = {
+            home: LOCAL_BUSINESS_JSX_SOURCE, header: LOCAL_BUSINESS_HEADER_JSX_SOURCE, footer: LOCAL_BUSINESS_FOOTER_JSX_SOURCE,
+            "404": LOCAL_BUSINESS_404_JSX_SOURCE, services: LOCAL_BUSINESS_SERVICES_JSX_SOURCE,
+          };
         }
+
+        const injectedPages: Record<string, string> = {};
+        for (const [key, src] of Object.entries(rawPages)) {
+          try { injectedPages[key] = injectUids(src); } catch { injectedPages[key] = src; }
+        }
+        
+        const populatedJsxPages = await populateReactPages(enriched.original, injectedPages);
+        
+        send("files", { type: "jsx-pages", files: populatedJsxPages });
+        send("step", { step: "templates", status: "done", detail: `${templateIdToUse} React templates populated` });
+
+        send("step", { step: "parts", status: "active", detail: "Bypassing block HTML parts population..." });
+        send("step", { step: "parts", status: "done", detail: "Block HTML handled client-side" });
+        send("step", { step: "patterns", status: "active", detail: "Bypassing pattern injection..." });
+        send("step", { step: "patterns", status: "done", detail: "Pattern injection bypassed" });
 
         const darkMode = await darkModePromise;
 

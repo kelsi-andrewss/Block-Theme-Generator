@@ -1728,6 +1728,38 @@
     "resolved": true
   },
   {
+    "timestamp": "2026-03-23T14:30:00.634Z",
+    "date": "2026-03-23",
+    "session_id": "6c262334-8e6e-48e2-9787-9cf71c16e330",
+    "turn_index": 4,
+    "source": "main",
+    "agent_type": null,
+    "agent_id": null,
+    "project": "Block Theme Generator",
+    "category": "command_failed",
+    "tool_name": "Bash",
+    "skill": null,
+    "model": "claude-opus-4-6",
+    "detail": "Exit code 1\nerror: Your local changes to the following files would be overwritten by checkout:\n\t.claude/tracking/charts.html\n\t.claude/tracking/tracking.db\nPlease commit your changes or stash them before you switch branches.\nAborting",
+    "resolved": null
+  },
+  {
+    "timestamp": "2026-03-23T14:30:06.198Z",
+    "date": "2026-03-23",
+    "session_id": "6c262334-8e6e-48e2-9787-9cf71c16e330",
+    "turn_index": 5,
+    "source": "main",
+    "agent_type": null,
+    "agent_id": null,
+    "project": "Block Theme Generator",
+    "category": "retry",
+    "tool_name": "Bash",
+    "skill": null,
+    "model": "claude-opus-4-6",
+    "detail": "Retry succeeded",
+    "resolved": true
+  },
+  {
     "timestamp": "2026-03-23T04:18:04.640Z",
     "date": "2026-03-23",
     "session_id": "ad9c1728-52be-4bf7-b892-4b3095cfb4d9",

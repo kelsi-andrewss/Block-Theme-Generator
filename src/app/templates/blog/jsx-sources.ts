@@ -74,7 +74,7 @@ export const BLOG_JSX_SOURCE = `
     <article style={{display:"flex",flexDirection:"column",gap:"3rem",paddingBottom:"5rem",borderBottom:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)",marginBottom:"5rem",cursor:"pointer"}}>
       <div style={{position:"relative",aspectRatio:"2/1",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 5%, transparent)",borderRadius:"1rem",overflow:"hidden",boxShadow:"0 25px 50px -12px color-mix(in srgb, var(--wp--preset--color--contrast) 15%, transparent)",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 10%, transparent)"}}>
         <img src="/images/templates/blog_workspace.png" alt="Featured Article" style={{width:"100%",height:"100%",objectFit:"cover",transform:"scale(1.02)",transition:"transform 0.7s ease"}} />
-        <div style={{position:"absolute",inset:0,background:"linear-gradient(to top, color-mix(in srgb, var(--wp--preset--color--contrast) 30%, transparent), transparent)"}}></div>
+        <div style={{position:"absolute",inset:0,pointerEvents:"none",background:"linear-gradient(to top, color-mix(in srgb, var(--wp--preset--color--contrast) 30%, transparent), transparent)"}}></div>
       </div>
       <div style={{display:"flex",flexDirection:"column",alignItems:"center",textAlign:"center",maxWidth:"48rem",margin:"0 auto"}}>
         <div style={{display:"inline-flex",alignItems:"center",gap:"1rem",marginBottom:"2rem",fontSize:"0.875rem",fontWeight:"700",textTransform:"uppercase",letterSpacing:"0.1em",padding:"0.5rem 1.25rem",borderRadius:"999px",backgroundColor:"color-mix(in srgb, var(--wp--preset--color--contrast) 5%, transparent)",border:"1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 10%, transparent)"}}>
